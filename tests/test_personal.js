@@ -23,6 +23,14 @@
  check(M.filter([a,b],{q:'限江苏地区',nameOnly:true},new Set()).length===0,'name only');
  check(M.filter([a,b],{favOnly:true},new Set([b.key]))[0]===b,'favorite identity');
  check(M.sort([unknown,a,b],'priceDesc').map(x=>x.key).join() === [a,b,unknown].map(x=>x.key).join(),'unknown price sorted last');
+ const sh=M.normalize({id:'sh',title:'上海套餐',fee:'19',firstLevel:'套餐',detail:{feeUnit:'元/月'}},{id:'unicom:shanghai',carrier:'unicom',region:'shanghai',name:'上海联通'},0);
+ const national=M.normalize({id:'nation',title:'江苏可用的全国套餐',detail:{useScope:'江苏用户'}},{id:'telecom:quanguo',carrier:'telecom',region:'quanguo',name:'全国电信'},0);
+ check(M.filter([a,b,sh,national],{region:'jiangsu'},new Set()).map(x=>x.key).join()===[a,b].map(x=>x.key).join(),'province filter uses snapshot region across carriers');
+ check(M.filter([a,b,sh,national],{region:'jiangsu',carrier:'unicom',max:'20'},new Set())[0]===b,'province combines with carrier and price');
+ check(M.filter([a,b,sh,national],{region:'quanguo'},new Set())[0]===national,'national tariffs have an explicit separate option');
+ check(M.filter([a,b,sh,national],{region:''},new Set()).length===4,'clear province restores every source');
+ const alpha={...sh,title:'A plan',label:'上海联通'},zulu={...a,title:'Z plan',label:'江苏移动'};
+ check(M.sort([zulu,alpha],'name')[0]===alpha,'name sorting is independent of region');
  check(new Set(M.defaults).size===12,'12 requested sources');
  check(M.escape('<img src=x onerror=1>').includes('&lt;img'),'HTML escape');
  check(M.csvCell('=HYPERLINK("evil")').startsWith('"\''),'CSV formula protection');
