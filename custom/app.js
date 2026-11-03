@@ -2,7 +2,7 @@
 'use strict';
 const M=window.TariffModel,E=M.escape,$=id=>document.getElementById(id),KEY='tariff_personal_v1',SIZE=40;
 let manifest=null,cache=new Map(),loading=new Set(),failures=new Map(),favorites=new Set(),compared=new Set(),manual=[],selected=new Set(M.defaults),includeNational=true,page=1,visible=[],items=[],generation=0,editing=null,toastTimer;
-const initial={q:'',carrier:'',category:'',sort:'name',min:'',max:'',nameOnly:false,favOnly:false};
+const initial={q:'',carrier:'',region:'',category:'',sort:'name',min:'',max:'',nameOnly:false,favOnly:false};
 let state={...initial},theme='light',stored={};
 try{stored=JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){storageWarning();}
 function storageWarning(){$('storageWarning').hidden=false;$('storageWarning').textContent='浏览器无法保存本机配置。当前会话仍可使用，请及时导出配置备份。';}
@@ -21,14 +21,14 @@ function validConfig(d){
  });
  if(new Set(clean.map(x=>x.id)).size!==clean.length)throw Error('自定义资费 ID 重复');
  const f=d.filters&&typeof d.filters==='object'?d.filters:{};
- const filters={...initial,q:String(f.q||'').slice(0,500),carrier:['','mobile','telecom','unicom','gb'].includes(f.carrier)?f.carrier:'',category:String(f.category||'').slice(0,100),sort:['name','priceAsc','priceDesc'].includes(f.sort)?f.sort:'name',nameOnly:!!f.nameOnly,favOnly:!!f.favOnly};
+ const filters={...initial,q:String(f.q||'').slice(0,500),carrier:['','mobile','telecom','unicom','gb'].includes(f.carrier)?f.carrier:'',region:['','quanguo',...Object.keys(M.regions)].includes(f.region)?f.region:'',category:String(f.category||'').slice(0,100),sort:['name','priceAsc','priceDesc'].includes(f.sort)?f.sort:'name',nameOnly:!!f.nameOnly,favOnly:!!f.favOnly};
  for(const k of ['min','max'])filters[k]=f[k]!==''&&f[k]!=null&&Number.isFinite(Number(f[k]))&&Number(f[k])>=0?String(f[k]):'';
  return {selected:safe,includeNational:d.includeNational!==false,favorites:d.favorites||[],manual:clean,filters,theme:d.theme==='dark'?'dark':'light'};
 }
 function apply(d){selected=new Set(d.selected);includeNational=d.includeNational;favorites=new Set(d.favorites);manual=d.manual;state=d.filters;theme=d.theme;syncInputs();}
 function snapshot(){return {version:1,selected:[...selected],includeNational,favorites:[...favorites],manual,filters:state,theme};}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(snapshot()));}catch(e){storageWarning();}}
-function syncInputs(){for(const k of ['carrier','sort','min','max'])$(k).value=state[k];$('search').value=state.q;$('nameOnly').checked=state.nameOnly;$('national').checked=includeNational;$('favOnly').setAttribute('aria-pressed',String(state.favOnly));document.body.classList.toggle('dark',theme==='dark');}
+function syncInputs(){for(const k of ['carrier','region','sort','min','max'])$(k).value=state[k];$('search').value=state.q;$('nameOnly').checked=state.nameOnly;$('national').checked=includeNational;$('favOnly').setAttribute('aria-pressed',String(state.favOnly));document.body.classList.toggle('dark',theme==='dark');}
 try{if(stored.version)apply(validConfig(stored));}catch(e){storageWarning();}
 syncInputs();
 async function json(url){const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),45000);try{const r=await fetch(url,{cache:'no-store',signal:ctrl.signal});if(!r.ok)throw Error('HTTP '+r.status);return await r.json();}finally{clearTimeout(timer);}}
@@ -63,8 +63,8 @@ function card(x){const note=x.details.find(([k])=>/适用|服务内容/.test(k))
 function detail(key){const x=items.find(x=>x.key===key);if(!x)return;$('detailTitle').textContent=x.title;$('detailBody').innerHTML='<div class="notice">'+E(x.label)+' · '+(x.manual?'本机自定义，未经自动核实':'官方公开快照')+'<br>快照时间（按源站记录）：'+E(x.timestamp||'未提供')+'</div><p><a href="'+E(M.safeURL(x.official))+'" target="_blank" rel="noopener noreferrer">打开官方资费专区 ↗</a></p><dl><dt>资费标准</dt><dd>'+E(x.fee+' '+x.unit)+'</dd>'+x.details.map(([k,v])=>'<dt>'+E(k)+'</dt><dd>'+E(v)+'</dd>').join('')+'</dl>'+(x.manual?'<div class="dialog-actions"><button data-edit="'+E(x.id)+'">编辑自定义记录</button><button data-delete="'+E(x.id)+'">删除自定义记录</button></div>':'');$('detailDialog').showModal();}
 function openEditor(id){if(!manifest){toast('数据目录仍在载入，请稍候');return;}const m=id?manual.find(x=>x.id===id):null;editing=m?m.id:null;$('editorForm').reset();$('editorTitle').textContent=m?'编辑自定义资费':'新增自定义资费';$('editSource').innerHTML=M.defaults.map(k=>'<option value="'+E(k)+'">'+E(source(k).name)+'</option>').join('');if(m){$('editSource').value=m.source;$('editTitle').value=m.title;$('editFee').value=m.fee;$('editCategory').value=m.category;$('editNotes').value=m.notes;$('editURL').value=m.url;}$('editor').showModal();}
 function download(name,type,text){const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function filterChange(){state.q=$('search').value;for(const k of ['carrier','category','sort','min','max'])state[k]=$(k).value;state.nameOnly=$('nameOnly').checked;page=1;save();render();}
-let debounce;for(const id of ['search','min','max'])$(id).addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(filterChange,180);});for(const id of ['carrier','category','sort','nameOnly'])$(id).addEventListener('change',filterChange);
+function filterChange(){state.q=$('search').value;for(const k of ['carrier','region','category','sort','min','max'])state[k]=$(k).value;state.nameOnly=$('nameOnly').checked;page=1;save();render();}
+let debounce;for(const id of ['search','min','max'])$(id).addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(filterChange,180);});for(const id of ['carrier','region','category','sort','nameOnly'])$(id).addEventListener('change',filterChange);
 $('clearFilters').onclick=()=>{state={...initial};syncInputs();page=1;save();render();};$('favOnly').onclick=()=>{state.favOnly=!state.favOnly;page=1;save();render();};$('theme').onclick=()=>{theme=theme==='dark'?'light':'dark';syncInputs();save();};
 $('sources').addEventListener('change',e=>{const id=e.target.dataset.source;if(!id)return;if(e.target.checked)selected.add(id);else selected.delete(id);page=1;save();load();});$('national').onchange=()=>{includeNational=$('national').checked;page=1;save();load();};$('reset').onclick=()=>{selected=new Set(M.defaults);includeNational=true;syncInputs();page=1;save();load();};
 $('reload').onclick=async()=>{if(loading.size){toast('快照正在载入，请稍候');return;}$('reload').disabled=true;try{const next=await json('../data/coverage.json');if(!Array.isArray(next.sources))throw Error('目录格式错误');manifest=next;cache.clear();failures.clear();page=1;await load();toast('已刷新站点快照');}catch(e){toast('刷新失败，保留当前数据：'+e.message);}finally{$('reload').disabled=false;}};

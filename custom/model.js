@@ -29,7 +29,7 @@
     const q=String(state.q || '').trim().toLowerCase();
     const lo=state.min==='' || state.min==null ? null : Number(state.min);
     const hi=state.max==='' || state.max==null ? null : Number(state.max);
-    return items.filter(x=>(!q || (state.nameOnly ? x.title.toLowerCase() : x.search).includes(q)) && (!state.carrier || x.carrier===state.carrier) && (!state.category || x.category===state.category) && (!state.favOnly || favorites.has(x.key)) && ((lo===null && hi===null) || (x.monthly!==null && (lo===null || x.monthly>=lo) && (hi===null || x.monthly<=hi))));
+    return items.filter(x=>(!q || (state.nameOnly ? x.title.toLowerCase() : x.search).includes(q)) && (!state.carrier || x.carrier===state.carrier) && (!state.region || x.region===state.region) && (!state.category || x.category===state.category) && (!state.favOnly || favorites.has(x.key)) && ((lo===null && hi===null) || (x.monthly!==null && (lo===null || x.monthly>=lo) && (hi===null || x.monthly<=hi))));
   }
   function sort(items, order) {
     return items.slice().sort((a,b)=>{
@@ -38,7 +38,7 @@
         if(b.monthly===null && a.monthly!==null)return -1;
         if(a.monthly!==null && b.monthly!==null && a.monthly!==b.monthly)return (a.monthly-b.monthly)*(order==='priceAsc'?1:-1);
       }
-      return a.label.localeCompare(b.label,'zh-CN') || a.title.localeCompare(b.title,'zh-CN') || a.key.localeCompare(b.key);
+      return a.title.localeCompare(b.title,'zh-CN') || a.label.localeCompare(b.label,'zh-CN') || a.key.localeCompare(b.key);
     });
   }
   function escape(s) {return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
