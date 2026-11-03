@@ -65,6 +65,10 @@ jobs:
         with:
           pattern: refresh-*
           path: _refresh
+      - name: Refresh Jiangsu Mobile and Unicom announcements
+        if: inputs.archive_only != true
+        continue-on-error: true
+        run: python3 -u pipelines/scripts/announce_fetch.py --move-dir data --uni-dir unicom/data
       - name: Open permanent history branch
         run: |
           set -euo pipefail

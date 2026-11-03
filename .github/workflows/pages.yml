@@ -37,7 +37,10 @@ jobs:
           python3 tests/test_final_regressions.py
           python3 -m unittest discover -s tests -p 'test_personal*.py' -v
           python3 -m unittest discover -s tests -p 'test_scheduled*.py' -v
+          python3 -m unittest discover -s tests -p 'test_announcements.py' -v
           node tests/test_personal.js
+          node --check app.js
+          node --check unicom/app.js
           node --check custom/app.js
       - name: Build static artifact
         env:
