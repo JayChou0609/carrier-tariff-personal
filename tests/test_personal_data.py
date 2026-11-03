@@ -63,6 +63,7 @@ class PersonalDataTest(unittest.TestCase):
             for name in ['.git', '.env', 'pipelines', 'scripts', '.github', 'unicom/data/_pool.json', 'data/_degrade.json']:
                 self.assertFalse((out / name).exists(), name)
             self.assertTrue((out / 'data/announce.json').exists())
+            self.assertTrue((out / 'unicom/data/announce.json').exists())
             for carrier in ['', 'telecom/', 'unicom/', 'gb/']:
                 self.assertTrue((out / (carrier + 'data/quanguo.json')).exists())
             self.assertIn('https://example-user.github.io/tariffs/', (out / 'index.html').read_text())
