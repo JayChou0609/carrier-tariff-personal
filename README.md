@@ -1,3 +1,5 @@
+> 本次扩展：新增 [我的资费](custom/) 页面，默认关注指定 12 个地区组合及四家全国资费。完整说明与发布状态见 [DELIVERY.md](DELIVERY.md)。省份快照覆盖情况以 `data/coverage.json` 为准，江苏/上海/浙江电信省级采集尚未完成。
+
 # 运营商资费监控 · 数据展示站（移动 / 联通 / 电信 / 广电）
 
 本仓库是一个**自包含**的运营商资费监控项目：定时抓取四家运营商官网的公开资费数据，
@@ -8,10 +10,10 @@
 
 ## 在线访问
 
-- 中国移动：<https://amxysw.github.io/carrier-tariff-site/>
-- 中国联通：<https://amxysw.github.io/carrier-tariff-site/unicom/>
-- 中国电信：<https://amxysw.github.io/carrier-tariff-site/telecom/>
-- 中国广电：<https://amxysw.github.io/carrier-tariff-site/gb/>
+- 中国移动：<https://JayChou0609.github.io/carrier-tariff-personal/>
+- 中国联通：<https://JayChou0609.github.io/carrier-tariff-personal/unicom/>
+- 中国电信：<https://JayChou0609.github.io/carrier-tariff-personal/telecom/>
+- 中国广电：<https://JayChou0609.github.io/carrier-tariff-personal/gb/>
 
 ## 数据说明
 

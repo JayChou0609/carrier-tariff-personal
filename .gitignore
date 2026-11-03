@@ -23,3 +23,8 @@ _diag.json
 /_site/
 /snapshots/
 
+
+# 本机开发与 Pages 构建产物
+.venv/
+_pages/
+*.tar.gz
