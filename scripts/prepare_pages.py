@@ -15,8 +15,8 @@ def prepare(root, out, repo=''):
     for name in ['index.html', 'app.js', 'style.css', 'common-extras.js', 'logo.png',
                  'tariff-fetch-source.zip', 'manifest.json', 'sw.js', 'push-center.html', '.nojekyll', 'LICENSE']:
         shutil.copy2(root / name, out / name)
-    for folder in ['icons', 'custom', 'telecom', 'unicom', 'gb']:
-        if folder in ['icons', 'custom']:
+    for folder in ['icons', 'custom', 'history', 'telecom', 'unicom', 'gb']:
+        if folder in ['icons', 'custom', 'history']:
             shutil.copytree(root / folder, out / folder,
                             ignore=shutil.ignore_patterns('__pycache__', 'node_modules'))
         else:
@@ -31,7 +31,7 @@ def prepare(root, out, repo=''):
         wanted.update(Path(s['path']).name for s in coverage['sources']
                       if s['available'] and str(Path(s['path']).parent) == folder)
         if folder == 'data':
-            wanted.add('announce.json')
+            wanted.update(['announce.json', 'refresh-status.json'])
         for name in wanted:
             src = root / folder / name
             if src.exists():
