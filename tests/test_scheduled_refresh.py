@@ -30,6 +30,35 @@ class ScheduledTest(unittest.TestCase):
         for filename in ['mobile-build.yml','telecom-gb-fetch.yml','unicom-fetch.yml','province-notify.yml']:
             self.assertNotIn('\n  schedule:', (path / filename).read_text())
 
+    def test_telecom_official_province_codes_and_fresh_sessions(self):
+        from unittest.mock import patch
+        import telecom_pipeline as t
+        self.assertEqual({s:t.SCOPES[s]['prov'] for s in ['jiangsu','shanghai','zhejiang']},
+                         {'jiangsu':'600103','shanghai':'600102','zhejiang':'600104'})
+        issued=[]
+        def call(fn, request):
+            if fn=='tariffSectionHome':
+                session='new-session-'+str(len(issued));issued.append(session)
+                self.assertEqual(request['sessionid'],'')
+                return {'responseContent':{'provCode':request['provCode'],'sessionid':session,
+                                            'lableOneList':[{'id':'A','name':'套餐'}]}}
+            self.assertEqual(request['sessionid'],issued[-1])
+            return {'responseContent':{'zoneTitleListCount':1,
+                    'zoneTitleList':[{'id':'official','name':'已核验套餐','fees':'59'}]}}
+        with patch.object(t,'call',side_effect=call),patch.object(t.time,'sleep'):
+            for scope in ['jiangsu','shanghai','zhejiang']:
+                self.assertEqual(len(t.fetch_scope(scope,t.SCOPES[scope]['prov'])),1)
+        self.assertEqual(len(set(issued)),3)
+
+    def test_telecom_rejects_wrong_province_or_truncated_category(self):
+        from unittest.mock import patch
+        import telecom_pipeline as t
+        with patch.object(t,'call',return_value={'responseContent':{'provCode':'wrong'}}):
+            with self.assertRaisesRegex(ValueError,'编码与请求不一致'):t.home('600103')
+        with patch.object(t,'home',return_value={'sessionid':'fresh','lableOneList':[{'id':'A'}]}), \
+             patch.object(t,'query',return_value={'zoneTitleListCount':2,'zoneTitleList':[{'name':'A'}]}):
+            with self.assertRaisesRegex(ValueError,'被截断'):t.fetch_scope('jiangsu','600103')
+
     def test_failure_empty_and_drop_never_overwrite(self):
         for data, error in [([], ''), ([item()], 'timeout')]:
             with self.assertRaises(ValueError): acceptable([item()], data, error)
