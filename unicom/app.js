@@ -950,12 +950,14 @@ function renderAnnounce() {
   const box = $("announceBox");
   const sub = $("announceSub");
   loadAnnounce().then((d) => {
-    if (!d || !d.items || !d.items.length) {
+    if (!d || d.province !== "jiangsu" || d.operator !== "unicom") throw new Error("公告地区不匹配");
+    if (!d.items || !d.items.length) {
+      if (d.status === "failed") throw new Error("公告采集失败");
       if (sub) sub.textContent = "";
       box.innerHTML = '<div class="empty">暂无公告数据</div>';
       return;
     }
-    if (sub) sub.innerHTML = "数据更新时间：" + esc(d.updated || "");
+    if (sub) sub.textContent = "数据更新时间：" + (d.updated || "") + (d.status === "failed" ? " · 本轮获取失败，显示上次成功数据" : " · 每天 00:00、12:00 自动检查");
     box.innerHTML = d.items.map((it, i) => {
       const att = (it.attachments && it.attachments.length)
         ? '<div class="ann-att">' + it.attachments.map((a) =>
@@ -963,7 +965,7 @@ function renderAnnounce() {
         : "";
       const body = (it.content && it.content.trim())
         ? '<div class="ann-content">' + it.content + "</div>"
-        : '<div class="ann-noimg">该公告正文以图片形式发布，请点击查看官网原文。</div>';
+        : '<div class="ann-noimg">正文暂未取得，请点击查看官网原文。</div>';
       return '<div class="ann-item" data-i="' + i + '">' +
         '<div class="ann-head">' +
         '<span class="ann-date">' + esc(it.date || "") + "</span>" +
@@ -985,7 +987,7 @@ function renderAnnounce() {
     });
   }).catch(() => {
     if (sub) sub.textContent = "";
-    box.innerHTML = '<div class="empty">公告数据加载失败，请稍后重试</div>';
+    box.innerHTML = '<div class="empty">江苏公告暂时无法加载，请稍后刷新或访问官网查看</div>';
   });
 }
 
