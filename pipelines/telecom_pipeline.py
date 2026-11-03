@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """中国电信资费监控管线（可在 GitHub Actions 直接运行，路径全部相对脚本目录）
 
-职责：抓取电信「湖南(600203) + 全国(1000000037)」资费（对齐联通站 JSON schema）
+职责：抓取电信全国、江苏、上海、浙江、湖南公开资费（统一 JSON schema）
       → 与上一版数据 diff → 输出站点数据目录（{scope}.json + latest.json + history.json）。
-说明：其余 29 省 provCode 无公开口径且各省 h5 受瑞数 WAF 拦截，暂无法自动化，预留 SCOPES 可扩展。
+省份编码由官方 tariffSectionHome 返回值核实；每次先获取新的 sessionid，不固定保存会话值。
 用法:
   python3 telecom_pipeline.py --prev-dir PATH --out-dir PATH
 """
@@ -21,6 +21,9 @@ API = "https://www.189.cn/wapportalweb/wapportalweb/tariffSection.do"
 
 SCOPES = {
     "hunan": {"prov": "600203", "name": "湖南"},
+    "jiangsu": {"prov": "600103", "name": "江苏"},
+    "shanghai": {"prov": "600102", "name": "上海"},
+    "zhejiang": {"prov": "600104", "name": "浙江"},
     "quanguo": {"prov": "1000000037", "name": "全国"},
 }
 
@@ -52,7 +55,10 @@ def call(fn, rc):
 
 def home(prov):
     d = call("tariffSectionHome", {"ticket": "", "sessionid": "", "provCode": prov})
-    return d.get("responseContent", {})
+    rc = d.get("responseContent", {})
+    if rc.get("provCode") and str(rc["provCode"]) != str(prov):
+        raise ValueError("电信首页返回省份编码与请求不一致")
+    return rc
 
 
 def query(sess, prov, l1, l2=""):
@@ -118,7 +124,9 @@ def fetch_scope(scope, prov):
     sess = rc.get("sessionid")
     boards = rc.get("lableOneList") or []
     items = []
-    print("[%s] session=%s boards=%s" % (scope, sess, [b.get("name") for b in boards]))
+    print("[%s] boards=%s" % (scope, [b.get("name") for b in boards]))
+    if not sess:
+        raise ValueError("电信首页未返回有效 sessionid")
     if not boards:
         print("  !! home 未返回板块，provCode=%s 可能受限" % prov)
         return []
@@ -126,6 +134,9 @@ def fetch_scope(scope, prov):
         l1 = b["id"]
         rq = query(sess, prov, l1)
         lst = rq.get("zoneTitleList") or []
+        expected = rq.get("zoneTitleListCount")
+        if str(expected).isdigit() and int(expected) > len(lst):
+            raise ValueError("电信分类列表被截断：应有 %s 条，取得 %s 条" % (expected, len(lst)))
         for x in lst:
             items.append(parse_item(x))
         print("  [%s] count=%s got=%d" % (b.get("name"), rq.get("zoneTitleListCount"), len(lst)))
@@ -207,8 +218,8 @@ def build_latest(scopes, datadir):
         sections.append({"section": scope, "name": SCOPES[scope]["name"], "total": total,
                          "onsale": total, "updated": d.get("timestamp") or ""})
     now = time.strftime("%Y-%m-%d %H:%M:%S")
-    latest = {"sections": sections, "default": "hunan", "quanguo_total": q_total,
-              "prov_total": prov_stats.get("hunan", {}).get("total", 0),
+    latest = {"sections": sections, "default": "jiangsu" if "jiangsu" in prov_stats else "hunan", "quanguo_total": q_total,
+              "prov_total": sum(v["total"] for k, v in prov_stats.items() if k != "quanguo"),
               "prov_stats": prov_stats, "updated": now, "timestamp": now}
     save(os.path.join(datadir, "latest.json"), latest)
     print("latest.json 已生成: quanguo=%s hunan=%s" % (q_total, prov_stats.get("hunan", {}).get("total")))
