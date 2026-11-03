@@ -17,6 +17,9 @@ on:
         type: string
         default: ""
 
+env:
+  TZ: Asia/Shanghai
+
 permissions:
   contents: write
 
@@ -68,7 +71,7 @@ jobs:
           [ -n "$MODE" ] || MODE="full"
           FOCUS="${{ github.event.inputs.focus_provs }}"
           [ -n "$FOCUS" ] || FOCUS="${{ vars.FOCUS_PROVS }}"
-          [ -n "$FOCUS" ] || FOCUS="jiangxi,guangdong"
+          [ -n "$FOCUS" ] || FOCUS="jiangsu,shanghai,zhejiang,hebei,henan,sichuan,guangdong"
           # 兜底：每周日跑一次全量，避免 focus 模式下其余省份永远不更新
           DOW=$(date -u +%u)
           if [ "$DOW" = "7" ]; then
