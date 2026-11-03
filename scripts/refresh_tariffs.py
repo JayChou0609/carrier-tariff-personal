@@ -172,6 +172,9 @@ def fetch_carrier(carrier, root=ROOT, output=None, collector=collect):
                        count=len(old['items']), message=str(e)[:300])
         row['finished'] = now()
         report.append(row)
+        # Persist each finished scope so a later timeout cannot discard its result.
+        write(output / 'status.json', {'carrier': carrier, 'started': started,
+                                       'finished': now(), 'sources': report})
         print(row['id'], row['status'], row['count'], flush=True)
     if carrier == 'unicom':
         write(output / 'files' / state_path, sampling)

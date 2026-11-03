@@ -29,7 +29,9 @@ def put_object(archive, value):
             raise ValueError('Archive object hash collision or corruption')
     else:
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(gzip.compress(payload, mtime=0))
+        temp = target.with_suffix(target.suffix + '.tmp')
+        temp.write_bytes(gzip.compress(payload, mtime=0))
+        temp.replace(target)
     return path.as_posix()
 
 
