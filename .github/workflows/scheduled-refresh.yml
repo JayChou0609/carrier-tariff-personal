@@ -1,0 +1,119 @@
+name: Scheduled Tariff Refresh
+on:
+  schedule:
+    - cron: "0 4,16 * * *" # UTC -> Asia/Shanghai 每天 12:00 / 00:00
+  workflow_dispatch:
+    inputs:
+      archive_only:
+        description: "仅建立现有数据的历史基线（不重新采集）"
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency:
+  group: tariff-scheduled-refresh
+  cancel-in-progress: false
+env:
+  TZ: Asia/Shanghai
+jobs:
+  fetch:
+    if: inputs.archive_only != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        carrier: [mobile, telecom, unicom, gb]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Fetch national and requested provincial tariffs
+        env:
+          CARRIER: ${{ matrix.carrier }}
+          UNICOM_TIME_BUDGET: '300'
+          UNICOM_FEE_SEGMENT: '1'
+        run: python3 -u scripts/refresh_tariffs.py --carrier "$CARRIER"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: refresh-${{ matrix.carrier }}
+          path: _refresh/refresh-${{ matrix.carrier }}
+          if-no-files-found: warn
+          retention-days: 7
+  archive:
+    needs: fetch
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        if: inputs.archive_only != true
+        with:
+          pattern: refresh-*
+          path: _refresh
+      - name: Open permanent history branch
+        run: |
+          set -euo pipefail
+          git config user.name tariff-bot
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          TARIFF_HISTORY_DIR="$RUNNER_TEMP/tariff-history"
+          if git ls-remote --exit-code --heads origin tariff-history > /dev/null; then
+            git fetch origin tariff-history:refs/remotes/origin/tariff-history
+            git worktree add --detach "$TARIFF_HISTORY_DIR" origin/tariff-history
+          else
+            git worktree add --detach "$TARIFF_HISTORY_DIR" HEAD
+            git -C "$TARIFF_HISTORY_DIR" switch --orphan tariff-history
+          fi
+          echo "TARIFF_HISTORY_DIR=$TARIFF_HISTORY_DIR" >> "$GITHUB_ENV"
+      - name: Merge validated data and retain complete history
+        id: refresh
+        continue-on-error: true
+        env:
+          REPOSITORY: ${{ github.repository }}
+          RUN_KEY: ${{ github.run_id }}-${{ github.run_attempt }}
+          ARCHIVE_ONLY: ${{ inputs.archive_only }}
+        run: |
+          set -euo pipefail
+          FLAGS=()
+          if [ "$ARCHIVE_ONLY" = true ]; then FLAGS+=(--archive-only); fi
+          python3 scripts/archive_tariffs.py \
+            --archive "$TARIFF_HISTORY_DIR" --incoming _refresh \
+            --repository "$REPOSITORY" --run-id "$RUN_KEY" "${FLAGS[@]}"
+      - name: Save immutable archive and site data
+        run: |
+          set -euo pipefail
+          test -f history/data/index.json
+          git -C "$TARIFF_HISTORY_DIR" add objects runs legacy
+          if ! git -C "$TARIFF_HISTORY_DIR" diff --cached --quiet; then
+            git -C "$TARIFF_HISTORY_DIR" commit -m "archive: tariffs $(date -Iseconds)"
+            git -C "$TARIFF_HISTORY_DIR" push origin HEAD:tariff-history
+          fi
+          git add data telecom/data unicom/data gb/data history/data
+          if ! git diff --cached --quiet; then
+            git commit -m "data: scheduled tariffs $(date -Iseconds)"
+            for attempt in 1 2 3; do
+              git pull --rebase origin main
+              if git push origin HEAD:main; then exit 0; fi
+              sleep 5
+            done
+            exit 1
+          fi
+      - name: Report collection failure after preserving last reliable data
+        if: steps.refresh.outcome == 'failure'
+        run: |
+          echo '::error::本轮未取得可接受的更新，已保留旧快照；请检查采集报告及历史状态。'
+          exit 1

@@ -1,9 +1,8 @@
+# 定时采集已统一至 scheduled-refresh.yml；本文件保留手动运行。
 name: Unicom Fetch
 # 公开仓 Actions 免费不限量（私有仓额度已耗尽）
 
 on:
-  schedule:
-    - cron: "37 1,13 * * *"    # 北京 09:37 / 21:37
   workflow_dispatch:
     inputs:
       mode:

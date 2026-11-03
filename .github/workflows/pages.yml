@@ -4,7 +4,7 @@ on:
     branches: [main]
   workflow_dispatch:
   workflow_run:
-    workflows: ["Mobile Fetch & Build", "Telecom & GB Fetch", "Unicom Fetch"]
+    workflows: ["Scheduled Tariff Refresh", "Mobile Fetch & Build", "Telecom & GB Fetch", "Unicom Fetch"]
     types: [completed]
 permissions:
   contents: read
@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   deploy:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' || (github.event.workflow_run.name == 'Scheduled Tariff Refresh' && github.event.workflow_run.conclusion == 'failure')
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -36,6 +36,7 @@ jobs:
           python3 tests/test_diff.py
           python3 tests/test_final_regressions.py
           python3 -m unittest discover -s tests -p 'test_personal*.py' -v
+          python3 -m unittest discover -s tests -p 'test_scheduled*.py' -v
           node tests/test_personal.js
           node --check custom/app.js
       - name: Build static artifact

@@ -1,10 +1,9 @@
+# 定时采集已统一至 scheduled-refresh.yml；本文件保留手动运行。
 name: Telecom & GB Fetch
 # 公开仓 Actions 免费不限量（私有仓额度已耗尽）
 # 单 job 顺序执行：电信 → 广电 → 统一提交，避免并行 push 冲突
 
 on:
-  schedule:
-    - cron: "17 1,13 * * *"    # 北京 09:17 / 21:17
   workflow_dispatch:
     inputs:
       mode:
