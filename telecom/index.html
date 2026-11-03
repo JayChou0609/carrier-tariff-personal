@@ -8,11 +8,11 @@
 <title>中国电信资费专区 · 数据一览</title>
 <link rel="stylesheet" href="./style.css?v=20260913d">
   <link rel="icon" type="image/webp" href="telecom_logo.webp">
-  <meta name="description" content="中国电信资费专区 · 湖南及全国公开资费数据一览，支持实时检索、资费对比与变化历史追踪。">
+  <meta name="description" content="中国电信资费专区 · 江苏、上海、浙江、湖南及全国公开资费数据一览，支持实时检索、资费对比与变化历史追踪。">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="资费监控站">
   <meta property="og:title" content="中国电信资费专区">
-  <meta property="og:description" content="中国电信资费专区 · 湖南及全国公开资费数据一览，支持实时检索、资费对比与变化历史追踪。">
+  <meta property="og:description" content="中国电信资费专区 · 江苏、上海、浙江、湖南及全国公开资费数据一览，支持实时检索、资费对比与变化历史追踪。">
   <meta property="og:url" content="https://amxysw.github.io/carrier-tariff-site/telecom/">
   <meta property="og:image" content="https://amxysw.github.io/carrier-tariff-site/telecom/telecom_logo.webp">
   <meta name="twitter:card" content="summary">
@@ -25,7 +25,7 @@
       <span class="brand-logo"><img src="telecom_logo.webp" alt="中国电信资费专区"></span>
       <div class="brand-text">
         <div class="brand-name">中国电信资费专区</div>
-        <div class="brand-sub">湖南 · 全国 资费数据一览</div>
+        <div class="brand-sub">江苏 · 上海 · 浙江 · 湖南 · 全国 资费数据一览</div>
       </div>
     </div>
     <div class="topbar-actions">
@@ -39,7 +39,7 @@
   <nav class="tabs">
     <button class="tab active" data-view="overview">数据总览</button>
     <button class="tab" data-view="quanguo">全国资费</button>
-    <button class="tab" data-view="prov">湖南资费</button>
+    <button class="tab" data-view="prov">省份资费</button>
     <button class="tab" data-view="history">变化历史</button>
     <button class="tab" data-view="about">关于</button>
   </nav>
@@ -50,17 +50,17 @@
   <section id="view-overview" class="view active">
     <div class="stat-grid">
       <div class="stat-card"><div class="stat-num" id="stTotal">-</div><div class="stat-label">全国资费总数</div></div>
-      <div class="stat-card"><div class="stat-num" id="stAllProv">-</div><div class="stat-label" id="stAllProvLabel">湖南资费总数</div></div>
+      <div class="stat-card"><div class="stat-num" id="stAllProv">-</div><div class="stat-label" id="stAllProvLabel">省份资费总数</div></div>
       <div class="stat-card accent"><div class="stat-num" id="stQuanguo">-</div><div class="stat-label" id="stQuanguoLabel">本省资费总数</div></div>
       <div class="stat-card accent2"><div class="stat-num" id="stGq">-</div><div class="stat-label" id="stGqLabel">本省在售资费</div></div>
     </div>
     <div class="panel">
-      <h2 class="panel-title">湖南资费统计
+      <h2 class="panel-title">省份资费统计
         <button type="button" class="prov-pick" id="oProvBtn" title="切换省份查看该省资费统计"><span class="prov-name" id="oProvTxt">加载中…</span><span class="prov-caret">▾</span></button>
 <select id="oProv" class="sel prov-sel" title="切换省份查看该省资费统计" hidden></select>
         <span class="panel-sub" id="distDesc">分类分布</span>
       </h2>
-      <div class="stat-card"><div class="stat-num" id="opTotal">-</div><div class="stat-label" id="opLabel">湖南资费总数</div></div>
+      <div class="stat-card"><div class="stat-num" id="opTotal">-</div><div class="stat-label" id="opLabel">省份资费总数</div></div>
       <div class="bars" id="distBars"></div>
     </div>
   </section>
@@ -90,7 +90,7 @@
     <div class="pager" id="qPager"></div>
   </section>
 
-  <!-- 湖南资费 -->
+  <!-- 省份资费 -->
   <section id="view-prov" class="view">
     <div class="toolbar">
       <div class="sort-bar" id="pSortBar">
@@ -114,7 +114,7 @@
       <button class="btn" id="pReload">重新加载</button>
       <span class="count-hint" id="pCount"></span>
     </div>
-    <div class="list" id="pList"><div class="loading">加载湖南资费数据…</div></div>
+    <div class="list" id="pList"><div class="loading">加载省份资费数据…</div></div>
     <div class="pager" id="pPager"></div>
   </section>
 
@@ -137,11 +137,11 @@
       <div class="about-banner"><img src="telecom_logo.webp" alt="中国电信"></div>
       <h2 class="panel-title">关于本页</h2>
       <div class="about-text">
-        <p>本页面展示中国电信「全国资费」及湖南的公开资费资料，数据由自动监控程序定期抓取官网并存入代码仓库，再发布为静态网页。</p>
+        <p>本页面展示中国电信「全国资费」及江苏、上海、浙江、湖南的公开资费资料，数据由自动监控程序定期抓取官网并存入代码仓库，再发布为静态网页。</p>
         <ul>
           <li><b>数据来源：</b>中国电信官网公开资费专区（rateZone）</li>
-          <li><b>省份范围：</b>湖南 + 全国（集团资费公示），默认湖南；电信源站仅公开此两板块，无其他省份可选</li>
-          <li><b>更新方式：</b>自动定时抓取比对，有变化即刷新本页</li>
+          <li><b>省份范围：</b>江苏、上海、浙江、湖南 + 全国（集团资费公示），默认江苏，可自助切换省份</li>
+          <li><b>更新方式：</b>北京时间每天 00:00 / 12:00 触发指定地区采集，完成后刷新页面，完整记录保存在历史归档</li>
           <li><b>数据口径：</b>以官网「适用对象」「适用地区」字段为准，仅供参考</li>
           <li><b>免责声明：</b>展示内容可能存在延迟或误差，办理业务请以营业厅 / 10000 官方信息为准</li>
         </ul>
