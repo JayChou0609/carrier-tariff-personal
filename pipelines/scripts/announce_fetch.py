@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""公告抓取脚本：江西移动公告 + 联通公告，各只保留最新 15 条，输出 announce.json
+"""公告抓取脚本：江苏移动公告 + 联通公告，各只保留最新 15 条，输出 announce.json
 
 用法:
     python3 pipelines/scripts/announce_fetch.py --move-dir data --uni-dir unicom/data
     （路径相对仓库根目录；前端读取的就是 data/announce.json 与 unicom/data/announce.json）
 说明:
-    - 移动(江西)公告列表/详情均为静态 JSON，GET 直取；
+    - 移动(江苏)公告列表/详情均为静态 JSON，GET 直取；
       详情接口触发 TLS legacy renegotiation，需注入 openssl_legacy.cnf(见下)。
     - 联通公告列表/详情为 POST 接口，需带 XHR 特征头(否则中文被替换成 ?)。
     - 输出文件:
@@ -32,17 +32,17 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 MAX_KEEP = 15
 
-# ---------------- 移动(江西) ----------------
-# 栏目 ID 与湖南版相同(5004505_873_2361)，仅省份前缀不同：jx/791(南昌区号)
-MOVE_LIST_URL = ("https://www.10086.cn/aboutus/news/pannounce/jx/791/5004505_873_2361.json")
-MOVE_DETAIL_PREFIX = ("https://www.10086.cn/aboutus/news/pannounce/jx/791/5004505_873_2361_detail_")
-MOVE_DETAIL_PAGE = ("https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_{id}.html")
+# ---------------- 移动(江苏) ----------------
+# 江苏官方列表页 index_250_250.html 声明的栏目 JSON。
+MOVE_LIST_URL = ("https://www.10086.cn/aboutus/news/pannounce/js/250/5004505_873_2361.json")
+MOVE_DETAIL_PREFIX = ("https://www.10086.cn/aboutus/news/pannounce/js/250/5004505_873_2361_detail_")
+MOVE_DETAIL_PAGE = ("https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_{id}.html")
 MOVE_SITE = "https://www.10086.cn"
 
 # ---------------- 联通 ----------------
 UNI_LIST_URL = "https://www.10010.com/mall/service/query/announcementquery"
 UNI_DETAIL_URL = "https://www.10010.com/mall/service/query/announcementquerydetail"
-UNI_PROVINCE = "075"  # 江西。实测接口省份代码：074=湖南、075=江西、079=西藏、034=江苏
+UNI_PROVINCE = "034"  # 江苏；075 为江西
 UNI_DETAIL_PAGE = ("https://www.10010.com/wt_links/index.html#/announcementDetail?announcementId={id}"
                    "&pageSize=12&pageNo=1")
 UNI_IMG_HOST = "https://m1.img.10010.com"
@@ -113,46 +113,53 @@ def _safe_proto(url):
     return ""
 
 
-def clean_html(raw):
-    """清洗 CMS/Word 富文本为简洁 HTML（保留表格/链接/图片），并补全站内相对链接"""
-    if not raw:
-        return ""
-    h = raw
-    h = re.sub(r"<\?xml.*?\?>", "", h, flags=re.S)
-    h = re.sub(r"<style.*?</style>", "", h, flags=re.S | re.I)
-    h = re.sub(r"<script.*?</script>", "", h, flags=re.S | re.I)
-    h = re.sub(r"<!--.*?-->", "", h, flags=re.S)
-    # 只保留基础标签，其余(如 span 大量嵌套)一并剥掉标签保留文本
-    h = re.sub(r"<(?!/?(p|br|div|a|img|strong|b|em|i|u|ul|ol|li|table|tr|td|th|tbody|thead|h\d|blockquote)(\s|/|>))[^>]*>", "", h, flags=re.I)
-    h = strip_style(h)
-    # 清理空属性与僵尸 span
-    h = re.sub(r'\s+(class|id|lang|dir|colspan|rowspan|border|width|height|align|cellpadding|cellspacing)="[^"]*"', "", h, flags=re.I)
-    h = re.sub(r"\s+class=['\"][^'\"]*['\"]", "", h, flags=re.I)
-    # 补全图片相对路径
-    h = re.sub(r'(<img[^>]*?src=)["\'](?!https?://|data:)([^"\']*)["\']',
-               lambda m: m.group(1) + '"' + _abs_link(m.group(2), "move") + '"', h, flags=re.I)
-    h = re.sub(r'(<a[^>]*?href=)["\'](?!https?://|#|mailto:)([^"\']*)["\']',
-               lambda m: m.group(1) + '"' + _abs_link(m.group(2), "move") + '"', h, flags=re.I)
-    # 逐段切分，保留换行
-    h = h.replace("</p>", "</p>\n").replace("<br>", "<br>\n").replace("<br/>", "<br>\n").replace("<br />", "<br>\n")
-    h = re.sub(r"\n{3,}", "\n\n", h)
-    # 链接/图片协议白名单兜底：仅保留 http/https/mailto 与相对链接，其余(如 javascript:/data:text)置空
-    h = re.sub(r'(<a[^>]*?href=)["\']([^"\']*)["\']',
-               lambda m: m.group(1) + '"' + _safe_proto(m.group(2)) + '"', h, flags=re.I)
-    h = re.sub(r'(<img[^>]*?src=)["\']([^"\']*)["\']',
-               lambda m: m.group(1) + '"' + _safe_proto(m.group(2)) + '"', h, flags=re.I)
-    return h.strip()
+def clean_html(raw, kind="move"):
+    """Allowlist rich text and attributes; resolve links against the correct operator."""
+    from html.parser import HTMLParser
+    from html import escape
+
+    class Cleaner(HTMLParser):
+        def __init__(self):
+            super().__init__(convert_charrefs=True)
+            self.out, self.blocked = [], 0
+
+        def handle_starttag(self, tag, attrs):
+            if tag in {"script", "style", "iframe", "object"}:
+                self.blocked += 1
+                return
+            if self.blocked or tag not in KEEP_TAGS:
+                return
+            kept = []
+            for key, value in attrs:
+                value = value or ""
+                if (tag == "a" and key == "href") or (tag == "img" and key == "src"):
+                    value = _safe_proto(value)
+                    if value:
+                        kept.append((key, _abs_link(value, kind)))
+                elif key in {"title", "alt"} or (tag in {"td", "th"} and key in {"colspan", "rowspan"} and value.isdigit()):
+                    kept.append((key, value))
+            if tag == "a":
+                kept.extend([("target", "_blank"), ("rel", "noopener noreferrer")])
+            self.out.append("<" + tag + "".join(' %s="%s"' % (k, escape(v, quote=True)) for k, v in kept) + ">")
+
+        def handle_endtag(self, tag):
+            if tag in {"script", "style", "iframe", "object"}:
+                self.blocked = max(0, self.blocked - 1)
+            elif not self.blocked and tag in KEEP_TAGS and tag not in {"img", "br"}:
+                self.out.append("</" + tag + ">")
+
+        def handle_data(self, text):
+            if not self.blocked:
+                self.out.append(escape(text))
+
+    parser = Cleaner()
+    parser.feed(raw or "")
+    return "".join(parser.out).strip()
 
 
-_img_dom = {"move": "https://www.10086.cn", "uni": UNI_IMG_HOST}
 def _abs_link(path, kind):
-    if path.startswith(("http://", "https://", "data:")):
-        return path
-    if path.startswith("/"):
-        if kind == "move":
-            return MOVE_SITE + path
-        return UNI_IMG_HOST + path
-    return path
+    base = MOVE_DETAIL_PAGE.format(id="") if kind == "move" else UNI_IMG_HOST + "/"
+    return urllib.parse.urljoin(base, path)
 
 
 def html_to_text(h):
@@ -192,6 +199,8 @@ def fetch_move():
     raw = _http_get(MOVE_LIST_URL)
     j = json.loads(raw)
     lst = j["cData"]["list"] or []
+    if not isinstance(lst, list) or not lst:
+        raise ValueError("江苏移动公告列表为空或结构异常")
     items = []
     for row in lst:
         href = row.get("detail_href") or ""
@@ -230,12 +239,27 @@ def fetch_move():
 # ---------------- 联通抓取 ----------------
 def fetch_uni():
     print("[联通] 拉取公告列表 ...")
-    raw = _http_post(UNI_LIST_URL, {"pageNo": "1", "pageSize": str(MAX_KEEP + 5),
-                                    "province": UNI_PROVINCE, "condition": "0", "title": ""}, UNI_HDRS)
-    j = json.loads(raw)
-    lst = j.get("result") or []
+    lst = []
+    page, total_pages = 1, 1
+    while page <= total_pages:
+        j = json.loads(_http_post(UNI_LIST_URL, {
+            "pageNo": str(page), "pageSize": "20", "province": UNI_PROVINCE,
+            "condition": "0", "title": ""}, UNI_HDRS))
+        rows = j.get("result")
+        if not isinstance(rows, list) or not rows:
+            raise ValueError("江苏联通公告分页为空或结构异常")
+        total_pages = int(j.get("totalPages", 1))
+        if not 1 <= total_pages <= 100:
+            raise ValueError("江苏联通公告分页数量异常")
+        lst.extend(rows)
+        page += 1
+        time.sleep(0.2)
     items = []
+    seen = set()
     for row in lst:
+        if row.get("creatorProvinceName") != "江苏" or row.get("id") in seen:
+            continue
+        seen.add(row.get("id"))
         items.append({
             "id": row.get("id") or "",
             "title": row.get("title") or "",
@@ -256,14 +280,25 @@ def fetch_uni():
                 "province": UNI_PROVINCE}, UNI_HDRS))
             n = dj.get("tNoticeDto") or {}
             text = n.get("noticeDetails") or ""
-            content = clean_html(text)
+            content = clean_html(text, "uni")
             content = re.sub(r'(<img[^>]*?src=)["\'](?!https?://)([^"\']*)["\']',
                              lambda m: m.group(1) + '"' + UNI_IMG_HOST + m.group(2) + '"', content, flags=re.I)
-            it["title"] = n.get("title") or it["title"]
+            # Detail endpoint sometimes replaces Chinese metadata with question marks.
+            # The list title is intact and authoritative; keep it.
+            if not n or not text:
+                raise ValueError("公告详情缺少正文")
             it["date"] = (n.get("noticeTime") or it["date"])[:10]
             it["summary"] = html_to_text(content)[:120]
             it["content"] = content
             it["attachments"] = find_attachments(content, UNI_IMG_HOST)
+            for annex in n.get("annexInfos") or []:
+                url = _safe_proto(annex.get("enclosureUrl"))
+                if url:
+                    name = annex.get("enclosureName") or ""
+                    if not name or "?" in name:
+                        name = urllib.parse.urlparse(url).path.rsplit("/", 1)[-1] or "附件"
+                    if url not in [a["url"] for a in it["attachments"]]:
+                        it["attachments"].append({"name": name, "url": url})
         except Exception as e:
             print(f"[联通] 详情 {it['id']} 失败: {e}")
             it["summary"], it["content"], it["attachments"] = "", "", []
@@ -271,15 +306,40 @@ def fetch_uni():
     # 详情返回的 noticeTime 会覆盖列表里的发布日期，按最终日期再排一次，
     # 保证页面展示严格为时间倒序（最新公告在最前）。
     items.sort(key=lambda x: x.get("date") or "", reverse=True)
+    if not items:
+        raise ValueError("未取得有效的江苏联通公告")
     return items
 
 
-def write_json(items, path):
-    data = {"updated": now_str(), "count": len(items), "items": items}
+def write_json(items, path, operator="mobile", status="ok", error=""):
+    """Atomically persist a province-labelled feed; never relabel an old province cache."""
+    old = {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            old = json.load(f)
+    except (OSError, ValueError):
+        pass
+    compatible = old.get("province") == "jiangsu" and old.get("operator") == operator
+    if status == "ok" and not items:
+        raise ValueError("拒绝以空列表覆盖公告")
+    if status != "ok":
+        items = old.get("items", []) if compatible else []
+    elif compatible:
+        previous = {it["id"]: it for it in old.get("items", [])}
+        for item in items:
+            if not item.get("content") and previous.get(item["id"], {}).get("content"):
+                item.update({k: previous[item["id"]][k] for k in ("content", "summary", "attachments")})
+    data = {"province": "jiangsu", "province_name": "江苏", "operator": operator,
+            "source_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250.html" if operator == "mobile" else "https://www.10010.com/wt_links/index.html#/announcement",
+            "updated": now_str() if status == "ok" else old.get("updated", "") if compatible else "",
+            "checked_at": now_str(), "status": status, "error": error,
+            "count": len(items), "items": items}
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
-    print(f"已写入 {path} ({len(items)} 条)")
+    os.replace(tmp, path)
+    print(f"已写入 {path} ({len(items)} 条, {status})")
 
 
 def _resolve(root, p):
@@ -299,12 +359,21 @@ def main():
             move_dir = _resolve(root, args[i + 1])
         if a == "--uni-dir" and i + 1 < len(args):
             uni_dir = _resolve(root, args[i + 1])
-    if move_dir:
-        write_json(fetch_move(), os.path.join(move_dir, "announce.json"))
-    if uni_dir:
-        write_json(fetch_uni(), os.path.join(uni_dir, "announce.json"))
+    failed = False
+    for directory, fetcher, operator in [(move_dir, fetch_move, "mobile"), (uni_dir, fetch_uni, "unicom")]:
+        if not directory:
+            continue
+        path = os.path.join(directory, "announce.json")
+        try:
+            write_json(fetcher(), path, operator)
+        except Exception as exc:
+            failed = True
+            print(f"[{operator}] 公告采集失败，保留江苏旧数据: {exc}", file=sys.stderr)
+            write_json([], path, operator, "failed", str(exc)[:200])
     if not move_dir and not uni_dir:
         print(__doc__)
+    if failed:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
