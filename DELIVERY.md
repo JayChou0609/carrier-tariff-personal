@@ -75,3 +75,7 @@ python3 scripts/prepare_pages.py --repo YOUR_ACCOUNT/carrier-tariff-personal
 - `tests/test_personal.js`、`tests/test_personal_data.py`：新增数据处理及发布包检查。
 
 个人收藏按运营商、地区、业务 ID 分开，避免跨省同名业务互相覆盖。所有个人数据只保存在浏览器本机，不跨设备同步；清理浏览器数据前请导出配置。
+
+## 后续定时更新改造
+
+已统一使用 Scheduled Tariff Refresh，在北京时间每天 00:00 / 12:00 触发指定 16 个组合的采集与状态记录，完整历史保存在 `tariff-history` 分支并通过 `/history/` 查询。电信三省未接入的限制继续明确保留。具体规则见 [SCHEDULE.md](SCHEDULE.md)。

@@ -28,3 +28,6 @@ _diag.json
 .venv/
 _pages/
 *.tar.gz
+
+# 定时采集临时产物（永久历史位于 tariff-history 分支）
+_refresh/

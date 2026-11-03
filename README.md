@@ -1,3 +1,5 @@
+> 定时更新：北京时间每天 **00:00 / 12:00**；完整历史不自动清理。详见 [更新与归档说明](SCHEDULE.md)，线上 [完整历史](https://jaychou0609.github.io/carrier-tariff-personal/history/)。
+
 > 本次扩展：新增 [我的资费](custom/) 页面，默认关注指定 12 个地区组合及四家全国资费。完整说明与发布状态见 [DELIVERY.md](DELIVERY.md)。省份快照覆盖情况以 `data/coverage.json` 为准，江苏/上海/浙江电信省级采集尚未完成。
 
 # 运营商资费监控 · 数据展示站（移动 / 联通 / 电信 / 广电）
