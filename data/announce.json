@@ -1,146 +1,168 @@
 {
- "updated": "2026-11-03 15:38",
+ "province": "jiangsu",
+ "province_name": "江苏",
+ "operator": "mobile",
+ "source_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250.html",
+ "updated": "2026-11-03 23:58",
+ "checked_at": "2026-11-03 23:58",
+ "status": "ok",
+ "error": "",
  "count": 15,
  "items": [
   {
-   "id": "55791",
-   "title": "中国移动通信集团江西有限公司个人信息处理规则",
-   "date": "2026-09-10",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_55791.html",
-   "summary": "1. 您的通信自由和通信秘密不受侵犯，我们对您的资料和通信信息负有保密义务。但根据法律、行政法规规定，司法、监察、行政机关依法要求我们提供协助和配合，我们应给予协助和配合的，不构成违反保密义务。 2.个人信息是指以电子或者其他方式记录的与已",
-   "content": "<p style=\"text-align:center\"><br>\n</p>\n<p style=\"text-align:justify\"><p style=\"text-align:justify\">1. 您的通信自由和通信秘密不受侵犯，我们对您的资料和通信信息负有保密义务。但根据法律、行政法规规定，司法、监察、行政机关依法要求我们提供协助和配合，我们应给予协助和配合的，不构成违反保密义务。</p>\n<p style=\"text-align:justify\">2.个人信息是指以电子或者其他方式记录的与已识别或者可识别的自然人有关的各种信息，不包括匿名化处理后的信息。敏感个人信息是一旦泄露或者非法使用，容易导致自然人的人格尊严受到侵害或者人身、财产安全受到危害的个人信息，包括生物识别、宗教信仰、特定身份、医疗健康、金融账户、行踪轨迹等信息，以及不满十四周岁未成年人的个人信息。我们收集、使用您个人信息，应当遵循合法、正当、必要的原则。针对您敏感个人信息，我们将采取更加严格的保护措施保障个人信息处理安全，包括但不限于开展个人信息保护影响评估、在实现目的所需的最小必要范围内处理敏感个人信息、采取加密等安全技术措施等（以下将对涉及到的敏感个人信息以粗体进行显著标识）。</p>\n<p style=\"text-align:justify\">3.您理解并同意，我们可以通过业务受理系统登记、纸质返档，通过网络接收、读取并记录等方式，以提供服务所必需为目的，在业务活动中收集、使用您提供的和您使用服务过程中形成的个人信息。我们基于提供服务所收集和使用您个人信息的具体内容如下：</p>\n<p style=\"text-align:justify\">3.1办理业务登记</p>\n<p style=\"text-align:justify\">基于为您办理业务登记的目的，我们会收集您的【证件信息（包括不限于姓名、证件类型、证件号码、证件有效期、住址信息、<b>持证人照片</b>）、<b>个人面部信息</b>、手机号码】；</p>\n<p style=\"text-align:justify\">3.2业务受理、提供与计费</p>\n<p style=\"text-align:justify\">基于受理您业务订购需求，保障您正常使用服务及实现业务计费收费准确的目的，我们会收集您的【业务订购信息、消费信息、业务使用信息、个人通信设备信息、<b>位置信息</b>、通信记录信息】；</p>\n<p style=\"text-align:justify\">3.3 优化服务质量</p>\n<p style=\"text-align:justify\">基于优化提升为您所提供的服务质量的目的，我们会收集使用您的【住址信息、<b>位置信息</b>、通信记录信息、手机号码、网络访问信息、信号质量数据】；</p>\n<p style=\"text-align:justify\">3.4 提供用户服务</p>\n<p style=\"text-align:justify\">为帮助您解决问题或记录相关问题的处理方案及结果，我们会收集您的【沟通记录、订单信息、您提供的咨询所需的必要信息】。</p>\n<p style=\"text-align:justify\">为了解您使用我们服务的感知体验，优化我们服务内容和流程的目的，我们可能会使用您【手机号码】，向您发送服务调研问卷，并收集您的【反馈信息】。您如不希望收到此类调研问卷，可以通过调研短信中提供的退订途径申请退订。</p>\n<p style=\"text-align:justify\">3.5 提供网络安全保障</p>\n<p style=\"text-align:justify\">为履行保障网络安全的法定义务，我们可能收集和使用依法收集您的【个人身份信息、通信记录信息、手机号码、网络访问信息】</p>\n<p style=\"text-align:justify\">3.6 个性化推荐商品和服务信息（注1）</p>\n<p style=\"text-align:justify\">您知悉并同意：为向您展示商品或服务信息，满足您的多元化需求，我们会结合依法收集的您的个人信息【手机号码、证件类型、证件号码、姓名、证件地市、年龄、性别、唯一设备识别码、终端设备信息、网络制式、物联网卡号、IMSI、位置信令、短信端口、邮箱、通话行为、账单、上网行为】，通过算法模型预测您的偏好特征，并基于您的偏好特征，通过移动官方热线、短信（含10086、10088、10085等）向您推荐您可能感兴趣的产品和服务（同时也将会为您提供不针对其个人特征的产品或服务）。</p>\n<p style=\"text-align:justify\">如您希望取消或退订上述个性化推荐功能，可通过以下方式取消（注2）：【10086热线、短信退订、门户网站、营业网点】。</p>\n<p style=\"text-align:justify\">3.7 提供用户信用评估及相关服务</p>\n<p style=\"text-align:justify\">为向客户提供基于信用的权益与服务，我们会结合依法收集的客户的个人信息，通过算法模型从身份特征、消费能力、人脉关系、信用历史、行为偏好等方面综合评估您信用状况。我们有权根据评估结果提供对应档次的信用权益与服务。</p>\n<p style=\"text-align:justify\">3.8 大数据分析服务</p>\n<p style=\"text-align:justify\">公司可能收集和分析处理客户的【手机号码、证件类型、证件号码、姓名、证件地市、年龄、性别、唯一设备识别码、终端设备信息、网络制式、物联网卡号、IMSI、位置信令、短信端口、邮箱、通话行为、账单、上网行为】，通过数据的采集、存储、清洗、去标识化、建模分析及加密传输等方式，用于统计、分析、建模、风控核验。</p>\n<p style=\"text-align:justify\">4.我们将会依据法律法规的要求对您的个人信息进行匿名化处理，并对无法识别到您特定个人且不能复原的整体用户数据进行统计、分析并加以利用。</p>\n<p style=\"text-align:justify\">5. 我们在中华人民共和国境内收集的您个人信息，将存储在中华人民共和国境内，并且仅会在实现收集您个人信息的目的所必需的最短时间内保留您的个人信息。超出个人信息保存期限后（注3），我们会对个人信息进行删除或匿名化处理，但法律、行政法规另有规定的情形除外。</p>\n<p style=\"text-align:justify\">6.基于为您提供电信服务所必需，我们可能委托授权合作伙伴处理您的个人信息。对于我们委托处理个人信息的授权合作伙伴，我们将会要求其按照我们的要求以及国家规定的保密和安全措施处理您的个人信息。我们仅会出于约定的合法、正当、必要、特定、明确的目的委托授权合作伙伴处理您的信息，授权合作伙伴只能接触到其履行职责所需信息。同时，我们会对授权合作伙伴的数据处理活动进行监督，保障授权合作伙伴在委托范围内进行数据处理。</p>\n<p style=\"text-align:justify\">7.我们不会与任何第三方公司、组织和个人共享您的个人信息，但以下情况除外：</p>\n<p style=\"text-align:justify\">（1）事先获得您单独同意或授权；</p>\n<p style=\"text-align:justify\">（2）为履行我们法定义务所必需的共享；</p>\n<p style=\"text-align:justify\">（3）基于为您提供电信服务所必需，将您个人信息与我们关联公司或合作伙伴共享。我们关联公司是指我们现在或将来控制、受控制或与其处于共同控制下的任何公司、机构以及上述公司或机构的合法继承人。其中“控制”是指直接或间接地拥有影响所提及公司管理的能力，无论是通过所有权、有投票权的股份、合同或其他被人民法院认定的方式。我们合作伙伴包括但不限于与我们签订漫游协议的电信运营商、为您办理业务的我们渠道代理商、您所订购的由我们代收服务费的增值业务服务提供商等。我们只会共享必要的个人信息，且受本协议中声明的目的的约束，我们关联公司或合作伙伴如要改变个人信息的处理目的，需再次征求您的授权同意；</p>\n<p style=\"text-align:justify\">（4）基于符合法律法规的社会公共利益、应对突发公共卫生事件、紧急情况下为保护自然人的生命健康和财产安全所必需而共享。</p>\n<p style=\"text-align:justify\">8.您可以通过我们营业厅或指定的其他渠道（包括10086电话、营业网点、门户网站等），在符合法律规定的情形及条件下，对其个人信息进行查询、复制、请求转移、更正、补充、删除、获取个人信息副本、限制和拒绝我们处理。</p>\n<p style=\"text-align:justify\">9.我们致力于保护使用公司产品或服务的14周岁以下未成年人个人信息，我们已制定《敏感个人信息及未满十四周岁未成年人个人信息处理规则》（以下简称“儿童信息处理规则”），请在使用我们产品或服务前务必仔细阅读并透彻理解儿童信息处理规则，特别是以粗体标识的条款应重点阅读，在确认充分理解并同意全部条款后再开始使用或允许您的孩子使用。</p>\n<p style=\"text-align:justify\">10.我们严格按照《中华人民共和国网络安全法》、《中华人民共和国数据安全法》、《中华人民共和国个人信息保护法》、《全国人民代表大会常务委员会关于加强网络信息保护的决定》、《电信和互联网用户个人信息保护规定》（工业和信息化部令第24号）、《电话用户真实身份信息登记规定》（工业和信息化部令第25号）等法律法规的相关要求，对在提供服务过程中处理的您个人信息履行保护义务。</p>\n<p style=\"text-align:justify\">11.您不得利用我们提供的服务从事违法犯罪活动或违背公序良俗的活动，不得发送违法信息或未经接收方同意发送骚扰信息，不得有拨打骚扰电话等不当行为，否则，我们可以暂停向您提供服务，直至终止服务。</p>\n<p style=\"text-align:justify\">12.如何联系我们</p>\n<p style=\"text-align:justify\">公司名称：中国移动通信集团江西有限公司</p>\n<p style=\"text-align:justify\">联系地址：江西省南昌市红谷滩区学府大道666号</p>\n<p style=\"text-align:justify\">公司投诉电话：10086</p>\n<p>公司个人信息保护负责人邮箱：grxxbh@jx.chinamobile.com。</p>\n<p>&nbsp;</p>\n<p>注1：在印制纸质合同或开发电子合同签订交互界面时，本条应当设计为勾选项（默认不勾选），告知客户后由客户主动勾选确认。</p>\n<p>注2：可根据实际情况增删具体的取消方式，但必须为客户提供便捷有效的取消方式。</p>\n<p>注3：包括用户注销账号或服务关系终止后，对个人信息在进行在法律法规及行业规范要求的时间内进行保存，到期后删除。</p>\n</p>\n<p style=\"text-align:left\"></p>\n<p><br>\n</p>\n<p style=\"text-align:left\"><br>\n</p>\n<p style=\"text-align:left\"><br>\n</p>\n<p style=\"text-align:right\">中国移动集团江西有限公司</p>\n<p style=\"text-align:right\">2026年9月10日</p>\n<p><br>\n</p>",
+   "id": "56105",
+   "title": "2026年11月5日系统升级公告",
+   "date": "2026-10-31",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_56105.html",
+   "summary": "尊敬的客户： 为给客户提供更优质的服务，我公司将于2026年11月5日22:00至次日10:00进行业务支撑系统升级，调整期间，全省营业系统、10086系统业务办理存在中断，网上营业厅、掌上营业厅、短信营业厅、自助终端等所有渠道查询受理业务",
+   "content": "尊敬的客户：<br><p>　　为给客户提供更优质的服务，我公司将于2026年11月5日22:00至次日10:00进行业务支撑系统升级，调整期间，全省营业系统、10086系统业务办理存在中断，网上营业厅、掌上营业厅、短信营业厅、自助终端等所有渠道查询受理业务出现短时中断，充值复机、短信提醒、国漫开通及扣费时间有所延迟，全省话单查询、电子发票等受影响。<br>　　给您带来不便，敬请广大客户谅解！</p><p>中国移动通信集团江苏有限公司</p><div>2026年10月31日</div>",
    "attachments": []
   },
   {
-   "id": "55790",
-   "title": "敏感个人信息及未满十四周岁未成年人个人信息处理规则",
-   "date": "2026-09-10",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_55790.html",
-   "summary": "我们依据《个人信息保护法》《未成年人保护法》《儿童个人信息网络保护规定》《未成年人网络保护条例》等法律法规，特向您清晰、透明地说明我们如何处理敏感个人信息以及未满14周岁未成年人（以下称“儿童”）的个人信息。请您仔细阅读本告知书，以便您更好",
-   "content": "<p style=\"vertical-align:baseline\"><p style=\"vertical-align:baseline\">我们依据《个人信息保护法》《未成年人保护法》《儿童个人信息网络保护规定》《未成年人网络保护条例》等法律法规，特向您清晰、透明地说明我们如何处理敏感个人信息以及未满14周岁未成年人（以下称“儿童”）的个人信息。请您仔细阅读本告知书，以便您更好地保护自己和孩子的隐私权益。</p>\n<p style=\"vertical-align:baseline\">一、什么是敏感个人信息？我们会如何处理？</p>\n<p style=\"vertical-align:baseline\">1.敏感个人信息的定义</p>\n<p style=\"vertical-align:baseline\">敏感个人信息是指一旦泄露或非法使用，容易导致您的人格尊严受侵害或人身、财产安全受危害的信息。这类信息包括：生物识别信息（如人脸、指纹）、宗教信仰、特定身份、医疗健康、金融账户、行踪轨迹等。特别地，不满14周岁未成年人的全部个人信息也属于敏感个人信息。</p>\n<p style=\"vertical-align:baseline\">2.我们处理敏感个人信息的原则</p>\n<p style=\"vertical-align:baseline\">特定且必要：我们只会在明确、具体的业务目的下处理敏感信息，并且只收集为实现该目的所必需的最少信息。</p>\n<p style=\"vertical-align:baseline\">严格保护：我们对敏感信息采取最高等级的安全防护措施。</p>\n<p style=\"vertical-align:baseline\">单独告知与同意：在收集您的敏感信息前，我们会单独向您告知处理目的、方式、范围以及对您的影响，并取得您的单独同意（法律法规另有规定的除外）。如果法律要求书面同意，我们会按此执行。</p>\n<p style=\"vertical-align:baseline\">3.我们会事先进行安全评估</p>\n<p style=\"vertical-align:baseline\">处理敏感个人信息之前，我们都会进行个人信息保护影响评估，分析可能对您权益带来的风险，并制定应对措施。评估报告和处理记录会至少保存三年。</p>\n<p style=\"vertical-align:baseline\">4.例外情形</p>\n<p style=\"vertical-align:baseline\">在极少数情况下，如为履行法定职责、应对突发公共卫生事件、紧急保护生命财产安全等法律允许的情形，我们可能无需您的同意即可处理，但会严格依法操作。</p>\n<p style=\"vertical-align:baseline\">二、关于14岁以下未成年人（儿童）个人信息的特别安排</p>\n<p style=\"vertical-align:baseline\">由于儿童个人信息属于敏感信息，我们对其处理更加审慎，并执行比一般个人信息更严格的标准。</p>\n<p style=\"vertical-align:baseline\">1.必须征得监护人同意</p>\n<p style=\"vertical-align:baseline\">我们不会在未获得您（作为监护人）明确同意的情况下收集、使用或转移您孩子的任何个人信息。当我们需要收集儿童信息时，会以显著、清晰的方式通知您，并同时提供拒绝选项。</p>\n<p style=\"vertical-align:baseline\">2.我们具体告知您哪些内容？</p>\n<p style=\"vertical-align:baseline\">在征得您同意时，我们会向您清楚说明：</p>\n<p style=\"vertical-align:baseline\">收集儿童信息的目的、方式和范围；</p>\n<p style=\"vertical-align:baseline\">信息存储的地点和期限，以及到期后的处理方式；</p>\n<p style=\"vertical-align:baseline\">我们采取的安全保障措施；</p>\n<p style=\"vertical-align:baseline\">如果您拒绝，可能的影响；</p>\n<p style=\"vertical-align:baseline\">您如何更正或删除儿童信息，以及如何投诉举报。</p>\n<p style=\"vertical-align:baseline\">如果上述任何事项发生重大变化，我们会再次征得您的同意。</p>\n<p style=\"vertical-align:baseline\">3.以孩子能懂的方式告知</p>\n<p style=\"vertical-align:baseline\">对于儿童本人，我们还会尽量用适合他们年龄和理解能力的语言，向其说明相关信息处理情况，做到真正尊重未成年人。</p>\n<p style=\"vertical-align:baseline\">4.我们坚持最小必要收集</p>\n<p style=\"vertical-align:baseline\">我们绝不收集与所提供服务无关的儿童信息，且存储期限不超过实现目的所必需的最短时间。</p>\n<p style=\"vertical-align:baseline\">5.严格限制内部访问与外部共享</p>\n<p style=\"vertical-align:baseline\">内部：我们采用最小授权原则，只有经过审批并记录的工作人员才能访问儿童信息，且无法违法复制或下载。</p>\n<p style=\"vertical-align:baseline\">委托第三方处理：如须委托，我们会进行安全评估，签署协议明确责任，并要求受托方不得转委托，委托结束后及时删除数据。</p>\n<p style=\"vertical-align:baseline\">对外转移或披露：除非法律强制规定或经您明确同意，我们不会向任何第三方转移或公开披露儿童个人信息。</p>\n<p style=\"vertical-align:baseline\">三、您和孩子享有的权利</p>\n<p style=\"vertical-align:baseline\">作为监护人或儿童本人，您和孩子对相关信息拥有以下法定权利，我们会提供便捷的行使通道：</p>\n<p style=\"vertical-align:baseline\">查阅、复制：您可以随时查看我们收集了您孩子的哪些信息。</p>\n<p style=\"vertical-align:baseline\">更正：如果信息有误，您有权要求我们及时更正。</p>\n<p style=\"vertical-align:baseline\">删除：在以下情况下，您可以要求我们删除儿童信息：</p>\n<p style=\"vertical-align:baseline\">我们违反法律法规或约定收集、使用；</p>\n<p style=\"vertical-align:baseline\">超出必要期限；</p>\n<p style=\"vertical-align:baseline\">您撤回同意；</p>\n<p style=\"vertical-align:baseline\">我们停止提供服务；</p>\n<p style=\"vertical-align:baseline\">其他依法应删除的情形。</p>\n<p style=\"vertical-align:baseline\">撤回同意：您随时可以撤回对我们处理儿童信息的同意，撤回后我们将不再收集或使用。</p>\n<p style=\"vertical-align:baseline\">解释说明：您有权要求我们解释本规则的具体内容或我们处理信息的细节。</p>\n<p style=\"vertical-align:baseline\">如需行使上述权利，可通过文末联系方式与我们取得联系。</p>\n<p style=\"vertical-align:baseline\">四、我们的安全保障与合规管理</p>\n<p style=\"vertical-align:baseline\">我们高度重视信息安全性，并采取以下措施保障敏感信息和儿童信息的安全：</p>\n<p style=\"vertical-align:baseline\">技术层面：采用加密脱敏、去标识化、访问控制等主流安全技术；</p>\n<p style=\"vertical-align:baseline\">管理层面：建立完善的安全管理制度，定期培训员工，制定应急预案；</p>\n<p style=\"vertical-align:baseline\">事件应对：一旦发生或可能发生信息泄露、篡改、丢失，我们会立即启动应急方案，第一时间通知您和相关监管部门；</p>\n<p style=\"vertical-align:baseline\">年度审计：我们每年会自行或委托专业机构对儿童个人信息保护情况进行合规审计，并向网信部门报送结果；</p>\n<p style=\"vertical-align:baseline\">专人负责：我们已指定个人信息保护负责人，专门监督本规则的执行。</p>\n<p style=\"vertical-align:baseline\">五、规则的适用与更新</p>\n<p style=\"vertical-align:baseline\">本规则适用于我们在中华人民共和国境内所有涉及敏感信息和儿童个人信息的处理活动。我们会根据法律法规变化或业务调整适时修订本规则，修订后将以适当方式通知您，请您留意。</p>\n<p style=\"vertical-align:baseline\">本规则自发布之日起生效。若本规则内容与国家法律法规有不一致之处，以法律法规为准。</p>\n<p style=\"vertical-align:baseline\">六、如何联系我们？</p>\n<p style=\"vertical-align:baseline\">如果您对本规则有任何疑问、意见或建议，或需要行使您的权利，您可以通过以下方式与我们沟通：</p>\n<p style=\"vertical-align:baseline\">公司名称：中国移动通信集团江西有限公司</p>\n<p style=\"vertical-align:baseline\">联系地址：江西省南昌市红谷滩区学府大道666号</p>\n<p style=\"vertical-align:baseline\">客服电话：10086</p>\n<p style=\"vertical-align:baseline\">公司个人信息保护负责人邮箱：grxxbh@jx.chinamobile.com</p>\n<p style=\"vertical-align:baseline\">我们会尽快回复您的关切。</p>\n<p style=\"vertical-align:baseline\">感谢您的信任。我们将始终以负责任的态度保护您和孩子的隐私安全。</p>\n<p>&nbsp;</p>\n</p>\n<p style=\"vertical-align:baseline\"><br>\n</p>\n<p style=\"vertical-align:baseline\"><br>\n</p>\n<p style=\"text-align:right\"><br>\n</p>\n<p style=\"text-align:right\"><br>\n</p>\n<p style=\"text-align:right\">中国移动通信集团江西有限公司</p>\n<p style=\"text-align:right\">2026年9月10日</p>\n<p><br>\n</p>\n<p style=\"vertical-align:baseline\"><br>\n</p>",
+   "id": "56104",
+   "title": "2026年11月3日系统升级公告",
+   "date": "2026-10-31",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_56104.html",
+   "summary": "尊敬的客户： 为给客户提供更优质的服务，我公司将于2026年11月3日0:00至6:00进行相关网络调整工作，届时可能会影响全省用户的语音、上网业务的正常使用。 我公司将于2026年11月3日22:00至次日8:00进行业务支撑系统升级，调",
+   "content": "尊敬的客户：<br><p>　　为给客户提供更优质的服务，我公司将于2026年11月3日0:00至6:00进行相关网络调整工作，届时可能会影响全省用户的语音、上网业务的正常使用。<br>　　我公司将于2026年11月3日22:00至次日8:00进行业务支撑系统升级，调整期间，全省营业系统、10086系统业务办理存在中断，网上营业厅、掌上营业厅、短信营业厅、自助终端等所有渠道查询受理业务出现短时中断，充值复机、短信提醒、国漫开通及扣费时间有所延迟，全省话单查询、电子发票等受影响。<br>　　给您带来不便，敬请广大客户谅解！</p><p>中国移动通信集团江苏有限公司</p><div>2026年10月31日</div>",
    "attachments": []
   },
   {
-   "id": "55633",
-   "title": "江西移动关于开展网络升级的公告",
-   "date": "2026-08-12",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_55633.html",
-   "summary": "",
-   "content": "<p style=\"text-align:right\"><br>\n</p>\n<div style=\"text-align:left\"><img src=\"https://www.10086.cn/uploadBaseDir/content/jpg/20260812/20260812173423994HTb.jpg\" alt=\"\"><br>\n</div><p><br>\n</p>",
+   "id": "56103",
+   "title": "2026年11月4日系统升级公告",
+   "date": "2026-10-31",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_56103.html",
+   "summary": "尊敬的客户： 为给客户提供更优质的服务，我公司将于2026年11月4日0:00至6:00进行相关网络调整工作，届时可能会影响全省移动用户的语音、手机上网、互联网电视、停复机、短信业务的正常使用，全省物联网用户的上网、开销户、停复机业务的正常",
+   "content": "尊敬的客户：<br><p>　　为给客户提供更优质的服务，我公司将于2026年11月4日0:00至6:00进行相关网络调整工作，届时可能会影响全省移动用户的语音、手机上网、互联网电视、停复机、短信业务的正常使用，全省物联网用户的上网、开销户、停复机业务的正常使用，以及全省用户其他业务的办理。<br>　　我公司将于2026年11月4日22:00至次日10:00进行业务支撑系统升级，调整期间，全省营业系统、10086系统业务办理存在中断，网上营业厅、掌上营业厅、短信营业厅、自助终端等所有渠道查询受理业务出现短时中断，充值复机、短信提醒、国漫开通及扣费时间有所延迟，全省话单查询、电子发票等受影响。<br>　　给您带来不便，敬请广大客户谅解！</p><p>中国移动通信集团江苏有限公司</p><div>2026年10月31日</div>",
    "attachments": []
   },
   {
-   "id": "54543",
-   "title": "关于2026年动感地带客户评定的公告",
-   "date": "2026-02-12",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_54543.html",
-   "summary": "尊敬的客户： 您好！动感地带是面向年轻群体打造的专属品牌，非常感谢您对动感地带的关注与支持。我公司每年会对动感地带品牌身份进行评定，系统将于3月1日开始评定，符合评定条件的客户即可成为动感地带品牌客户。现将主要评定标准告知如下: 1.年龄在",
-   "content": "<p style=\"background-color:rgb(255, 255, 255)\"><strong>尊敬的客户：</strong></p>\n<p style=\"background-color:rgb(255, 255, 255)\">&nbsp; &nbsp; 您好！动感地带是面向年轻群体打造的专属品牌，非常感谢您对动感地带的关注与支持。我公司每年会对动感地带品牌身份进行评定，系统将于3月1日开始评定，符合评定条件的客户即可成为动感地带品牌客户。现将主要评定标准告知如下:<br>\n&nbsp; &nbsp; &nbsp;1.年龄在30周岁及以下的非全球通、非神州行客户；</p>\n<p style=\"background-color:rgb(255, 255, 255);text-align:justify\">&nbsp; &nbsp; &nbsp;2.年龄在30周岁以上且已订购动感地带资费产品的非全球通客户；<br>\n&nbsp; &nbsp; &nbsp;3.如有任何疑问，可详询10086。<br>\n&nbsp; &nbsp; &nbsp;特此公告</p>\n<p style=\"background-color:rgb(255, 255, 255)\">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;中国移动通信集团江西有限公司<br>\n&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;2026年2月</p>",
-   "attachments": []
-  },
-  {
-   "id": "54432",
-   "title": "携转解约厅店公示",
-   "date": "2026-01-27",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_54432.html",
-   "summary": "",
-   "content": "<img src=\"https://www.10086.cn/uploadBaseDir/content/jpg/20260127/202601271122166854Wq.jpg\" alt=\"\">",
-   "attachments": []
-  },
-  {
-   "id": "54193",
-   "title": "2025年12月25日系统升级公告",
-   "date": "2025-12-25",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_54193.html",
-   "summary": "尊敬的客户： 为给客户提供更优质的服务，我公司将于2025年12月25日23:00至次日7:00进行业务支撑系统升级，调整期间，全省营业系统、10086系统业务办理存在中断，网上营业厅、掌上营业厅、短信营业厅、自助终端等所有渠道査询受理业务",
-   "content": "<div style=\"color:rgb(0, 0, 0)\" microsoft=\"\" yahei=\"\" ui\";=\"\" font-size:=\"\" 14px;=\"\" font-style:=\"\" normal;=\"\" font-variant-ligatures:=\"\" font-variant-caps:=\"\" font-weight:=\"\" 400;=\"\" letter-spacing:=\"\" orphans:=\"\" 2;=\"\" text-align:=\"\" start;=\"\" text-indent:=\"\" 0px;=\"\" text-transform:=\"\" none;=\"\" widows:=\"\" word-spacing:=\"\" -webkit-text-stroke-width:=\"\" white-space:=\"\" background-color:=\"\" rgb(255,=\"\" 255,=\"\" 255);=\"\" text-decoration-thickness:=\"\" initial;=\"\" text-decoration-style:=\"\" text-decoration-color:=\"\" initial;\"=\"\">尊敬的客户：</div><div style=\"color:rgb(0, 0, 0)\" microsoft=\"\" yahei=\"\" ui\";=\"\" font-size:=\"\" 14px;=\"\" font-style:=\"\" normal;=\"\" font-variant-ligatures:=\"\" font-variant-caps:=\"\" font-weight:=\"\" 400;=\"\" letter-spacing:=\"\" orphans:=\"\" 2;=\"\" text-align:=\"\" start;=\"\" text-indent:=\"\" 0px;=\"\" text-transform:=\"\" none;=\"\" widows:=\"\" word-spacing:=\"\" -webkit-text-stroke-width:=\"\" white-space:=\"\" background-color:=\"\" rgb(255,=\"\" 255,=\"\" 255);=\"\" text-decoration-thickness:=\"\" initial;=\"\" text-decoration-style:=\"\" text-decoration-color:=\"\" initial;\"=\"\"><br>\n</div><div style=\"color:rgb(0, 0, 0)\" microsoft=\"\" yahei=\"\" ui\";=\"\" font-size:=\"\" 14px;=\"\" font-style:=\"\" normal;=\"\" font-variant-ligatures:=\"\" font-variant-caps:=\"\" font-weight:=\"\" 400;=\"\" letter-spacing:=\"\" orphans:=\"\" 2;=\"\" text-align:=\"\" start;=\"\" text-indent:=\"\" 0px;=\"\" text-transform:=\"\" none;=\"\" widows:=\"\" word-spacing:=\"\" -webkit-text-stroke-width:=\"\" white-space:=\"\" background-color:=\"\" rgb(255,=\"\" 255,=\"\" 255);=\"\" text-decoration-thickness:=\"\" initial;=\"\" text-decoration-style:=\"\" text-decoration-color:=\"\" initial;\"=\"\">　　为给客户提供更优质的服务，我公司将于2025年12月25日23:00至次日7:00进行业务支撑系统升级，调整期间，全省营业系统、10086系统业务办理存在中断，网上营业厅、掌上营业厅、短信营业厅、自助终端等所有渠道査询受理业务出现短时中断，充值复机、短信提醒、国漫开通及扣费时间有所延迟，全省话单查询、电子发票等受影响。</div><div style=\"color:rgb(0, 0, 0)\" microsoft=\"\" yahei=\"\" ui\";=\"\" font-size:=\"\" 14px;=\"\" font-style:=\"\" normal;=\"\" font-variant-ligatures:=\"\" font-variant-caps:=\"\" font-weight:=\"\" 400;=\"\" letter-spacing:=\"\" orphans:=\"\" 2;=\"\" text-align:=\"\" start;=\"\" text-indent:=\"\" 0px;=\"\" text-transform:=\"\" none;=\"\" widows:=\"\" word-spacing:=\"\" -webkit-text-stroke-width:=\"\" white-space:=\"\" background-color:=\"\" rgb(255,=\"\" 255,=\"\" 255);=\"\" text-decoration-thickness:=\"\" initial;=\"\" text-decoration-style:=\"\" text-decoration-color:=\"\" initial;\"=\"\"><br>\n</div><div style=\"color:rgb(0, 0, 0)\" microsoft=\"\" yahei=\"\" ui\";=\"\" font-size:=\"\" 14px;=\"\" font-style:=\"\" normal;=\"\" font-variant-ligatures:=\"\" font-variant-caps:=\"\" font-weight:=\"\" 400;=\"\" letter-spacing:=\"\" orphans:=\"\" 2;=\"\" text-align:=\"\" start;=\"\" text-indent:=\"\" 0px;=\"\" text-transform:=\"\" none;=\"\" widows:=\"\" word-spacing:=\"\" -webkit-text-stroke-width:=\"\" white-space:=\"\" background-color:=\"\" rgb(255,=\"\" 255,=\"\" 255);=\"\" text-decoration-thickness:=\"\" initial;=\"\" text-decoration-style:=\"\" text-decoration-color:=\"\" initial;\"=\"\">　　给您带来不便，敬请广大客户谅解!</div><div style=\"color:rgb(0, 0, 0)\" microsoft=\"\" yahei=\"\" ui\";=\"\" font-size:=\"\" 14px;=\"\" font-style:=\"\" normal;=\"\" font-variant-ligatures:=\"\" font-variant-caps:=\"\" font-weight:=\"\" 400;=\"\" letter-spacing:=\"\" orphans:=\"\" 2;=\"\" text-align:=\"\" start;=\"\" text-indent:=\"\" 0px;=\"\" text-transform:=\"\" none;=\"\" widows:=\"\" word-spacing:=\"\" -webkit-text-stroke-width:=\"\" white-space:=\"\" background-color:=\"\" rgb(255,=\"\" 255,=\"\" 255);=\"\" text-decoration-thickness:=\"\" initial;=\"\" text-decoration-style:=\"\" text-decoration-color:=\"\" initial;\"=\"\"><br>\n</div><div style=\"color:rgb(0, 0, 0)\" microsoft=\"\" yahei=\"\" ui\";=\"\" font-size:=\"\" 14px;=\"\" font-style:=\"\" normal;=\"\" font-variant-ligatures:=\"\" font-variant-caps:=\"\" font-weight:=\"\" 400;=\"\" letter-spacing:=\"\" orphans:=\"\" 2;=\"\" text-align:=\"\" start;=\"\" text-indent:=\"\" 0px;=\"\" text-transform:=\"\" none;=\"\" widows:=\"\" word-spacing:=\"\" -webkit-text-stroke-width:=\"\" white-space:=\"\" background-color:=\"\" rgb(255,=\"\" 255,=\"\" 255);=\"\" text-decoration-thickness:=\"\" initial;=\"\" text-decoration-style:=\"\" text-decoration-color:=\"\" initial;\"=\"\">&nbsp;</div><div style=\"color:rgb(0, 0, 0)\" microsoft=\"\" yahei=\"\" ui\";=\"\" font-size:=\"\" 14px;=\"\" font-style:=\"\" normal;=\"\" font-variant-ligatures:=\"\" font-variant-caps:=\"\" font-weight:=\"\" 400;=\"\" letter-spacing:=\"\" text-indent:=\"\" 0px;=\"\" text-transform:=\"\" none;=\"\" word-spacing:=\"\" -webkit-text-stroke-width:=\"\" white-space:=\"\" background-color:=\"\" rgb(255,=\"\" 255,=\"\" 255);=\"\" text-decoration-thickness:=\"\" initial;=\"\" text-decoration-style:=\"\" text-decoration-color:=\"\" initial;\"=\"\"><br>\n</div><div style=\"color:rgb(0, 0, 0)\" microsoft=\"\" yahei=\"\" ui\";=\"\" font-size:=\"\" 14px;=\"\" font-style:=\"\" normal;=\"\" font-variant-ligatures:=\"\" font-variant-caps:=\"\" font-weight:=\"\" 400;=\"\" letter-spacing:=\"\" text-indent:=\"\" 0px;=\"\" text-transform:=\"\" none;=\"\" word-spacing:=\"\" -webkit-text-stroke-width:=\"\" white-space:=\"\" background-color:=\"\" rgb(255,=\"\" 255,=\"\" 255);=\"\" text-decoration-thickness:=\"\" initial;=\"\" text-decoration-style:=\"\" text-decoration-color:=\"\" initial;\"=\"\">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 中国移动通信集团江西有限公司</div><div style=\"color:rgb(0, 0, 0)\" microsoft=\"\" yahei=\"\" ui\";=\"\" font-size:=\"\" 14px;=\"\" font-style:=\"\" normal;=\"\" font-variant-ligatures:=\"\" font-variant-caps:=\"\" font-weight:=\"\" 400;=\"\" letter-spacing:=\"\" text-indent:=\"\" 0px;=\"\" text-transform:=\"\" none;=\"\" word-spacing:=\"\" -webkit-text-stroke-width:=\"\" white-space:=\"\" background-color:=\"\" rgb(255,=\"\" 255,=\"\" 255);=\"\" text-decoration-thickness:=\"\" initial;=\"\" text-decoration-style:=\"\" text-decoration-color:=\"\" initial;\"=\"\"><br>\n</div><div style=\"color:rgb(0, 0, 0)\" microsoft=\"\" yahei=\"\" ui\";=\"\" font-size:=\"\" 14px;=\"\" font-style:=\"\" normal;=\"\" font-variant-ligatures:=\"\" font-variant-caps:=\"\" font-weight:=\"\" 400;=\"\" letter-spacing:=\"\" text-indent:=\"\" 0px;=\"\" text-transform:=\"\" none;=\"\" word-spacing:=\"\" -webkit-text-stroke-width:=\"\" white-space:=\"\" background-color:=\"\" rgb(255,=\"\" 255,=\"\" 255);=\"\" text-decoration-thickness:=\"\" initial;=\"\" text-decoration-style:=\"\" text-decoration-color:=\"\" initial;\"=\"\">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2025年12月25日</div><br>",
-   "attachments": []
-  },
-  {
-   "id": "54206",
-   "title": "关于防诈权益包活动下线的公告",
-   "date": "2025-12-23",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_54206.html",
-   "summary": "尊敬的客户: 因业务调整，5G新通话防诈权益包、 2元流量防诈权益包、3元流量防诈权益包、5元家庭防诈权益包将于2025年12月10日23:59分下线（已办理的客户不受影响），感谢您的理解和支持！ 中国移动通信集团江西有限公司 2025年1",
-   "content": "<p>尊敬的客户:</p>\n<p>&nbsp;</p>\n<p>因业务调整，5G新通话防诈权益包、 2元流量防诈权益包、3元流量防诈权益包、5元家庭防诈权益包将于2025年12月10日23:59分下线（已办理的客户不受影响），感谢您的理解和支持！</p>\n<p>&nbsp;</p>\n<p style=\"text-align:right\">中国移动通信集团江西有限公司</p>\n<p style=\"text-align:right\">2025年12月23日</p>",
-   "attachments": []
-  },
-  {
-   "id": "54135",
-   "title": "中国移动通信集团江西有限公司个人信息处理规则",
-   "date": "2025-12-18",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_54135.html",
-   "summary": "1.您的通信自由和通信秘密不受侵犯，我们对您的资料和通信信息负有保密义务。但根据法律、行政法规规定，司法、行政机关依法要求我们提供协助和配合，我们应给予协助和配合的，不构成违反保密义务。 2.个人信息是指以电子或者其他方式记录的与已识别或者",
-   "content": "1.您的通信自由和通信秘密不受侵犯，我们对您的资料和通信信息负有保密义务。但根据法律、行政法规规定，司法、行政机关依法要求我们提供协助和配合，我们应给予协助和配合的，不构成违反保密义务。<br>\n　　2.个人信息是指以电子或者其他方式记录的与已识别或者可识别的自然人有关的各种信息，不包括匿名化处理后的信息。敏感个人信息是一旦泄露或者非法使用，容易导致自然人的人格尊严受到侵害或者人身、财产安全受到危害的个人信息，包括生物识别、宗教信仰、特定身份、医疗健康、金融账户、行踪轨迹等信息，以及不满十四周岁未成年人的个人信息。我们收集、使用您个人信息，应当遵循合法、正当、必要的原则。针对您敏感个人信息，我们将采取更加严格的保护措施保障个人信息处理安全，包括但不限于开展个人信息保护影响评估、在实现目的所需的最小必要范围内处理敏感个人信息、采取加密等安全技术措施等（以下将对涉及到的敏感个人信息以粗体进行显著标识）。<br>\n　　3.您理解并同意，我们可以通过业务受理系统登记、纸质返档，通过网络接收、读取并记录等方式，以提供服务所必需为目的，在业务活动中收集、使用您提供的和您使用服务过程中形成的个人信息。我们基于提供服务所收集和使用您个人信息的具体内容如下：<br>\n　　<strong>3.1办理业务登记</strong><br>\n　　基于为您办理业务登记的目的，我们会收集您的【<strong>姓名、证件类型、证件号码、证件有效期、个人面部信息、住址信息</strong>】；<br>\n　　<strong>3.2业务受理、提供与计费</strong><br>\n　　基于受理您业务订购需求，保障您正常使用服务及实现业务计费收费准确的目的，我们会收集您的【<strong>业务订购信息、消费信息、业务使用信息、个人通信设备信息、位置信息</strong>】；<br>\n　　<strong>3.3 优化服务质量</strong><br>\n　　基于优化提升为您所提供的服务质量的目的，我们会收集使用您的【<strong>住址信息、位置信息、通信记录信息</strong>】；<br>\n　　<strong>3.4 提供用户服务</strong><br>\n　　为帮助您解决问题或记录相关问题的处理方案及结果，我们会收集您的【<strong>沟通记录、订单信息、您提供的咨询所需的必要信息</strong>】。<br>\n　　为了解您使用我们服务的感知体验，优化我们服务内容和流程的目的，我们可能会使用您【<strong>手机号码</strong>】，向您发送服务调研问卷，并收集您的【<strong>反馈信息</strong>】。您如不希望收到此类调研问卷，可以通过调研短信中提供的退订途径申请退订。<br>\n　　<strong>3.5 提供网络安全保障</strong><br>\n　　为履行保障网络安全的法定义务，我们可能收集和使用依法收集您的【<strong>个人身份信息、通信记录信息</strong>】<br>\n　　<strong>3.6 个性化推荐商品和服务信息</strong><br>\n　　您知悉并同意：为向您展示商品或服务信息，满足您的多元化需求，我们会结合依法收集的您的个人信息，通过算法模型预测您的偏好特征，并基于您的偏好特征，向您推荐您可能感兴趣的产品和服务（同时也将会为您提供不针对其个人特征的产品或服务），或者向您发送商业性短信息。<br>\n　　如您希望取消或退订上述个性化推荐功能，可通过以下方式取消：【10086热线、短信退订、门户网站、营业网点】<br>\n　　4.我们将会依据法律法规的要求对您的个人信息进行匿名化处理，并对无法识别到您特定个人且不能复原的整体用户数据进行统计、分析并加以利用。<br>\n　　5. 我们在中华人民共和国境内收集的您个人信息，将存储在中华人民共和国境内，并且仅会在实现收集您个人信息的目的所必需的最短时间内保留您的个人信息。超出个人信息保存期限后，我们会对个人信息进行删除或匿名化处理，但法律、行政法规另有规定的情形除外。<br>\n　　6.基于为您提供服务所必需，我们可能委托授权合作伙伴处理您的个人信息。对于我们委托处理个人信息的授权合作伙伴，我们将会要求其按照我们的要求、本协议以及国家规定的保密和安全措施处理您的个人信息。我们仅会出于本协议约定的合法、正当、必要、特定、明确的目的委托授权合作伙伴处理您的信息，授权合作伙伴只能接触到其履行职责所需信息。同时，我们会对授权合作伙伴的数据处理活动进行监督，保障授权合作伙伴在委托范围内进行数据处理。<br>\n　　7.我们不会与任何第三方公司、组织和个人共享您的个人信息，但以下情况除外：<br>\n　　（1）事先获得您单独同意或授权；<br>\n　　（2）为履行我们法定义务所必需的共享；<br>\n　　（3）基于为您提供服务所必需，将您个人信息与我们关联公司或合作伙伴共享。我们关联公司是指我们现在或将来控制、受控制或与其处于共同控制下的任何公司、机构以及上述公司或机构的合法继承人。其中“控制”是指直接或间接地拥有影响所提及公司管理的能力，无论是通过所有权、有投票权的股份、合同或其他被人民法院认定的方式。我们合作伙伴包括但不限于与我们签订漫游协议的电信运营商、为您办理业务的我们渠道代理商、您所订购的由我们代收服务费的增值业务服务提供商等。我们只会共享必要的个人信息，且受本协议中声明的目的的约束，我们关联公司或合作伙伴如要改变个人信息的处理目的，需再次征求您的授权同意；<br>\n　　（4）基于符合法律法规的社会公共利益、应对突发公共卫生事件而共享。<br>\n　　8.您可以通过我们营业厅或指定的其他渠道（包括10086电话、营业网点、门户网站等），在符合法律规定的情形及条件下，对其个人信息进行查询、复制、请求转移、更正、补充、删除、获取个人信息副本、限制和拒绝我们处理。<br>\n　　9.我们严格按照《网络安全法》、《数据安全法》、《个人信息保护法》、《全国人民代表大会常务委员会关于加强网络信息保护的决定》、《电信和互联网用户个人信息保护规定》（工业和信息化部令第24号）、《电话用户真实身份信息登记规定》（工业和信息化部令第25号）等法律法规的相关要求，对在提供服务过程中处理的您个人信息履行保护义务。<br>\n　　10.您不得利用我们提供的服务从事违法犯罪活动或违背公序良俗的活动，不得发送违法信息或未经接收方同意发送骚扰信息，不得有拨打骚扰电话等不当行为，否则，我们可以暂停向您提供服务，直至终止服务。",
-   "attachments": []
-  },
-  {
-   "id": "34684",
-   "title": "关于家庭语音流量共享业务优惠升级的公告",
-   "date": "2019-09-24",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_34684.html",
-   "summary": "尊敬的【家庭语音流量共享业务】客户，为深入贯彻落实党中央国务院 “提速降费”部署要求，从9月25日（待定）0时开始，您的群组内成员本地互相拨打电话免费，其他功能保持不变，请您知晓。 中国移动通信集团江西有限公司 2019年9月24日",
-   "content": "<p>尊敬的【家庭语音流量共享业务】客户，为深入贯彻落实党中央国务院\n“提速降费”部署要求，从9月25日（待定）0时开始，您的群组内成员本地互相拨打电话免费，其他功能保持不变，请您知晓。</p>\n\n<p style=\"text-align:right\">中国移动通信集团江西有限公司</p>\n\n<p style=\"text-align:right\">2019年9月24日</p>",
-   "attachments": []
-  },
-  {
-   "id": "31660",
-   "title": "关于笑传短信业务下线公告",
-   "date": "2018-03-19",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_31660.html",
-   "summary": "尊敬的客户： 您好！ 尊敬的笑传短信会员，因合作到期，“笑传短信”免费会员服务于2018年3月1日起正式下线并全面停止服务。高级会员服务于2018年3月31日起正式下线并全面停止服务。您可于即日起发送“0000”至10086退订笑传短信会员",
-   "content": "<p>尊敬的客户：</p>\n<p>　　您好！</p>\n<p>　　尊敬的笑传短信会员，因合作到期，“笑传短信”免费会员服务于2018年3月1日起正式下线并全面停止服务。高级会员服务于2018年3月31日起正式下线并全面停止服务。您可于即日起发送“0000”至10086退订笑传短信会员。欢迎您继续使用江西移动推出的其它优质业务。 </p>\n<p>中国移动通信集团江西有限公司</p>\n<p>2018年3月19日</p>",
-   "attachments": []
-  },
-  {
-   "id": "31107",
-   "title": "江西移动2014年GSM网、TD-SCDMA网及LTE网基站建设竣工环保验收报告网络公示",
-   "date": "2017-09-29",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_31107.html",
-   "summary": "根据《中华人民共和国环境影响评价法》规定，建设单位或者其委托的环境保护竣工验收监测机构在编制环境保护验收报告书的过程中，应当在报送环境保护行政主管部门审批或者重新审核前，向公众公告建设项目相关信息。现将建设项目相关信息向公众公告如下： 一、",
-   "content": "<p>　　根据《中华人民共和国环境影响评价法》规定，建设单位或者其委托的环境保护竣工验收监测机构在编制环境保护验收报告书的过程中，应当在报送环境保护行政主管部门审批或者重新审核前，向公众公告建设项目相关信息。现将建设项目相关信息向公众公告如下：</p>\n<p>　　一、建设项目情况简述：</p>\n<p>　　中国移动通信集团江西有限公司在江西省11个设区市建设的2014年GSM网、TD-SCDMA网及LTE网基站建设项目，共6740个基站。2017年3月，中国移动通信集团江西有限公司委托江西省辐射环境监督站针对中国移动通信集团江西有限公司2014年GSM网、TD-SCDMA网及LTE网基站建设项目开展环境保护竣工验收工作。本次验收将对投入运行的基站进行现场监测，并采用现状监测资料的分析基础上并来评估本项目基站运行时对周围环境所产生的影响。</p>\n<p>　　二、建设项目对环境可能造成影响的概述：</p>\n<p>　　中国移动通信集团江西有限公司2014年GSM网、TD-SCDMA网及LTE网基站建设项目中的基站绝大部分建设在建筑物顶部，利用原有的房间作为机房，对周围环境影响有限；少部分采用地面铁塔方式建设，但其占地面积较小，对周边周围环境影响很小。</p>\n<p>　　基站运行期间的主要功能是通过天线接收和向周围环境发射无线电信号，实现移动通信的目的，因此对周边区域产生电磁辐射影响；同时机房内的空调设备室外机运行时会产生一定的噪声；由于基站为无人值守，基站运行期间不存在废水、废气污染和固体废弃物。由以上分析可见，本次环境影响评估的重点为基站运行过程中产生的电磁辐射对周围电磁环境的影响。</p>\n<p>　　三、预防或减轻不良环境影响的对策和措施的要点：</p>\n<p>　　对基站进行合理选址、优化网络设置；设备采取优选低噪声的空调等，设备安装时天线朝向尽量避免居民住宅和其他环境保护目标。</p>\n<p>　　四、环境保护验收报告书提出的环境影响评估结论的要点：</p>\n<p>　　在采取上述环保措施的情况下，基站的建设从环保角度看是可行的。</p>\n<p>　　五、公众查阅环境保护验收报告书以及公众认为必要时向建设单位委托的环境保护验收监测机构索取补充信息的方式及期限：</p>\n<p>　　为了解本项目的环境影响情况，自本告知公示之日起10个工作日内，即2017年9月29日～2017年10月16日，公众可通过电话和邮件方式，索取本项目环境保护竣工监测报告书的电子文档。</p>\n<p>　　验收监测机构名称：江西省辐射环境监督站</p>\n<p>　　联系地址：南昌市洪都北大道1131号</p>\n<p>　　联系人：李茜</p>\n<p>　　联系电话：0791-86866880</p>\n<p>　　电子邮件：14635091@qq.com</p>\n<p>　　六、公众提出意见的主要方式：</p>\n<p>　　公众可以在有关信息公开后，以信函、传真、电子邮件或者按照有关公告要求的其他方式，向建设单位委托的环境保护验收机构、负责审批或者重新审核环境影响报告书的环境保护行政主管部门，提交书面意见。</p>\n<p>中国移动通信集团江西有限公司</p>\n<p>2017年9月29日</p>",
-   "attachments": []
-  },
-  {
-   "id": "31502",
-   "title": "优化流量封顶规则公告",
-   "date": "2017-08-01",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_31502.html",
-   "summary": "尊敬的客户： 为进一步满足广大客户手机上网流量使用需求，我公司将客户每月手机上网流量50G封顶值上调至100G，到达100GB后将停止当月手机上网流量使用，次月恢复。特此公告。 注： 1、以上“流量”包含手机上网使用的2/3/4G流量，不含",
-   "content": "<p>尊敬的客户：</p>\n<p>　　为进一步满足广大客户手机上网流量使用需求，我公司将客户每月手机上网流量50G封顶值上调至100G，到达100GB后将停止当月手机上网流量使用，次月恢复。特此公告。</p>\n<p>　　注：</p>\n<p>　　1、以上“流量”包含手机上网使用的2/3/4G流量，不含Volte流量、物联卡流量、WLAN流量、国际及港澳台漫游流量。</p>\n<p>　　2、订购了WAP、E学地带等包月不限2/3G流量套餐的客户仍执行原双封顶规则。公告自发出之日起实行，详询当地营业厅。</p>\n<p>中国移动通信集团江西有限公司</p>\n<p>2017年8月1日</p>",
-   "attachments": []
-  },
-  {
-   "id": "29868",
-   "title": "关于进一步落实电话用户真实身份信息登记规定的公告",
-   "date": "2016-07-15",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_29868.html",
-   "summary": "尊敬的客户： 您好！ 根据《中华人民共和国反恐怖主义法》、《全国人民代表大会常务委员会关于加强网络信息保护的决定》、《中华人民共和国电信条例》（国务院令第291号）、《电话用户真实身份信息登记规定》（工业和信息化部令第25号）等法律法规的要",
-   "content": "<p>尊敬的客户：</p>\n <p>　　您好！</p>\n <p>　　根据《中华人民共和国反恐怖主义法》、《全国人民代表大会常务委员会关于加强网络信息保护的决定》、《中华人民共和国电信条例》（国务院令第291号）、《电话用户真实身份信息登记规定》（工业和信息化部令第25号）等法律法规的要求，为保障国家安全和社会安定，维护人民群众合法权益，加强网络信息保护和用户个人信息安全，现将进一步强化落实电话用户真实身份信息登记有关工作<a title=\"点击访问：中国移动企业和网站公告\" href=\"http://www.10086.cn/aboutus/news/announced\" target=\"_blank\" name=\"AnchorAddByWCM\">公告</a>如下：</p>\n <p>　　一、新入网用户，在我公司各类营销网点（含实体<a title=\"点击访问：中国移动服务渠道-实体营业厅\" href=\"http://www.10086.cn/support/service/channel/entity/\" target=\"_blank\" name=\"AnchorAddByWCM\">营业厅</a>、网上营业厅、授权代理网点等）办理移动电话（含<a title=\"点击访问：全国WLAN热点查询\" href=\"http://www.10086.cn/support/selfservice/wlan/wlan.html\" target=\"_blank\" name=\"AnchorAddByWCM\">无线上网</a>卡，下同）、固定电话等入网手续时，须出示本人有效身份证件原件进行查验和登记。对于身份不明或者拒绝身份查验的，我公司不提供相应服务。</p>\n <p>　　二、已在网老用户，若使用的移动电话、固定电话等业务，尚未登记真实身份信息或者登记信息不完整的，我公司将从2016年7月1日起，通过电话/短信/公告/书面信函等方式进行通知，对于在通知时间内未补办登记手续的用户，2016年8月1日起，我公司将依法单向暂停通信服务（即暂停主叫、短信发送和上网，但火警、匪警、医疗急救、交通事故报警等紧急服务除外），并再次进行催告，对于在催告期满仍未补办登记手续的用户，我公司将依法停止全部通信服务（火警、匪警、医疗急救、交通事故报警等紧急服务除外）。</p>\n <p>　　为了不影响您的使用，请未完成实名登记的用户尽快持本人有效身份证件原件和本机号卡至我公司授权营业厅，或登录网上营业厅/关注官方微信办理电话用户实名信息补登记业务。本公告未尽事宜，以国家颁布的法律法规以及工业和信息化部发布的有关文件要求为准。</p>\n <p>　　如有疑问，请咨询我公司客服电话：10086。</p>\n <p><a title=\"点击访问：关于中国移动\" href=\"http://www.10086.cn/aboutus\" target=\"_blank\" name=\"AnchorAddByWCM\">中国移动</a>通信集团江西有限公司</p>\n <p>2016年7月15日</p>\n <p>&nbsp;</p>",
-   "attachments": []
-  },
-  {
-   "id": "29867",
-   "title": "关于防诈骗风险提示的公告",
-   "date": "2016-05-17",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_29867.html",
-   "summary": "尊敬的客户： 您好！近日不法分子利用虚拟改号、盗取客户SIM卡密码等方式进行行骗的情况时有发生，诈骗手段愈加高明。为避免您上当受骗，特做以下风险提示： 风险提示一：为保护您的财产安全，请妥善保管并定期修改中国移动网上营业厅登录密码和客服密码",
-   "content": "<p>尊敬的客户：</p>\n <p>　　您好！近日不法分子利用虚拟改号、盗取客户SIM卡密码等方式进行行骗的情况时有发生，诈骗手段愈加高明。为避免您上当受骗，特做以下风险提示：</p>\n <p>　　风险提示一：为保护您的财产安全，请妥善保管并定期修改<a title=\"点击访问：关于中国移动\" href=\"http://www.10086.cn/aboutus\" target=\"_blank\" name=\"AnchorAddByWCM\">中国移动</a>网上<a title=\"点击访问：中国移动服务渠道-实体营业厅\" href=\"http://www.10086.cn/support/channel/Entity1/\" target=\"_blank\" name=\"AnchorAddByWCM\">营业厅</a>登录密码和客服密码；切勿向他人泄露系统下发的业务办理验证码；如非本人开通业务，请发送短信“0000”到10086查询及退订所订购的业务，有疑问可进一步致电10086咨询。【<a title=\"点击访问：关于中国移动\" href=\"http://www.10086.cn/aboutus\" target=\"_blank\" name=\"AnchorAddByWCM\">中国移动</a>】</p>\n <p>　　风险提示二：近期有不法分子仿冒<a title=\"点击访问：关于中国移动\" href=\"http://www.10086.cn/aboutus\" target=\"_blank\" name=\"AnchorAddByWCM\">中国移动</a>发送虚假业务退订短信，诱骗客户提供收到的换卡验证码。一旦提供，不法分子可能利用该验证码进行换卡操作，盗用客户手机号码。建议您收到验证码类短信时，切勿向他人泄露，以防上当受骗，如有疑问请咨询10086。【<a title=\"点击访问：关于中国移动\" href=\"http://www.10086.cn/aboutus\" target=\"_blank\" name=\"AnchorAddByWCM\">中国移动</a>】</p>\n <p>　　风险提示三：近期有不法分子利用改号软件仿冒“00”开头的<a title=\"点击访问：关于中国移动\" href=\"http://www.10086.cn/aboutus\" target=\"_blank\" name=\"AnchorAddByWCM\">中国移动</a>国际、港澳台服务热线13800100186实施诈骗，通过播放自动语音告知客户手机号码状态异常，引导客户按键选择人工咨询，进一步诱骗客户提供银行卡账号、密码等重要隐私信息，建议您接到类似电话时提高警惕。<a title=\"点击访问：关于中国移动\" href=\"http://www.10086.cn/aboutus\" target=\"_blank\" name=\"AnchorAddByWCM\">中国移动</a>不会以任何理由要求客户提供此类信息，如有疑问请咨询10086。【<a title=\"点击访问：关于中国移动\" href=\"http://www.10086.cn/aboutus\" target=\"_blank\" name=\"AnchorAddByWCM\">中国移动</a>】</p>\n <p><a title=\"点击访问：关于中国移动\" href=\"http://www.10086.cn/aboutus\" target=\"_blank\" name=\"AnchorAddByWCM\">中国移动</a>通信集团江西有限公司</p>\n <p>2016年5月17日</p>",
-   "attachments": []
-  },
-  {
-   "id": "30487",
-   "title": "抚州分公司2014年GSM、TD-SCDMA 及TD-LTE网基站建设项目环境影响评价网络公示",
-   "date": "2016-05-09",
-   "page_url": "https://www.10086.cn/aboutus/news/pannounce/jx/index_791_791_detail_30487.html",
-   "summary": "根据《中华人民共和国环境影响评价法》和《环境影响评价公众参与暂行办法》（环发〔2006〕28号）的通知第九条规定，建设单位或者其委托的环境影响评价机构在编制环境影响报告书的过程中，应当在报送环境保护行政主管部门审批或者重新审核前，向公众公告",
-   "content": "<p>　　根据《中华人民共和国环境影响评价法》和《环境影响评价公众参与暂行办法》（环发〔2006〕28号）的通知第九条规定，建设单位或者其委托的环境影响评价机构在编制环境影响报告书的过程中，应当在报送环境保护行政主管部门审批或者重新审核前，向公众<a title=\"点击访问：中国移动企业和网站公告\" target=\"_blank\" href=\"http://www.10086.cn/aboutus/news/announced\" name=\"AnchorAddByWCM\">公告</a>建设项目相关信息。现将建设项目相关信息向公众<a title=\"点击访问：中国移动企业和网站公告\" target=\"_blank\" href=\"http://www.10086.cn/aboutus/news/announced\" name=\"AnchorAddByWCM\">公告</a>如下：</p>\n <p>　　<strong>一、建设项目情况简述：</strong></p>\n <p>　　<a title=\"点击访问：关于中国移动\" target=\"_blank\" href=\"http://www.10086.cn/aboutus\" name=\"AnchorAddByWCM\">中国移动</a>通信集团江西有限公司抚州分公司建设2014年GSM补点优化工程、2014年无线网提升改造工程、2014年TDL一期、TD-SCDMA网七期及其他工程基站建设项目，共416个基站。2014年12月，<a title=\"点击访问：关于中国移动\" target=\"_blank\" href=\"http://www.10086.cn/aboutus\" name=\"AnchorAddByWCM\">中国移动</a>通信集团江西有限公司委托江西省环境保护科学研究院针对<a title=\"点击访问：关于中国移动\" target=\"_blank\" href=\"http://www.10086.cn/aboutus\" name=\"AnchorAddByWCM\">中国移动</a>通信集团江西有限公司抚州分公司2014年GSM网、TD-SCDMA网及TD-<a title=\"点击访问：3G、4G专题\" target=\"_blank\" href=\"http://www.10086.cn/aboutus/focus/3g/\" name=\"AnchorAddByWCM\">LTE</a>网工程基站建设项目开展环境影响评价工作。本次评价将对投入运行的基站进行现场监测及典型测试评价，并采用现状监测资料的分析基础上并来评价本项目基站运行时对周围环境所产生的影响。</p>\n <p>　<strong>　二、建设项目对环境可能造成影响的概述：</strong></p>\n <p>　　<a title=\"点击访问：关于中国移动\" target=\"_blank\" href=\"http://www.10086.cn/aboutus\" name=\"AnchorAddByWCM\">中国移动</a>通信集团江西有限公司抚州分公司2014年GSM网、TD-SCDMA网及TD-<a title=\"点击访问：3G、4G专题\" target=\"_blank\" href=\"http://www.10086.cn/aboutus/focus/3g/\" name=\"AnchorAddByWCM\">LTE</a>网工程基站建设项目中的基站绝大部分建设在建筑物顶部，利用原有的房间作为机房，对周围环境影响有限；少部分采用地面铁塔方式建设，但其占地面积较小，对周边周围环境影响很小。</p>\n <p>　　基站运行期间的主要功能是通过天线接收和向周围环境发射无线电信号，实现移动通信的目的，因此对周边区域产生电磁辐射影响；同时机房内的空调设备室外机运行时会产生一定的噪声；由于基站为无人值守，基站运行期间不存在废水、废气污染和固体废弃物。由以上分析可见，本次环境影响评价的重点为基站运行过程中产生的电磁辐射对周围电磁环境的影响。</p>\n <p>　<strong>　三、预防或减轻不良环境影响的对策和措施的要点：</strong></p>\n <p>　　对基站进行合理选址、优化网络设置；设备采取优选低噪声的空调等，设备安装时天线朝向尽量避免居民住宅和其他环境保护目标。</p>\n <p>　　<strong>四、环境影响报告书提出的环境影响评价结论的要点：</strong></p>\n <p>　　在采取上述<a title=\"点击访问：中国移动企业社会责任专题\" target=\"_blank\" href=\"http://www.10086.cn/aboutus/csr/\" name=\"AnchorAddByWCM\">环保</a>措施的情况下，基站的建设从<a title=\"点击访问：中国移动企业社会责任专题\" target=\"_blank\" href=\"http://www.10086.cn/aboutus/csr/\" name=\"AnchorAddByWCM\">环保</a>角度看是可行的。</p>\n <p>　　<strong>五、公众查阅环境影响报告书简本以及公众认为必要时向建设单位或者其委托的环境影响评价机构索取补充信息的方式及期限：</strong></p>\n <p>　　为了解本项目的环境影响情况，自本告知公示之日起10个工作日内，即2016年5月9日～2016年5月20日，公众可从通过电话和邮件方式，索取本项目环境影响评价报告的简本电子文档。</p>\n <p>　　环评机构名称：江西省环境保护科学研究院（国环评证甲字第2303号）</p>\n <p>　　联系地址：江西省南昌市洪都北大道1131号</p>\n <p>　　联系人：陈小兰</p>\n <p>　　联系电话：0791-86866559</p>\n <p>　　电子邮件：<a href=\"mailto:lan.70@qq.com\">lan.70@qq.com</a></p>\n <p>　<strong>　六、公众提出意见的主要方式：</strong></p>\n <p>　　公众可以在有关信息公开后，以信函、传真、电子邮件或者按照有关<a title=\"点击访问：中国移动企业和网站公告\" target=\"_blank\" href=\"http://www.10086.cn/aboutus/news/announced\" name=\"AnchorAddByWCM\">公告</a>要求的其他方式，向建设单位或者其委托的环境影响评价机构、负责审批或者重新审核环境影响报告书的环境保护行政主管部门，提交书面意见。</p>\n <p><a title=\"点击访问：关于中国移动\" target=\"_blank\" href=\"http://www.10086.cn/aboutus\" name=\"AnchorAddByWCM\">中国移动</a>通信集团江西有限公司</p>\n <p>2016年5月9日</p>\n<p><a href=\"https://www.10086.cn/articleImage/520551/20170525165119946y9h.rar\" target=\"_blank\"><strong>点击此处下载附件</strong></a><br>\n</p>",
+   "id": "56098",
+   "title": "关于部分手机报产品下线的公告",
+   "date": "2026-10-30",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_56098.html",
+   "summary": "尊敬的客户： 因业务调整，我公司计划于2026年11月30日前将“世界添彩手机报”、“移动拍客”、“彩信大富翁”等29个产品做下线处理，具体下线清单详见附件。后续待产品下线完成后，对存量客户将不再提供服务，给您带来的不便，敬请谅解！感谢您的",
+   "content": "尊敬的客户：<br><p>　　因业务调整，我公司计划于2026年11月30日前将“世界添彩手机报”、“移动拍客”、“彩信大富翁”等29个产品做下线处理，具体下线清单详见附件。后续待产品下线完成后，对存量客户将不再提供服务，给您带来的不便，敬请谅解！感谢您的支持！</p><p>　　<a href=\"https://www.10086.cn/uploadBaseDir/content/xlsx/20261030/2026103015503515833n.xlsx\" target=\"_blank\" rel=\"noopener noreferrer\">附件：手机报下线产品清单.xlsx</a></p><p>中国移动通信集团江苏有限公司</p><div>2026年10月30日</div>",
    "attachments": [
     {
-     "name": "点击此处下载附件",
-     "url": "https://www.10086.cn/articleImage/520551/20170525165119946y9h.rar"
+     "name": "附件：手机报下线产品清单.xlsx",
+     "url": "https://www.10086.cn/uploadBaseDir/content/xlsx/20261030/2026103015503515833n.xlsx"
     }
    ]
+  },
+  {
+   "id": "56097",
+   "title": "2026年11月6日系统升级公告",
+   "date": "2026-10-30",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_56097.html",
+   "summary": "尊敬的客户： 为给客户提供更优质的服务，我公司将于2026年11月6日0:00至6:00进行相关网络调整工作，届时可能会影响全省移动用户的语音、手机上网、互联网电视、停复机、与电信联通用户收发短信业务的正常使用，全省物联网用户的上网、开销户",
+   "content": "尊敬的客户：<br><p>　　为给客户提供更优质的服务，我公司将于2026年11月6日0:00至6:00进行相关网络调整工作，届时可能会影响全省移动用户的语音、手机上网、互联网电视、停复机、与电信联通用户收发短信业务的正常使用，全省物联网用户的上网、开销户、停复机业务的正常使用，以及全省用户其他业务的办理。<br>　　给您带来不便，敬请广大客户谅解！</p><p>中国移动通信集团江苏有限公司</p><div>2026年10月30日</div>",
+   "attachments": []
+  },
+  {
+   "id": "56096",
+   "title": "互联网电视增值业务“喜马拉雅”下线公告",
+   "date": "2026-10-29",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_56096.html",
+   "summary": "尊敬的客户： 由于业务调整，互联网电视“喜马拉雅”产品于2026年12月31日24点起停止服务，届时续包月用户订购关系将自动取消，取消后不再收费。季包、半年包、年包等长周期订购用户未使用月份费用将进行退费处理。详情可咨询10086热线。感谢",
+   "content": "尊敬的客户：<br><p>　　由于业务调整，互联网电视“喜马拉雅”产品于2026年12月31日24点起停止服务，届时续包月用户订购关系将自动取消，取消后不再收费。季包、半年包、年包等长周期订购用户未使用月份费用将进行退费处理。详情可咨询10086热线。感谢您的支持！</p><div><a href=\"https://www.10086.cn/uploadBaseDir/content/xlsx/20261023/20261023152757210aVV.xlsx\" target=\"_blank\" rel=\"noopener noreferrer\"></a></div><p>中国移动通信集团江苏有限公司</p><div>2026年10月29日</div>",
+   "attachments": [
+    {
+     "name": "20261023152757210aVV.xlsx",
+     "url": "https://www.10086.cn/uploadBaseDir/content/xlsx/20261023/20261023152757210aVV.xlsx"
+    }
+   ]
+  },
+  {
+   "id": "56095",
+   "title": "互联网电视增值业务“聚师课堂”下线公告",
+   "date": "2026-10-29",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_56095.html",
+   "summary": "尊敬的客户： 由于业务调整，互联网电视“聚师课堂”产品于2026年12月31日24点起停止服务，届时续包月用户订购关系将自动取消，取消后不再收费。季包、半年包、年包等长周期订购用户未使用月份费用将进行退费处理。详情可咨询10086热线。感谢",
+   "content": "尊敬的客户：<br><p>　　由于业务调整，互联网电视“聚师课堂”产品于2026年12月31日24点起停止服务，届时续包月用户订购关系将自动取消，取消后不再收费。季包、半年包、年包等长周期订购用户未使用月份费用将进行退费处理。详情可咨询10086热线。感谢您的支持！</p><div><a href=\"https://www.10086.cn/uploadBaseDir/content/xlsx/20261023/20261023152757210aVV.xlsx\" target=\"_blank\" rel=\"noopener noreferrer\"></a></div><p>中国移动通信集团江苏有限公司</p><div>2026年10月29日</div>",
+   "attachments": [
+    {
+     "name": "20261023152757210aVV.xlsx",
+     "url": "https://www.10086.cn/uploadBaseDir/content/xlsx/20261023/20261023152757210aVV.xlsx"
+    }
+   ]
+  },
+  {
+   "id": "56094",
+   "title": "互联网电视增值业务“叮当少儿教育”下线公告",
+   "date": "2026-10-29",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_56094.html",
+   "summary": "尊敬的客户： 由于业务调整，互联网电视“叮当少儿教育”产品于2026年12月31日24点起停止服务，届时续包月用户订购关系将自动取消，取消后不再收费。季包、半年包、年包等长周期订购用户未使用月份费用将进行退费处理。详情可咨询10086热线。",
+   "content": "尊敬的客户：<br><p>　　由于业务调整，互联网电视“叮当少儿教育”产品于2026年12月31日24点起停止服务，届时续包月用户订购关系将自动取消，取消后不再收费。季包、半年包、年包等长周期订购用户未使用月份费用将进行退费处理。详情可咨询10086热线。感谢您的支持！</p><div><a href=\"https://www.10086.cn/uploadBaseDir/content/xlsx/20261023/20261023152757210aVV.xlsx\" target=\"_blank\" rel=\"noopener noreferrer\"></a></div><p>中国移动通信集团江苏有限公司</p><div>2026年10月29日</div>",
+   "attachments": [
+    {
+     "name": "20261023152757210aVV.xlsx",
+     "url": "https://www.10086.cn/uploadBaseDir/content/xlsx/20261023/20261023152757210aVV.xlsx"
+    }
+   ]
+  },
+  {
+   "id": "56087",
+   "title": "关于 “定期流量提醒（按周）” 下线的公告",
+   "date": "2026-10-23",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_56087.html",
+   "summary": "尊敬的客户： 为持续优化通信服务体验，避免不必要的短信打扰，我公司将于2026 年 11月25日起，逐步下线 “定期流量提醒（按周）”业务，届时将不再向您发送该定期流量提醒短信。 业务下线后，流量使用实时提醒正常发送，保障您及时掌握流量使用",
+   "content": "尊敬的客户：<br><p>　　为持续优化通信服务体验，避免不必要的短信打扰，我公司将于2026 年 11月25日起，逐步下线 “定期流量提醒（按周）”业务，届时将不再向您发送该定期流量提醒短信。<br>　　业务下线后，流量使用实时提醒正常发送，保障您及时掌握流量使用动态。您可通过手机营业厅 APP、官方微信公众号、客服热线等渠道，随时免费查询实时流量余量、套餐使用详情等信息，查询方式更灵活、信息展示更全面、服务使用更便捷。<br>　　感谢您的理解与支持，我们将不断提升服务品质，为您带来更优质的通信体验。</p><p>中国移动通信集团江苏有限公司</p><div>2026年10月23日</div>",
+   "attachments": []
+  },
+  {
+   "id": "56039",
+   "title": "关于全省四项禁止流量提醒业务停售的公告",
+   "date": "2026-10-21",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_56039.html",
+   "summary": "尊敬的客户： 为持续优化通信服务体验，我公司将于2026 年 10月27日起，停售 2200005053（禁止套餐流量阈值提醒）、2200005054（禁止有套餐零流量提醒）、2200005055（禁止流量达量提醒）、2200005067（",
+   "content": "尊敬的客户：<br><p>　　为持续优化通信服务体验，我公司将于2026 年 10月27日起，停售 2200005053（禁止套餐流量阈值提醒）、2200005054（禁止有套餐零流量提醒）、2200005055（禁止流量达量提醒）、2200005067（禁止流量阈值提醒）业务。<br>　　业务停售后，流量使用实时提醒正常发送，保障您及时掌握流量使用动态。您可通过手机营业厅 APP、官方微信公众号、客服热线等渠道，随时免费查询实时流量余量、套餐使用详情等信息，查询方式更灵活、信息展示更全面、服务使用更便捷。<br>　　感谢您的理解与支持，我们将不断提升服务品质，为您带来更优质的通信体验。</p><p>中国移动通信集团江苏有限公司</p><div>2026年10月21日</div>",
+   "attachments": []
+  },
+  {
+   "id": "56001",
+   "title": "2026年10月23日系统升级公告",
+   "date": "2026-10-16",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_56001.html",
+   "summary": "尊敬的客户： 为给客户提供更优质的服务，我公司将于2026年10月23日0:00至6:00进行相关网络调整工作，届时可能会影响全省移动用户的语音、手机上网、互联网电视业务的正常使用，全省物联网用户上网、停复机及开销户业务的正常使用，以及全省",
+   "content": "尊敬的客户：<br><p>　　为给客户提供更优质的服务，我公司将于2026年10月23日0:00至6:00进行相关网络调整工作，届时可能会影响全省移动用户的语音、手机上网、互联网电视业务的正常使用，全省物联网用户上网、停复机及开销户业务的正常使用，以及全省用户其他业务的办理。<br>　　给您带来不便，敬请广大客户谅解！</p><p>中国移动通信集团江苏有限公司</p><div>2026年10月16日</div>",
+   "attachments": []
+  },
+  {
+   "id": "55994",
+   "title": "2026年10月22日系统升级公告",
+   "date": "2026-10-16",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_55994.html",
+   "summary": "尊敬的客户： 为给客户提供更优质的服务，我公司将于2026年10月22日22:00至次日10:00进行业务支撑系统升级，调整期间，全省营业系统、10086系统业务办理存在中断，网上营业厅、掌上营业厅、短信营业厅、自助终端等所有渠道查询受理业",
+   "content": "尊敬的客户：<br><p>　　为给客户提供更优质的服务，我公司将于2026年10月22日22:00至次日10:00进行业务支撑系统升级，调整期间，全省营业系统、10086系统业务办理存在中断，网上营业厅、掌上营业厅、短信营业厅、自助终端等所有渠道查询受理业务出现短时中断，充值复机、短信提醒、国漫开通及扣费时间有所延迟，全省话单查询、电子发票等受影响。<br>　　我公司将于2026年10月22日0:00至6:00进行相关网络调整工作，届时可能会影响全省物联网用户上网、停复机及开销户业务的正常使用。<br>　　给您带来不便，敬请广大客户谅解！</p><p>中国移动通信集团江苏有限公司</p><div>2026年10月16日</div>",
+   "attachments": []
+  },
+  {
+   "id": "55993",
+   "title": "2026年10月21日系统升级公告",
+   "date": "2026-10-16",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_55993.html",
+   "summary": "尊敬的客户： 为给客户提供更优质的服务，我公司将于2026年10月21日22:00至次日10:00进行业务支撑系统升级，调整期间，全省营业系统、10086系统业务办理存在中断，网上营业厅、掌上营业厅、短信营业厅、自助终端等所有渠道查询受理业",
+   "content": "尊敬的客户：<br><p>　　为给客户提供更优质的服务，我公司将于2026年10月21日22:00至次日10:00进行业务支撑系统升级，调整期间，全省营业系统、10086系统业务办理存在中断，网上营业厅、掌上营业厅、短信营业厅、自助终端等所有渠道查询受理业务出现短时中断，充值复机、短信提醒、国漫开通及扣费时间有所延迟，全省话单查询、电子发票等受影响。<br>　　我公司将于2026年10月21日0:00至6:00进行相关网络调整工作，届时可能会影响全省移动用户的语音、手机上网、互联网电视业务的正常使用，全省物联网用户上网、停复机及开销户业务的正常使用。<br>　　给您带来不便，敬请广大客户谅解！</p><p>中国移动通信集团江苏有限公司</p><div>2026年10月16日</div>",
+   "attachments": []
+  },
+  {
+   "id": "55992",
+   "title": "2026年10月19日系统升级公告",
+   "date": "2026-10-15",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_55992.html",
+   "summary": "尊敬的客户： 为给客户提供更优质的服务，我公司将于2026年10月19日22:00至次日10:00进行业务支撑系统升级，调整期间，全省营业系统、10086系统业务办理存在中断，网上营业厅、掌上营业厅、短信营业厅、自助终端等所有渠道查询受理业",
+   "content": "尊敬的客户：<br><p>　　为给客户提供更优质的服务，我公司将于2026年10月19日22:00至次日10:00进行业务支撑系统升级，调整期间，全省营业系统、10086系统业务办理存在中断，网上营业厅、掌上营业厅、短信营业厅、自助终端等所有渠道查询受理业务出现短时中断，充值复机、短信提醒、国漫开通及扣费时间有所延迟，全省话单查询、电子发票等受影响。<br>　　给您带来不便，敬请广大客户谅解！</p><p>中国移动通信集团江苏有限公司</p><div>2026年10月15日</div>",
+   "attachments": []
+  },
+  {
+   "id": "55952",
+   "title": "2026年10月20日系统升级公告",
+   "date": "2026-10-15",
+   "page_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250_detail_55952.html",
+   "summary": "尊敬的客户： 为给客户提供更优质的服务，我公司将于2026年10月20日0:00至6:00进行相关网络调整工作，届时可能会影响全省移动用户的互联网电视业务，苏州、常州地区移动用户的语音、手机上网业务的正常使用以及其他业务的办理。 我公司将于",
+   "content": "尊敬的客户：<br><p>　　为给客户提供更优质的服务，我公司将于2026年10月20日0:00至6:00进行相关网络调整工作，届时可能会影响全省移动用户的互联网电视业务，苏州、常州地区移动用户的语音、手机上网业务的正常使用以及其他业务的办理。<br>　　我公司将于2026年10月20日22:00至次日8:00进行业务支撑系统升级，调整期间，全省营业系统、10086系统业务办理存在中断，网上营业厅、掌上营业厅、短信营业厅、自助终端等所有渠道查询受理业务出现短时中断，充值复机、短信提醒、国漫开通及扣费时间有所延迟，全省话单查询、电子发票等受影响。<br>　　给您带来不便，敬请广大客户谅解！</p><p>中国移动通信集团江苏有限公司</p><div>2026年10月15日</div>",
+   "attachments": []
   }
  ]
 }
