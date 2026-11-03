@@ -1,0 +1,135 @@
+import copy
+import datetime as dt
+import gzip
+import json
+from pathlib import Path
+import sys
+import tempfile
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'scripts'))
+from refresh_tariffs import (TARGETS, FOLDERS, acceptable, changes, fetch_carrier,
+                             merge_sample, merge_reports, read, write)
+from archive_tariffs import capture, put_object, publish_indexes, seed_legacy
+
+
+def item(identity='1', fee='39', title='套餐A'):
+    return {'id': identity, 'title': title, 'fee': fee, 'firstLevel': '套餐',
+            'detail': {'feesStandard': fee, 'commonData': '30', 'offDate': '2035-12-31'}}
+
+
+class ScheduledTest(unittest.TestCase):
+    def test_scope_list_and_cron(self):
+        self.assertEqual(sum(len(x) for x in TARGETS.values()), 16)
+        self.assertEqual(TARGETS['unicom'], ['quanguo','jiangsu','shanghai','hebei','henan','sichuan','guangdong'])
+        path = ROOT / '.github/workflows'
+        text = (path / 'scheduled-refresh.yml').read_text()
+        self.assertIn('"0 4,16 * * *"', text)
+        self.assertIn('cancel-in-progress: false', text)
+        for filename in ['mobile-build.yml','telecom-gb-fetch.yml','unicom-fetch.yml','province-notify.yml']:
+            self.assertNotIn('\n  schedule:', (path / filename).read_text())
+
+    def test_failure_empty_and_drop_never_overwrite(self):
+        for data, error in [([], ''), ([item()], 'timeout')]:
+            with self.assertRaises(ValueError): acceptable([item()], data, error)
+        with self.assertRaises(ValueError): acceptable([item(str(x)) for x in range(10)], [item()])
+
+    def test_mobile_field_changes_detected(self):
+        a = {'name':'移动套餐','fields':{'资费类型':'套餐','归属':'个人资费','资费标准':'39元/月'}}
+        b = copy.deepcopy(a);b['fields']['资费标准']='49元/月'
+        delta = changes([a], [b])
+        self.assertEqual(len(delta['modified_items']), 1)
+        self.assertFalse(delta['added_items'])
+
+    def test_missing_unicom_sample_is_retained(self):
+        old = [item(), item('2', title='套餐B')]
+        counters = {}
+        for _ in range(10):
+            result = merge_sample(old, [old[0]], counters, dt.date(2026,11,3))
+            self.assertEqual(len(result), 2)
+        self.assertEqual(counters['2'], 10)
+
+    def test_expired_unicom_requires_six_misses(self):
+        old = [item(), item('2', title='旧套餐')]
+        old[1]['detail']['offDate'] = '2020-01-01'
+        counters = {}
+        for _ in range(5): self.assertEqual(len(merge_sample(old,[old[0]],counters,dt.date(2026,11,3))),2)
+        self.assertEqual(len(merge_sample(old,[old[0]],counters,dt.date(2026,11,3))),1)
+
+    def test_unicom_missing_detail_preserves_known_fields(self):
+        result = merge_sample([item()], [dict(item(fee='49'), detail={})], {}, dt.date(2026,11,3))
+        self.assertEqual(result[0]['fee'], '39')
+
+    def test_collector_isolates_missing_provinces_and_does_not_mutate_old(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);old={'timestamp':'old','items':[item()]}
+            write(root/'telecom/data/quanguo.json',old)
+            def collect(c,s,ctx):
+                if s!='quanguo':raise NotImplementedError('not connected')
+                return [item(fee='49')], ''
+            report=fetch_carrier('telecom',root,collector=collect)
+            self.assertEqual(report[0]['status'],'updated')
+            self.assertEqual([r['status'] for r in report[1:]],['not_connected']*3)
+            self.assertEqual(read(root/'telecom/data/quanguo.json'),old)
+            self.assertEqual(read(root/'_refresh/refresh-telecom/files/telecom/data/quanguo.json')['items'][0]['fee'],'49')
+
+    def test_missing_artifacts_preserve_all_snapshots(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);old={'timestamp':'old','items':[item()]}
+            write(root/'data/quanguo.json',old)
+            rows=merge_reports(root,root/'no-artifacts')
+            self.assertEqual(len(rows),16)
+            self.assertTrue(all(r['status']=='failed' for r in rows))
+            self.assertEqual(read(root/'data/quanguo.json'),old)
+
+    def test_immutable_deduplicated_archive_and_full_fields(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)/'site';archive=Path(td)/'archive'
+            old={'timestamp':'2026-11-03T00:00:00+08:00','items':[item()]}
+            old['items'][0]['detail']['serviceContent']='完整详情'*1000
+            write(root/'data/quanguo.json',old)
+            row={'id':'mobile:quanguo','carrier':'mobile','region':'quanguo','name':'全国移动','path':'data/quanguo.json','status':'updated'}
+            first=capture(archive,root,[row],'2026-11-03T00:00:00+08:00','r1',baseline=True)
+            old['timestamp']='2026-11-03T12:00:00+08:00';write(root/row['path'],old)
+            second=capture(archive,root,[row],'2026-11-03T12:00:00+08:00','r2',baseline=True)
+            self.assertEqual(first['sources'][0]['snapshot'],second['sources'][0]['snapshot'])
+            stored=json.loads(gzip.decompress((archive/first['sources'][0]['snapshot']).read_bytes()))
+            self.assertEqual(stored['items'][0]['detail']['serviceContent'],'完整详情'*1000)
+            with self.assertRaises(ValueError):capture(archive,root,[row],'2026-11-03T12:00:00+08:00','r2')
+
+    def test_archive_retains_more_than_sixty_runs_and_all_original_history(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)/'site';archive=Path(td)/'archive'
+            original=[{'ts':str(i),'full_detail':'x'*1000} for i in range(100)]
+            write(root/'data/history.json',original)
+            seed_legacy(archive,root)
+            write(root/'data/history.json',[]);seed_legacy(archive,root)
+            self.assertEqual(json.loads(gzip.decompress((archive/'legacy/mobile-history.json.gz').read_bytes())),original)
+            for i in range(65):capture(archive,root,[],'2026-11-03T00:00:00+08:00','r'+str(i))
+            publish_indexes(archive,root,'JayChou0609/carrier-tariff-personal')
+            self.assertEqual(len(read(root/'history/data/2026.json')['runs']),65)
+
+    def test_archive_missing_source_has_no_fabricated_snapshot(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)/'site';archive=Path(td)/'archive'
+            row={'id':'telecom:jiangsu','name':'江苏电信','path':'telecom/data/jiangsu.json','status':'not_connected'}
+            report=capture(archive,root,[row],'2026-11-03T00:00:00+08:00','r1')
+            self.assertIsNone(report['sources'][0]['snapshot'])
+            self.assertIsNone(report['sources'][0]['count'])
+
+    def test_archive_modifications_include_before_snapshot_and_details(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)/'site';archive=Path(td)/'archive'
+            row={'id':'unicom:jiangsu','name':'江苏联通','path':'unicom/data/jiangsu.json','status':'updated'}
+            old={'items':[item()]};write(root/row['path'],{'items':[item(fee='49')]})
+            record=capture(archive,root,[row],'2026-11-03T12:00:00+08:00','r1',{'unicom:jiangsu':old})
+            entry=record['sources'][0]
+            self.assertEqual(entry['modified'],1)
+            self.assertIn('previousSnapshot',entry)
+            delta=json.loads(gzip.decompress((archive/entry['changes']).read_bytes()))
+            self.assertEqual(delta['modified_items'][0]['fee'],'49')
+            self.assertTrue(delta['modified_details'])
+
+
+if __name__=='__main__':unittest.main()
