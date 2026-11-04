@@ -42,23 +42,28 @@
     if(on&&on<=today&&/^(?:长期|长期有效|永久|无期限)$/.test(String(f['下线日期']||f.offDate||'').trim()))return result('onsale','已上线，源站标注长期有效');
     return result('unknown','源站未提供可判断的销售状态或下线日期');
   }
-  function normText(value) {
-    return String(value==null?'':value).replace(/<br\s*\/?>/gi,' ').replace(/<\/?p[^>]*>/gi,' ').replace(/<[^>]*>/g,'').replace(/&(?:nbsp|amp|lt|gt|quot|#39);/gi,' ').replace(/\s+/g,' ').trim();
-  }
-  function discoveryKey(raw) {
-    const mobile=!!raw.fields,f=raw.fields||raw.detail||{};
-    let identity;
-    for(const key of ['productCode','goodsCode','businessCode','code']){
-      const value=f[key]||raw[key];if(value!==null&&value!==undefined&&value!==''){identity=['code',key,normText(value)];break;}
+  function launchInfo(raw) {
+    if(raw.manual)return {date:'',source:'未提供官方日期'};
+    const fields=raw.fields||raw.detail||{};
+    const groups=[['官方上线日期',['上线日期','onDate','onlineDay','startDate']]];
+    for(const [source,keys] of groups)for(const field of keys)for(const data of [fields,raw]){
+      const value=data[field];
+      if(value===null||value===undefined||value==='')continue;
+      let date=dateDay(value);
+      // Explicit timestamp offsets are converted to Beijing; date-only business
+      // fields retain the official calendar date exactly as displayed.
+      if(typeof value==='string'&&/T.*(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)){
+        const time=Date.parse(value);date=Number.isFinite(time)?new Date(time+8*3600000).toISOString().slice(0,10):'';
+      }
+      if(date)return {date,source};
     }
-    if(!identity)identity=[normText(mobile?raw.name:raw.title||raw.name),normText(mobile?f['归属']:raw.firstLevel),normText(mobile?f['资费类型']:raw.secondLevel)];
-    return JSON.stringify([String(raw.id==null?'':raw.id).trim(),JSON.stringify(identity)]);
+    return {date:'',source:'官方未提供可解析的上线日期'};
   }
   function addedMatch(item,state,today) {
     const period=state.addedPeriod||'';
     if(!period)return true;
-    if(item.manual||!item.firstAdded)return false;
-    const day=today||beijingDay(),date=item.firstAdded;
+    if(item.manual||!item.launchDate)return false;
+    const day=today||beijingDay(),date=item.launchDate;
     if(period==='date')return !!state.addedDate&&date===state.addedDate;
     if(period==='today')return date===day;
     const shift=n=>new Date(Date.parse(day+'T00:00:00Z')+n*86400000).toISOString().slice(0,10);
@@ -75,11 +80,11 @@
     const id=String(raw.id || fields['方案编号'] || fields.reportNo || (title+'|'+index));
     const details=Object.entries(fields).filter(([,v])=>v!==null && v!==undefined && String(v)!=='').map(([k,v])=>[labels[k] || k, String(v)+(k==='commonData' && fields.dataUnit ? ' '+fields.dataUnit : k==='minute' && /^\d+(?:\.\d+)?$/.test(String(v)) ? ' 分钟' : '')]);
     const sale=saleState(raw);
-    const recorded=source.additions&&source.additions[discoveryKey(raw)];
-    const firstAdded=!raw.manual&&dateDay(recorded)===recorded?recorded:'';
-    details.unshift(['首次新增日期',firstAdded||'基线或未记录']);
+    const launched=launchInfo(raw);
+    const launchDate=launched.date,launchSource=launched.source;
+    details.unshift(['资费上线日期',launchDate||'未提供'],['日期来源',launchSource]);
     details.unshift(['销售状态',sale.label],['状态判断依据',sale.reason]);
-    return {firstAdded,saleStatus:sale.value,saleLabel:sale.label,saleReason:sale.reason,key:source.id+':'+id,id,title,fee,unit,category,details,carrier:source.carrier,region:source.region,source:source.id,label:source.name,timestamp:source.timestamp || '',official:source.official || '',monthly:price(fee,unit,source.carrier),manual:!!raw.manual,search:(title+' '+category+' '+details.map(x=>x.join(' ')).join(' ')).toLowerCase()};
+    return {launchDate,launchSource,saleStatus:sale.value,saleLabel:sale.label,saleReason:sale.reason,key:source.id+':'+id,id,title,fee,unit,category,details,carrier:source.carrier,region:source.region,source:source.id,label:source.name,timestamp:source.timestamp || '',official:source.official || '',monthly:price(fee,unit,source.carrier),manual:!!raw.manual,search:(title+' '+category+' '+details.map(x=>x.join(' ')).join(' ')).toLowerCase()};
   }
   function filter(items, state, favorites) {
     const q=String(state.q || '').trim().toLowerCase();
@@ -89,7 +94,7 @@
   }
   function sort(items, order) {
     return items.slice().sort((a,b)=>{
-      if(order==='addedDesc'&&a.firstAdded!==b.firstAdded)return (b.firstAdded||'').localeCompare(a.firstAdded||'');
+      if(order==='addedDesc'&&a.launchDate!==b.launchDate)return (b.launchDate||'').localeCompare(a.launchDate||'');
       if (order==='priceAsc' || order==='priceDesc') {
         if(a.monthly===null && b.monthly!==null)return 1;
         if(b.monthly===null && a.monthly!==null)return -1;
@@ -101,6 +106,6 @@
   function escape(s) {return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function csvCell(s) {const v=String(s==null?'':s);return '"'+(/^[\s]*[=+@-]/.test(v)?"'":'')+v.replace(/"/g,'""')+'"';}
   function safeURL(s) {try {const u=new URL(s);return u.protocol==='https:'?u.href:'';}catch(e){return '';}}
-  root.TariffModel={carriers,regions,defaults,labels,discoveryKey,addedMatch,saleLabels,dateDay,beijingDay,saleState,price,normalize,filter,sort,escape,csvCell,safeURL};
+  root.TariffModel={carriers,regions,defaults,labels,launchInfo,addedMatch,saleLabels,dateDay,beijingDay,saleState,price,normalize,filter,sort,escape,csvCell,safeURL};
   if(typeof module!=='undefined')module.exports=root.TariffModel;
 })(typeof globalThis!=='undefined'?globalThis:this);
