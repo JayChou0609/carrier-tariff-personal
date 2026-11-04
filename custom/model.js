@@ -42,6 +42,30 @@
     if(on&&on<=today&&/^(?:长期|长期有效|永久|无期限)$/.test(String(f['下线日期']||f.offDate||'').trim()))return result('onsale','已上线，源站标注长期有效');
     return result('unknown','源站未提供可判断的销售状态或下线日期');
   }
+  function normText(value) {
+    return String(value==null?'':value).replace(/<br\s*\/?>/gi,' ').replace(/<\/?p[^>]*>/gi,' ').replace(/<[^>]*>/g,'').replace(/&(?:nbsp|amp|lt|gt|quot|#39);/gi,' ').replace(/\s+/g,' ').trim();
+  }
+  function discoveryKey(raw) {
+    const mobile=!!raw.fields,f=raw.fields||raw.detail||{};
+    let identity;
+    for(const key of ['productCode','goodsCode','businessCode','code']){
+      const value=f[key]||raw[key];if(value!==null&&value!==undefined&&value!==''){identity=['code',key,normText(value)];break;}
+    }
+    if(!identity)identity=[normText(mobile?raw.name:raw.title||raw.name),normText(mobile?f['归属']:raw.firstLevel),normText(mobile?f['资费类型']:raw.secondLevel)];
+    return JSON.stringify([String(raw.id==null?'':raw.id).trim(),JSON.stringify(identity)]);
+  }
+  function addedMatch(item,state,today) {
+    const period=state.addedPeriod||'';
+    if(!period)return true;
+    if(item.manual||!item.firstAdded)return false;
+    const day=today||beijingDay(),date=item.firstAdded;
+    if(period==='date')return !!state.addedDate&&date===state.addedDate;
+    if(period==='today')return date===day;
+    const shift=n=>new Date(Date.parse(day+'T00:00:00Z')+n*86400000).toISOString().slice(0,10);
+    if(period==='yesterday')return date===shift(-1);
+    if(period==='week')return date>=shift(-6)&&date<=day;
+    return false;
+  }
   function normalize(raw, source, index) {
     const mobile=!!raw.fields, fields=raw.fields || raw.detail || {};
     const title=String(raw.name || raw.title || fields.name || '未命名资费');
@@ -51,17 +75,21 @@
     const id=String(raw.id || fields['方案编号'] || fields.reportNo || (title+'|'+index));
     const details=Object.entries(fields).filter(([,v])=>v!==null && v!==undefined && String(v)!=='').map(([k,v])=>[labels[k] || k, String(v)+(k==='commonData' && fields.dataUnit ? ' '+fields.dataUnit : k==='minute' && /^\d+(?:\.\d+)?$/.test(String(v)) ? ' 分钟' : '')]);
     const sale=saleState(raw);
+    const recorded=source.additions&&source.additions[discoveryKey(raw)];
+    const firstAdded=!raw.manual&&dateDay(recorded)===recorded?recorded:'';
+    details.unshift(['首次新增日期',firstAdded||'基线或未记录']);
     details.unshift(['销售状态',sale.label],['状态判断依据',sale.reason]);
-    return {saleStatus:sale.value,saleLabel:sale.label,saleReason:sale.reason,key:source.id+':'+id,id,title,fee,unit,category,details,carrier:source.carrier,region:source.region,source:source.id,label:source.name,timestamp:source.timestamp || '',official:source.official || '',monthly:price(fee,unit,source.carrier),manual:!!raw.manual,search:(title+' '+category+' '+details.map(x=>x.join(' ')).join(' ')).toLowerCase()};
+    return {firstAdded,saleStatus:sale.value,saleLabel:sale.label,saleReason:sale.reason,key:source.id+':'+id,id,title,fee,unit,category,details,carrier:source.carrier,region:source.region,source:source.id,label:source.name,timestamp:source.timestamp || '',official:source.official || '',monthly:price(fee,unit,source.carrier),manual:!!raw.manual,search:(title+' '+category+' '+details.map(x=>x.join(' ')).join(' ')).toLowerCase()};
   }
   function filter(items, state, favorites) {
     const q=String(state.q || '').trim().toLowerCase();
     const lo=state.min==='' || state.min==null ? null : Number(state.min);
     const hi=state.max==='' || state.max==null ? null : Number(state.max);
-    return items.filter(x=>(!q || (state.nameOnly ? x.title.toLowerCase() : x.search).includes(q)) && (!state.carrier || x.carrier===state.carrier) && (!state.region || x.region===state.region) && (!state.category || x.category===state.category) && (!state.saleStatus || x.saleStatus===state.saleStatus) && (!state.favOnly || favorites.has(x.key)) && ((lo===null && hi===null) || (x.monthly!==null && (lo===null || x.monthly>=lo) && (hi===null || x.monthly<=hi))));
+    return items.filter(x=>(!q || (state.nameOnly ? x.title.toLowerCase() : x.search).includes(q)) && (!state.carrier || x.carrier===state.carrier) && (!state.region || x.region===state.region) && (!state.category || x.category===state.category) && (!state.saleStatus || x.saleStatus===state.saleStatus) && addedMatch(x,state) && (!state.favOnly || favorites.has(x.key)) && ((lo===null && hi===null) || (x.monthly!==null && (lo===null || x.monthly>=lo) && (hi===null || x.monthly<=hi))));
   }
   function sort(items, order) {
     return items.slice().sort((a,b)=>{
+      if(order==='addedDesc'&&a.firstAdded!==b.firstAdded)return (b.firstAdded||'').localeCompare(a.firstAdded||'');
       if (order==='priceAsc' || order==='priceDesc') {
         if(a.monthly===null && b.monthly!==null)return 1;
         if(b.monthly===null && a.monthly!==null)return -1;
@@ -73,6 +101,6 @@
   function escape(s) {return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function csvCell(s) {const v=String(s==null?'':s);return '"'+(/^[\s]*[=+@-]/.test(v)?"'":'')+v.replace(/"/g,'""')+'"';}
   function safeURL(s) {try {const u=new URL(s);return u.protocol==='https:'?u.href:'';}catch(e){return '';}}
-  root.TariffModel={carriers,regions,defaults,labels,saleLabels,dateDay,beijingDay,saleState,price,normalize,filter,sort,escape,csvCell,safeURL};
+  root.TariffModel={carriers,regions,defaults,labels,discoveryKey,addedMatch,saleLabels,dateDay,beijingDay,saleState,price,normalize,filter,sort,escape,csvCell,safeURL};
   if(typeof module!=='undefined')module.exports=root.TariffModel;
 })(typeof globalThis!=='undefined'?globalThis:this);
