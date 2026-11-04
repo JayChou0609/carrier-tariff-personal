@@ -53,7 +53,7 @@
  check(M.filter([active,stopped,unknown],{saleStatus:'stopped',region:'jiangsu',carrier:'mobile',max:'20'},new Set())[0]===stopped,'stopped filter combines with province carrier and budget');
  check(M.filter([active,stopped,unknown],{saleStatus:'unknown'},new Set())[0]===unknown,'unknown status is separately selectable');
  check(M.filter([active,stopped,unknown],{saleStatus:''},new Set()).length===3,'clear sale status restores all records');
- if(typeof M.launchInfo==='function'){
+ check(typeof M.launchInfo==='function','official launch-date model required');
  const launchRaw={id:'launch',name:'上线测试套餐',fields:{'归属':'个人资费','资费类型':'套餐','资费标准':'19元/月','上线日期':'2026年11月3日','下线日期':'2030年12月31日'}};
  const launched=M.normalize(launchRaw,{...source,timestamp:'2026-11-04T12:00:00+08:00'},0);
  check(launched.launchDate==='2026-11-03','official launch date wins over current collection date');
@@ -77,7 +77,6 @@
  check(M.filter([launched,undated],{addedPeriod:''},new Set()).length===2,'all launch dates includes undated records');
  check(M.sort([undated,launched],'addedDesc')[0]===launched,'latest launch sort leaves undated records last');
  check(launched.details.some(x=>x[0]==='资费上线日期'&&x[1]==='2026-11-03'),'details expose canonical launch date');
- }
  const alpha={...sh,title:'A plan',label:'上海联通'},zulu={...a,title:'Z plan',label:'江苏移动'};
  check(M.sort([zulu,alpha],'name')[0]===alpha,'name sorting is independent of region');
  check(new Set(M.defaults).size===12,'12 requested sources');
