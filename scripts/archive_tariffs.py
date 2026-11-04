@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import sys
 
+from build_additions import build_additions
 from refresh_tariffs import (ROOT, TARGETS, FOLDERS, CN, CARRIER_CN, now, read, write,
                              changes, merge_reports, update_recent_history, rebuild_indexes)
 
@@ -116,6 +117,8 @@ def publish_indexes(archive, root, repository):
         'updated': now(), 'schedule': ['00:00', '12:00'], 'timezone': 'Asia/Shanghai',
         'history': '../history/', 'latest': read(root / 'history/data' / (years[0]['year'] + '.json'))['runs'][0]
         if years else None})
+
+    build_additions(archive, root)
 
 
 def initial_reports(root):
