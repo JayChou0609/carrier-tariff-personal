@@ -12,7 +12,7 @@ def prepare(root, out, repo=''):
         raise ValueError('Output directory must be new: ' + str(out))
     coverage = build(root)
     out.mkdir(parents=True)
-    for name in ['index.html', 'app.js', 'style.css', 'common-extras.js', 'logo.png',
+    for name in ['index.html', 'app.js', 'style.css', 'common-extras.js', 'announcements.js', 'announcements.css', 'logo.png',
                  'tariff-fetch-source.zip', 'manifest.json', 'sw.js', 'push-center.html', '.nojekyll', 'LICENSE']:
         shutil.copy2(root / name, out / name)
     for folder in ['icons', 'custom', 'history', 'telecom', 'unicom', 'gb']:
@@ -32,8 +32,10 @@ def prepare(root, out, repo=''):
                       if s['available'] and str(Path(s['path']).parent) == folder)
         if folder == 'data':
             wanted.update(['refresh-status.json', 'additions.json'])
-        if folder in ['data', 'unicom/data']:
+        if folder in ['data', 'unicom/data', 'telecom/data']:
             wanted.add('announce.json')
+        if folder == 'unicom/data':
+            wanted.add('announce-national.json')
         for name in wanted:
             src = root / folder / name
             if src.exists():
