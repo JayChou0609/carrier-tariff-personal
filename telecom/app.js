@@ -230,6 +230,7 @@ function goTab(v) {
   else if (v === "quanguo") renderList("quanguo");
   else if (v === "prov") { ensureSections(); renderList("prov"); }
   else if (v === "history") { ensureSections(); renderHistory(); }
+  else if (v === "announce") renderAnnounce();
 }
 document.querySelectorAll(".tab").forEach((tab) => {
   tab.addEventListener("click", () => {
@@ -928,9 +929,15 @@ function renderHistory() {
     });
 }
 
+function renderAnnounce() {
+  AnnouncementPanel.mount({operator:'telecom',feeds:[
+    {scope:'jiangsu',path:'data/announce.json',hash:'#announce',title:'江苏电信公告',source:'来源：中国电信江苏官网公告栏目',official:'https://img.189.cn/js/notice_list/'}
+  ]});
+}
+
 (function boot() {
   const raw = (location.hash || "").replace("#", "").trim();
-  const valid = ["overview", "quanguo", "prov", "history", "about"].indexOf(raw) >= 0;
+  const valid = ["overview", "quanguo", "prov", "history", "announce", "about"].indexOf(raw) >= 0;
   goTab(valid ? raw : "overview");
 })();
 
