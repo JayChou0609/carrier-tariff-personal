@@ -65,6 +65,10 @@ class PersonalDataTest(unittest.TestCase):
             self.assertTrue((out / 'data/announce.json').exists())
             self.assertTrue((out / 'data/additions.json').exists())
             self.assertTrue((out / 'unicom/data/announce.json').exists())
+            self.assertTrue((out / 'unicom/data/announce-national.json').exists())
+            self.assertTrue((out / 'telecom/data/announce.json').exists())
+            self.assertTrue((out / 'announcements.js').exists())
+            self.assertTrue((out / 'announcements.css').exists())
             for carrier in ['', 'telecom/', 'unicom/', 'gb/']:
                 self.assertTrue((out / (carrier + 'data/quanguo.json')).exists())
             self.assertIn('https://example-user.github.io/tariffs/', (out / 'index.html').read_text())
