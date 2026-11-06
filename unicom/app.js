@@ -43,16 +43,6 @@ function loadJson(file) {
     .then((j) => { cache[file] = j; return j; });
 }
 
-/* ---------- 公告数据（announce.json，最新15条） ---------- */
-let announceCache = null;
-function loadAnnounce() {
-  if (announceCache) return Promise.resolve(announceCache);
-  return fetchTimeout(DATA + "announce.json", { cache: "no-store" })
-    .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-    .then((j) => { announceCache = j; return j; })
-    .catch((e) => { announceCache = null; throw e; });
-}
-
 /* ---------- 板块索引 ---------- */
 let SECTIONS = [];
 let DEF_SECTION = "jiangxi";
@@ -947,48 +937,10 @@ function safeHref(url) {
   return url;
 }
 function renderAnnounce() {
-  const box = $("announceBox");
-  const sub = $("announceSub");
-  loadAnnounce().then((d) => {
-    if (!d || d.province !== "jiangsu" || d.operator !== "unicom") throw new Error("公告地区不匹配");
-    if (!d.items || !d.items.length) {
-      if (d.status === "failed") throw new Error("公告采集失败");
-      if (sub) sub.textContent = "";
-      box.innerHTML = '<div class="empty">暂无公告数据</div>';
-      return;
-    }
-    if (sub) sub.textContent = "数据更新时间：" + (d.updated || "") + (d.status === "failed" ? " · 本轮获取失败，显示上次成功数据" : " · 每天 00:00、12:00 自动检查");
-    box.innerHTML = d.items.map((it, i) => {
-      const att = (it.attachments && it.attachments.length)
-        ? '<div class="ann-att">' + it.attachments.map((a) =>
-            '<a class="ann-att-btn" href="' + esc(safeHref(a.url)) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">附件 · ' + esc(a.name || "下载") + "</a>").join("") + "</div>"
-        : "";
-      const body = (it.content && it.content.trim())
-        ? '<div class="ann-content">' + it.content + "</div>"
-        : '<div class="ann-noimg">正文暂未取得，请点击查看官网原文。</div>';
-      return '<div class="ann-item" data-i="' + i + '">' +
-        '<div class="ann-head">' +
-        '<span class="ann-date">' + esc(it.date || "") + "</span>" +
-        '<span class="ann-title">' + esc(it.title || "") + "</span>" +
-        '<span class="ann-arrow"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span>' +
-        "</div>" +
-        (it.summary ? '<div class="ann-summary">' + esc(it.summary) + "</div>" : "") +
-        '<div class="ann-body">' + body + att +
-        '<div class="ann-more"><a href="' + esc(safeHref(it.page_url || "#")) + '" target="_blank" rel="noopener">查看官网原文</a></div>' +
-        "</div></div>";
-    }).join("");
-    box.querySelectorAll(".ann-item").forEach((el) => {
-      const h = el.querySelector(".ann-head");
-      h.addEventListener("click", () => {
-        const open = el.classList.toggle("open");
-        const arw = el.querySelector(".ann-arrow");
-        if (arw) arw.style.transform = open ? "rotate(180deg)" : "";
-      });
-    });
-  }).catch(() => {
-    if (sub) sub.textContent = "";
-    box.innerHTML = '<div class="empty">江苏公告暂时无法加载，请稍后刷新或访问官网查看</div>';
-  });
+  AnnouncementPanel.mount({operator:'unicom',feeds:[
+    {scope:'jiangsu',path:'data/announce.json',hash:'#announce',title:'江苏联通公告',source:'来源：中国联通官方公告（江苏）',official:'https://www.10010.com/wt_links/index.html#/announcementPage'},
+    {scope:'quanguo',path:'data/announce-national.json',hash:'#announce-national',title:'联通全国总部公告',source:'来源：中国联通官方公告（全国）',official:'https://www.10010.com/wt_links/index.html#/announcementPage'}
+  ]});
 }
 
 function renderHistory() {
@@ -1010,7 +962,7 @@ function renderHistory() {
 (function boot() {
   const raw = (location.hash || "").replace("#", "").trim();
   const valid = ["overview", "quanguo", "prov", "history", "announce", "about"].indexOf(raw) >= 0;
-  goTab(valid ? raw : "overview");
+  goTab(raw === "announce-national" ? "announce" : valid ? raw : "overview");
 })();
 
 /* ---------- 检测资费 ---------- */

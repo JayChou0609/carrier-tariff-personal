@@ -17,6 +17,7 @@
   <meta property="og:image" content="https://amxysw.github.io/carrier-tariff-site/unicom/unicom_logo.webp">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="中国联通资费专区">
+<link rel="stylesheet" href="../announcements.css?v=20261106-announcements">
 </head>
 <body>
 <header class="topbar">
@@ -41,7 +42,7 @@
     <button class="tab" data-view="quanguo">全国资费</button>
     <button class="tab" data-view="prov">省份资费</button>
     <button class="tab" data-view="history">变化历史</button>
-    <button class="tab" data-view="announce">江苏联通公告</button>
+    <button class="tab" data-view="announce">联通公告</button>
     <button class="tab" data-view="about">关于</button>
   </nav>
 </header>
@@ -132,14 +133,11 @@
     </div>
   </section>
 
-  <!-- 江苏联通公告 -->
-  <section id="view-announce" class="view">
-    <div class="panel">
-      <h2 class="panel-title">江苏联通公告<span class="panel-sub">来源：中国联通官网公告（江苏）· 自动抓取，仅保留最新 15 条</span></h2>
-      <div class="announce-sub" id="announceSub"></div>
-      <div class="announce-list" id="announceBox"><div class="loading">加载公告…</div></div>
-    </div>
-  </section>
+  <section id="view-announce" class="view"><div class="panel">
+    <h2 class="panel-title"><span id="announceTitle">江苏联通公告</span><span class="panel-sub" id="announceSource">来源：中国联通官方公告</span></h2>
+    <div class="announcement-toolbar"><label>公告范围<select id="announceScope" aria-label="公告范围"><option value="jiangsu">江苏联通公告</option><option value="quanguo">联通全国总部公告</option></select></label><button id="announceRetry" type="button">刷新公告</button></div>
+    <div class="announce-sub" id="announceSub" role="status"></div><div class="announce-list" id="announceBox"><div class="loading">加载公告…</div></div>
+  </div></section>
 
   <!-- 关于 -->
   <section id="view-about" class="view">
@@ -212,7 +210,8 @@
 </div>
 
 
-<script src="./app.js?v=20261103-jsannounce"></script>
+<script src="../announcements.js?v=20261106-announcements"></script>
+<script src="./app.js?v=20261106-announcements"></script>
 <script src="../common-extras.js?v=20260915i"></script>
 
 </body>
