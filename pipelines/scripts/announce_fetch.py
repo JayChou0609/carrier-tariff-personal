@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""公告抓取脚本：江苏移动公告 + 联通公告，各只保留最新 15 条，输出 announce.json
+"""公告抓取脚本：江苏移动、江苏联通、联通全国总部及江苏电信公告，各只保留最新 15 条，输出 announce.json
 
 用法:
-    python3 pipelines/scripts/announce_fetch.py --move-dir data --uni-dir unicom/data
+    python3 pipelines/scripts/announce_fetch.py --move-dir data --uni-dir unicom/data --uni-national-dir unicom/data --telecom-dir telecom/data
     （路径相对仓库根目录；前端读取的就是 data/announce.json 与 unicom/data/announce.json）
 说明:
     - 移动(江苏)公告列表/详情均为静态 JSON，GET 直取；
@@ -31,6 +31,8 @@ import urllib.parse
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 MAX_KEEP = 15
+TELECOM_LIST_URL = "https://img.189.cn/js/notice_list/"
+TELECOM_SITE = "https://img.189.cn"
 
 # ---------------- 移动(江苏) ----------------
 # 江苏官方列表页 index_250_250.html 声明的栏目 JSON。
@@ -138,6 +140,8 @@ def clean_html(raw, kind="move"):
                         kept.append((key, _abs_link(value, kind)))
                 elif key in {"title", "alt"} or (tag in {"td", "th"} and key in {"colspan", "rowspan"} and value.isdigit()):
                     kept.append((key, value))
+            if tag == "img" and not any(k == "src" for k, _ in kept):
+                return
             if tag == "a":
                 kept.extend([("target", "_blank"), ("rel", "noopener noreferrer")])
             self.out.append("<" + tag + "".join(' %s="%s"' % (k, escape(v, quote=True)) for k, v in kept) + ">")
@@ -158,7 +162,7 @@ def clean_html(raw, kind="move"):
 
 
 def _abs_link(path, kind):
-    base = MOVE_DETAIL_PAGE.format(id="") if kind == "move" else UNI_IMG_HOST + "/"
+    base = MOVE_DETAIL_PAGE.format(id="") if kind == "move" else TELECOM_SITE + "/" if kind == "telecom" else UNI_IMG_HOST + "/"
     return urllib.parse.urljoin(base, path)
 
 
@@ -237,7 +241,10 @@ def fetch_move():
 
 
 # ---------------- 联通抓取 ----------------
-def fetch_uni():
+def fetch_uni(scope="jiangsu"):
+    if scope not in ("jiangsu", "quanguo"):
+        raise ValueError("Unsupported Unicom announcement scope")
+    region = "江苏" if scope == "jiangsu" else "全国"
     print("[联通] 拉取公告列表 ...")
     lst = []
     page, total_pages = 1, 1
@@ -247,17 +254,17 @@ def fetch_uni():
             "condition": "0", "title": ""}, UNI_HDRS))
         rows = j.get("result")
         if not isinstance(rows, list) or not rows:
-            raise ValueError("江苏联通公告分页为空或结构异常")
+            raise ValueError(region + "联通公告分页为空或结构异常")
         total_pages = int(j.get("totalPages", 1))
         if not 1 <= total_pages <= 100:
-            raise ValueError("江苏联通公告分页数量异常")
+            raise ValueError(region + "联通公告分页数量异常")
         lst.extend(rows)
         page += 1
         time.sleep(0.2)
     items = []
     seen = set()
     for row in lst:
-        if row.get("creatorProvinceName") != "江苏" or row.get("id") in seen:
+        if row.get("creatorProvinceName") != region or row.get("id") in seen:
             continue
         seen.add(row.get("id"))
         items.append({
@@ -307,11 +314,102 @@ def fetch_uni():
     # 保证页面展示严格为时间倒序（最新公告在最前）。
     items.sort(key=lambda x: x.get("date") or "", reverse=True)
     if not items:
-        raise ValueError("未取得有效的江苏联通公告")
+        raise ValueError("未取得有效的" + region + "联通公告")
     return items
 
 
-def write_json(items, path, operator="mobile", status="ok", error=""):
+def telecom_get(url, deadline=None):
+    """Use the two official hosts; retry transient gateway errors, never scrape a challenge."""
+    urls = [url, url.replace("https://img.189.cn/", "https://www.189.cn/")]
+    error = None
+    for attempt in range(3):
+        for target in dict.fromkeys(urls):
+            remaining = deadline - time.monotonic() if deadline else 12
+            if remaining <= 0:
+                raise TimeoutError("江苏电信本轮公告抓取已到时间预算")
+            try:
+                return _http_get(target, {"User-Agent": UA, "Referer": TELECOM_LIST_URL}, timeout=min(12, remaining))
+            except Exception as exc:
+                error = exc
+        time.sleep(0.5 * (attempt + 1))
+    raise error
+
+
+def telecom_list(html):
+    items = {}
+    for block in re.findall(r'<li\b[^>]*>(.*?)</li>', html, re.I | re.S):
+        link = re.search(r'<a\b[^>]*href=["\']([^"\']*/js/sy_ycgg/(\d+)\.html)["\'][^>]*>(.*?)</a>', block, re.I | re.S)
+        date = re.search(r'(\d{4}-\d{2}-\d{2})', re.sub(r'<[^>]+>', ' ', block))
+        if link and date:
+            items[link.group(2)] = {"id": link.group(2), "title": html_to_text(link.group(3)),
+                                   "date": date.group(1), "page_url": urllib.parse.urljoin(TELECOM_SITE, link.group(1))}
+    if not items:
+        raise ValueError("江苏电信公告列表为空或结构异常")
+    return sorted(items.values(), key=lambda item: (item["date"], int(item["id"])), reverse=True)[:MAX_KEEP]
+
+
+def telecom_content(html):
+    """Extract only the balanced notice_content block, including nested Word markup."""
+    from html.parser import HTMLParser
+    class Article(HTMLParser):
+        def __init__(self):
+            super().__init__(convert_charrefs=False)
+            self.depth, self.parts, self.done = 0, [], False
+        def handle_starttag(self, tag, attrs):
+            if self.done:
+                return
+            if not self.depth:
+                if "notice_content" in dict(attrs).get("class", "").split():
+                    self.depth = 1
+                return
+            self.parts.append(self.get_starttag_text())
+            if tag not in {"br", "img", "hr", "meta", "link", "input", "source", "wbr"}:
+                self.depth += 1
+        def handle_startendtag(self, tag, attrs):
+            if self.depth:
+                self.parts.append(self.get_starttag_text())
+        def handle_endtag(self, tag):
+            if self.depth and tag not in {"br", "img", "hr", "meta", "link", "input", "source", "wbr"}:
+                self.depth -= 1
+                if self.depth:
+                    self.parts.append("</" + tag + ">")
+                else:
+                    self.done = True
+        def handle_data(self, data):
+            if self.depth:
+                self.parts.append(data)
+        def handle_entityref(self, name):
+            if self.depth:
+                self.parts.append("&" + name + ";")
+        def handle_charref(self, name):
+            if self.depth:
+                self.parts.append("&#" + name + ";")
+    parser = Article()
+    parser.feed(html)
+    if not parser.done:
+        raise ValueError("江苏电信公告正文缺少完整 notice_content 区块")
+    content = clean_html("".join(parser.parts), "telecom")
+    if not html_to_text(content) and "<img" not in content:
+        raise ValueError("江苏电信公告正文为空")
+    return content
+
+
+def fetch_telecom():
+    deadline = time.monotonic() + 180
+    items = telecom_list(telecom_get(TELECOM_LIST_URL, deadline))
+    for item in items:
+        try:
+            content = telecom_content(telecom_get(item["page_url"], deadline))
+            item.update(content=content, summary=html_to_text(content)[:120],
+                        attachments=find_attachments(content, TELECOM_SITE))
+        except Exception as exc:
+            print("[江苏电信] 详情 " + item["id"] + " 失败: " + str(exc))
+            item.update(content="", summary="", attachments=[])
+        time.sleep(0.3)
+    return items
+
+
+def write_json(items, path, operator="mobile", status="ok", error="", scope="jiangsu"):
     """Atomically persist a province-labelled feed; never relabel an old province cache."""
     old = {}
     try:
@@ -319,7 +417,7 @@ def write_json(items, path, operator="mobile", status="ok", error=""):
             old = json.load(f)
     except (OSError, ValueError):
         pass
-    compatible = old.get("province") == "jiangsu" and old.get("operator") == operator
+    compatible = old.get("province") == scope and old.get("operator") == operator
     if status == "ok" and not items:
         raise ValueError("拒绝以空列表覆盖公告")
     if status != "ok":
@@ -329,8 +427,8 @@ def write_json(items, path, operator="mobile", status="ok", error=""):
         for item in items:
             if not item.get("content") and previous.get(item["id"], {}).get("content"):
                 item.update({k: previous[item["id"]][k] for k in ("content", "summary", "attachments")})
-    data = {"province": "jiangsu", "province_name": "江苏", "operator": operator,
-            "source_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250.html" if operator == "mobile" else "https://www.10010.com/wt_links/index.html#/announcement",
+    data = {"province": scope, "province_name": "全国总部" if scope == "quanguo" else "江苏", "operator": operator,
+            "source_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250.html" if operator == "mobile" else TELECOM_LIST_URL if operator == "telecom" else "https://www.10010.com/wt_links/index.html#/announcementPage",
             "updated": now_str() if status == "ok" else old.get("updated", "") if compatible else "",
             "checked_at": now_str(), "status": status, "error": error,
             "count": len(items), "items": items}
@@ -353,24 +451,32 @@ def main():
     # unicom/data/ 不一致，导致公告文件写到了镜像位置、线上长期不更新。
     root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     args = sys.argv[1:]
-    move_dir = uni_dir = None
+    move_dir = uni_dir = national_dir = telecom_dir = None
     for i, a in enumerate(args):
         if a == "--move-dir" and i + 1 < len(args):
             move_dir = _resolve(root, args[i + 1])
         if a == "--uni-dir" and i + 1 < len(args):
             uni_dir = _resolve(root, args[i + 1])
+        if a == "--uni-national-dir" and i + 1 < len(args):
+            national_dir = _resolve(root, args[i + 1])
+        if a == "--telecom-dir" and i + 1 < len(args):
+            telecom_dir = _resolve(root, args[i + 1])
     failed = False
-    for directory, fetcher, operator in [(move_dir, fetch_move, "mobile"), (uni_dir, fetch_uni, "unicom")]:
+    feeds = [(move_dir, fetch_move, "mobile", "jiangsu", "announce.json"),
+             (uni_dir, fetch_uni, "unicom", "jiangsu", "announce.json"),
+             (national_dir, lambda: fetch_uni("quanguo"), "unicom", "quanguo", "announce-national.json"),
+             (telecom_dir, fetch_telecom, "telecom", "jiangsu", "announce.json")]
+    for directory, fetcher, operator, scope, filename in feeds:
         if not directory:
             continue
-        path = os.path.join(directory, "announce.json")
+        path = os.path.join(directory, filename)
         try:
-            write_json(fetcher(), path, operator)
+            write_json(fetcher(), path, operator, scope=scope)
         except Exception as exc:
             failed = True
-            print(f"[{operator}] 公告采集失败，保留江苏旧数据: {exc}", file=sys.stderr)
-            write_json([], path, operator, "failed", str(exc)[:200])
-    if not move_dir and not uni_dir:
+            print(f"[{operator}] 公告采集失败，保留该范围旧数据: {exc}", file=sys.stderr)
+            write_json([], path, operator, "failed", str(exc)[:200], scope)
+    if not any([move_dir, uni_dir, national_dir, telecom_dir]):
         print(__doc__)
     if failed:
         sys.exit(1)
