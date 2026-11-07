@@ -3,10 +3,10 @@
  "province_name": "江苏",
  "operator": "mobile",
  "source_url": "https://www.10086.cn/aboutus/news/pannounce/js/index_250_250.html",
- "updated": "2026-11-07 06:00",
- "checked_at": "2026-11-07 19:30",
- "status": "failed",
- "error": "<urlopen error [Errno 101] Network is unreachable>",
+ "updated": "2026-11-08 04:35",
+ "checked_at": "2026-11-08 04:35",
+ "status": "ok",
+ "error": "",
  "count": 15,
  "items": [
   {
