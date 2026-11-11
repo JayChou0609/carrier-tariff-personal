@@ -1,8 +1,6 @@
 name: WeCom Tariff Notifications
 
 on:
-  schedule:
-    - cron: "0 4,10,16 * * *" # UTC -> 北京时间 12:00 / 18:00 / 00:00
   workflow_run:
     workflows: ["Scheduled Tariff Refresh"]
     types: [completed]
@@ -28,8 +26,7 @@ jobs:
   notify:
     if: >-
       github.repository == 'JayChou0609/carrier-tariff-personal' &&
-      (((github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') &&
-        github.ref == 'refs/heads/main') ||
+      ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
        (github.event_name == 'workflow_run' &&
         github.event.workflow_run.head_branch == 'main' &&
         github.event.workflow_run.head_repository.full_name == github.repository &&
