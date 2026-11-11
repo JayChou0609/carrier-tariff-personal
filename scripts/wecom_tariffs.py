@@ -27,8 +27,8 @@ SITE = 'https://jaychou0609.github.io/carrier-tariff-personal/'
 API = 'https://qyapi.weixin.qq.com/cgi-bin/'
 CARRIERS = {'mobile':'移动', 'telecom':'电信', 'unicom':'联通', 'gb':'广电'}
 REGIONS = {'quanguo':'全国','jiangsu':'江苏','shanghai':'上海','zhejiang':'浙江',
-           'hebei':'河北','henan':'河南','sichuan':'四川','guangdong':'广东'}
-SCOPES = {'mobile':['quanguo','jiangsu','shanghai'],
+           'hebei':'河北','henan':'河南','sichuan':'四川','guangdong':'广东','gansu':'甘肃'}
+SCOPES = {'mobile':['quanguo','jiangsu','shanghai','gansu'],
           'telecom':['quanguo','jiangsu','shanghai','zhejiang'],
           'unicom':['quanguo','jiangsu','shanghai','hebei','henan','sichuan','guangdong'],
           'gb':['quanguo','jiangsu']}
@@ -250,8 +250,8 @@ def summary(report, key, pending):
     elif not pending:
         lines.append('较前次没有新的条目或资费变更。')
     imperfect = [s for s in report['sources'] if s['status'] in ['failed','cached'] or s.get('stale') or s.get('timestamp_unknown')]
-    lines.append('数据：{} / 16 个源可用；异常/缓存/超过24小时 {} 个。'.format(
-                 sum(s['status'] != 'failed' for s in report['sources']),len(imperfect)))
+    lines.append('数据：{} / {} 个源可用；异常/缓存/超过24小时 {} 个。'.format(
+                 sum(s['status'] != 'failed' for s in report['sources']),len(report['sources']),len(imperfect)))
     if imperfect:
         lines.append('需留意：'+', '.join(s['id'] for s in imperfect[:5]))
     stamps = sorted({s['snapshot'] for s in report['sources'] if s.get('snapshot')})
