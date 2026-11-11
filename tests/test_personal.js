@@ -111,7 +111,7 @@
  check(M.lifecycleMatch({...resumed,reonlineDates:['2025-12-31']},{lifecyclePeriod:'yesterdayReonline'},'2026-01-01'),'yesterday handles year boundary in Beijing');
  const alpha={...sh,title:'A plan',label:'上海联通'},zulu={...a,title:'Z plan',label:'江苏移动'};
  check(M.sort([zulu,alpha],'name')[0]===alpha,'name sorting is independent of region');
- check(new Set(M.defaults).size===12,'12 requested sources');
+ check(new Set(M.defaults).size===13,'13 requested sources including Gansu Mobile');
  check(M.escape('<img src=x onerror=1>').includes('&lt;img'),'HTML escape');
  check(M.csvCell('=HYPERLINK("evil")').startsWith('"\''),'CSV formula protection');
  if(isNode){

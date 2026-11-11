@@ -81,8 +81,8 @@ class PushTests(unittest.TestCase):
                 state=Path(td)
                 r=app.collect(state_dir=state,loader=lambda u:{'timestamp':'2026-11-12T00:00:00+08:00','items':[raw(on='2026-11-12',off='2026-11-13')]})
                 self.assertEqual(r['day'],'2026-11-12')
-                self.assertEqual(len(r['buckets']['new']),16)
-                self.assertEqual(len(r['buckets']['tomorrow_off']),16)
+                self.assertEqual(len(r['buckets']['new']),17)
+                self.assertEqual(len(r['buckets']['tomorrow_off']),17)
                 self.assertFalse(r['buckets']['today_off'])
                 config=app.validate_config(CONFIG)
                 app.write_json(state/'ready.json',{'scope':app.config_hash(config)})
@@ -124,9 +124,9 @@ class PushTests(unittest.TestCase):
     def test_four_nationals_twelve_provinces_are_classified_independently(self):
         def loader(url):return {'timestamp':'2026-11-11T12:00:00+08:00','items':[raw()]}
         r=app.collect(DAY,state_dir=self.state,loader=loader)
-        self.assertEqual(len(r['sources']),16)
-        self.assertEqual(len(r['buckets']['new']),16)
-        self.assertEqual(len(r['buckets']['tomorrow_off']),16)
+        self.assertEqual(len(r['sources']),17)
+        self.assertEqual(len(r['buckets']['new']),17)
+        self.assertEqual(len(r['buckets']['tomorrow_off']),17)
         self.assertFalse(r['buckets']['today_off'])
 
     def test_total_failure_is_not_a_zero_report(self):
@@ -137,7 +137,7 @@ class PushTests(unittest.TestCase):
         app.write_json(self.state/'cache/mobile-jiangsu.json',{'timestamp':'2026-11-10T00:00:00+08:00','items':[raw()]})
         r=app.collect(DAY,state_dir=self.state,loader=lambda u:(_ for _ in ()).throw(OSError()))
         self.assertEqual(sum(s['status']=='cached' for s in r['sources']),1)
-        self.assertEqual(sum(s['status']=='failed' for s in r['sources']),15)
+        self.assertEqual(sum(s['status']=='failed' for s in r['sources']),16)
         self.assertEqual(len(r['buckets']['new']),1)
 
     def test_webhook_rejects_other_destinations_and_query_injection(self):

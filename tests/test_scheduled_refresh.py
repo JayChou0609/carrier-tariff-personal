@@ -30,7 +30,7 @@ class ScheduledTest(unittest.TestCase):
         self.assertFalse(collection_complete(rows[:-1]+[rows[0]]))
 
     def test_scope_list_and_cron(self):
-        self.assertEqual(sum(len(x) for x in TARGETS.values()), 16)
+        self.assertEqual(sum(len(x) for x in TARGETS.values()), 17)
         self.assertEqual(TARGETS['unicom'], ['quanguo','jiangsu','shanghai','hebei','henan','sichuan','guangdong'])
         path = ROOT / '.github/workflows'
         text = (path / 'scheduled-refresh.yml').read_text()
@@ -117,7 +117,7 @@ class ScheduledTest(unittest.TestCase):
             root=Path(td);old={'timestamp':'old','items':[item()]}
             write(root/'data/quanguo.json',old)
             rows=merge_reports(root,root/'no-artifacts')
-            self.assertEqual(len(rows),16)
+            self.assertEqual(len(rows),17)
             self.assertTrue(all(r['status']=='failed' for r in rows))
             self.assertEqual(read(root/'data/quanguo.json'),old)
 
