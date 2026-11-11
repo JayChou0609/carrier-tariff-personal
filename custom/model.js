@@ -84,6 +84,7 @@
     if(!period)return true;
     if(item.manual)return false;
     if(period==='todayOff')return !!item.offDate&&item.offDate===day;
+    if(period==='tomorrowOff')return !!item.offDate&&item.offDate===new Date(Date.parse(day+'T00:00:00Z')+86400000).toISOString().slice(0,10);
     const yesterday=new Date(Date.parse(day+'T00:00:00Z')-86400000).toISOString().slice(0,10);
     if(period==='todayReonline')return item.saleStatus==='onsale'&&(item.reonlineDates||[item.reonlineDate]).includes(day);
     // Yesterday is an event-date query; a later withdrawal must not hide it.

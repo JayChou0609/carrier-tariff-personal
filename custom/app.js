@@ -21,7 +21,7 @@ function validConfig(d){
  });
  if(new Set(clean.map(x=>x.id)).size!==clean.length)throw Error('自定义资费 ID 重复');
  const f=d.filters&&typeof d.filters==='object'?d.filters:{};
- const filters={...initial,q:String(f.q||'').slice(0,500),carrier:['','mobile','telecom','unicom','gb'].includes(f.carrier)?f.carrier:'',region:['','quanguo',...Object.keys(M.regions)].includes(f.region)?f.region:'',category:String(f.category||'').slice(0,100),saleStatus:['',...Object.keys(M.saleLabels)].includes(f.saleStatus)?f.saleStatus:'',addedPeriod:['','today','yesterday','week','date'].includes(f.addedPeriod)?f.addedPeriod:'',addedDate:M.dateDay(f.addedDate)===f.addedDate?f.addedDate:'',lifecyclePeriod:['','todayOff','todayReonline','yesterdayReonline','todayConfirmed','yesterdayConfirmed'].includes(f.lifecyclePeriod)?f.lifecyclePeriod:'',sort:['name','priceAsc','priceDesc','addedDesc'].includes(f.sort)?f.sort:'name',nameOnly:!!f.nameOnly,favOnly:!!f.favOnly};
+ const filters={...initial,q:String(f.q||'').slice(0,500),carrier:['','mobile','telecom','unicom','gb'].includes(f.carrier)?f.carrier:'',region:['','quanguo',...Object.keys(M.regions)].includes(f.region)?f.region:'',category:String(f.category||'').slice(0,100),saleStatus:['',...Object.keys(M.saleLabels)].includes(f.saleStatus)?f.saleStatus:'',addedPeriod:['','today','yesterday','week','date'].includes(f.addedPeriod)?f.addedPeriod:'',addedDate:M.dateDay(f.addedDate)===f.addedDate?f.addedDate:'',lifecyclePeriod:['','todayOff','tomorrowOff','todayReonline','yesterdayReonline','todayConfirmed','yesterdayConfirmed'].includes(f.lifecyclePeriod)?f.lifecyclePeriod:'',sort:['name','priceAsc','priceDesc','addedDesc'].includes(f.sort)?f.sort:'name',nameOnly:!!f.nameOnly,favOnly:!!f.favOnly};
  for(const k of ['min','max'])filters[k]=f[k]!==''&&f[k]!=null&&Number.isFinite(Number(f[k]))&&Number(f[k])>=0?String(f[k]):'';
  return {selected:safe,includeNational:d.includeNational!==false,favorites:d.favorites||[],manual:clean,filters,theme:d.theme==='dark'?'dark':'light'};
 }
@@ -42,7 +42,7 @@ function buildItems(){
  const categories=[...new Set(items.map(x=>x.category))].sort((a,b)=>a.localeCompare(b,'zh-CN'));
  $('category').innerHTML='<option value="">全部类型</option>'+[...new Set([...categories,...(state.category?[state.category]:[])])].map(x=>'<option>'+E(x)+'</option>').join('');$('category').value=state.category;
  $('total').textContent=items.length.toLocaleString();$('ready').textContent=wanted().filter(s=>cache.has(s.id)).length+'/'+wanted().length;$('favCount').textContent=favorites.size.toLocaleString();renderSources();render();
- $('lifecycleNote').textContent=lifecycleError||'今日下线按官方下线日期筛选（北京时间）；重新上线须有历史停售证据，优先采用新的官方上线日期，缺失时核对 firstConfirmTimeStr，再单列监测确认日期；移动官方确认仅作候选检索，不能单独证明重新上架。监测更新：'+(lifecycle&&lifecycle.updated||'等待载入');
+ $('lifecycleNote').textContent=lifecycleError||'今日与明日下线按官方下线日期筛选（北京时间）；重新上线须有历史停售证据，优先采用新的官方上线日期，缺失时核对 firstConfirmTimeStr，再单列监测确认日期；移动官方确认仅作候选检索，不能单独证明重新上架。监测更新：'+(lifecycle&&lifecycle.updated||'等待载入');
  const bad=wanted().filter(s=>!s.available||failures.has(s.id));$('errors').innerHTML=bad.length?'<div class="notice warning">'+bad.map(s=>E(s.name)+'：'+(s.available?'快照载入失败，刷新可重试。':'尚无省级快照。')+' <a href="'+E(M.safeURL(s.official))+'" target="_blank" rel="noopener noreferrer">查看官方公示 ↗</a>').join('<br>')+'</div>':'';
 }
 async function load(){
