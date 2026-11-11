@@ -85,7 +85,9 @@
     if(item.manual)return false;
     if(period==='todayOff')return !!item.offDate&&item.offDate===day;
     const yesterday=new Date(Date.parse(day+'T00:00:00Z')-86400000).toISOString().slice(0,10);
-    if(period==='todayReonline'||period==='yesterdayReonline')return item.saleStatus==='onsale'&&(item.reonlineDates||[item.reonlineDate]).includes(period==='todayReonline'?day:yesterday);
+    if(period==='todayReonline')return item.saleStatus==='onsale'&&(item.reonlineDates||[item.reonlineDate]).includes(day);
+    // Yesterday is an event-date query; a later withdrawal must not hide it.
+    if(period==='yesterdayReonline')return (item.reonlineDates||[item.reonlineDate]).includes(yesterday);
     if(period==='todayConfirmed'||period==='yesterdayConfirmed')return item.carrier==='mobile'&&!!item.confirmDate&&item.confirmDate===(period==='todayConfirmed'?day:yesterday);
     return false;
   }
