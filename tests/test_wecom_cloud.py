@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
 import wecom_cloud as cloud
@@ -24,6 +25,42 @@ class MemoryState(cloud.GitHubState):
 
 
 class CloudTests(unittest.TestCase):
+    def complete_report(self):
+        stamp='2026-11-11T18:49:26+08:00'
+        ids=[c+':'+r for c,regions in cloud.core.SCOPES.items() for r in regions]
+        latest={'id':'43001466760-1','timestamp':stamp,'baseline':False,
+                'sources':[{'id':sid,'status':'updated','snapshotTimestamp':stamp} for sid in ids]}
+        report={'day':'2026-11-11','sources':[{'id':sid,'status':'repository_snapshot','snapshot':stamp} for sid in ids]}
+        return latest,report
+
+    def test_formal_push_requires_all_sixteen_updated_sources(self):
+        latest,report=self.complete_report()
+        with patch.object(cloud.core,'read_json',return_value={'latest':latest}):
+            self.assertEqual(cloud.require_complete_collection(report,expected_run='43001466760')['collection_run'],'43001466760-1')
+        for status in ['retained','failed','not_connected']:
+            latest,report=self.complete_report();latest['sources'][0]['status']=status
+            with patch.object(cloud.core,'read_json',return_value={'latest':latest}):
+                with self.assertRaisesRegex(cloud.StateError,'采集不完整'):
+                    cloud.require_complete_collection(report)
+
+    def test_formal_push_rejects_missing_duplicate_old_day_and_wrong_run(self):
+        for kind in ['missing','duplicate','old_day','wrong_run','baseline']:
+            latest,report=self.complete_report()
+            if kind=='missing':latest['sources'].pop()
+            elif kind=='duplicate':latest['sources'][-1]=latest['sources'][0]
+            elif kind=='old_day':latest['timestamp']='2026-11-10T18:49:26+08:00'
+            elif kind=='wrong_run':latest['id']='123-1'
+            else:latest['baseline']=True
+            with patch.object(cloud.core,'read_json',return_value={'latest':latest}):
+                with self.assertRaises(cloud.StateError):
+                    cloud.require_complete_collection(report,expected_run='43001466760')
+
+    def test_formal_push_rejects_file_not_from_current_archive(self):
+        latest,report=self.complete_report();report['sources'][0]['snapshot']='2026-11-11T05:43:10+08:00'
+        with patch.object(cloud.core,'read_json',return_value={'latest':latest}):
+            with self.assertRaisesRegex(cloud.StateError,'归档不一致'):
+                cloud.require_complete_collection(report)
+
     def test_checkpoint_never_contains_webhook_or_github_token(self):
         state=MemoryState()
         for secret in ['test-webhook-key','test-github-token']:

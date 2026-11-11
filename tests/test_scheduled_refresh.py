@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from refresh_tariffs import (TARGETS, FOLDERS, acceptable, changes, fetch_carrier,
                              merge_sample, merge_reports, read, write)
-from archive_tariffs import capture, put_object, publish_indexes, seed_legacy
+from archive_tariffs import capture, put_object, publish_indexes, seed_legacy, collection_complete
 
 
 def item(identity='1', fee='39', title='套餐A'):
@@ -20,6 +20,15 @@ def item(identity='1', fee='39', title='套餐A'):
 
 
 class ScheduledTest(unittest.TestCase):
+    def test_partial_retained_collection_is_not_a_complete_success(self):
+        rows=[{'id':c+':'+s,'status':'updated'} for c,scopes in TARGETS.items() for s in scopes]
+        self.assertTrue(collection_complete(rows))
+        for status in ['retained','failed','not_connected']:
+            changed=copy.deepcopy(rows);changed[0]['status']=status
+            self.assertFalse(collection_complete(changed))
+        self.assertFalse(collection_complete(rows[:-1]))
+        self.assertFalse(collection_complete(rows[:-1]+[rows[0]]))
+
     def test_scope_list_and_cron(self):
         self.assertEqual(sum(len(x) for x in TARGETS.values()), 16)
         self.assertEqual(TARGETS['unicom'], ['quanguo','jiangsu','shanghai','hebei','henan','sichuan','guangdong'])

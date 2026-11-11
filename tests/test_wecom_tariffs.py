@@ -65,6 +65,18 @@ class PushTests(unittest.TestCase):
     def ready(self):
         app.write_json(self.state/'ready.json',{'scope':app.config_hash(self.config)})
 
+    def test_new_collection_reports_all_three_categories_even_after_earlier_slot_send(self):
+        self.ready();client=DummyClient();r=report()
+        app.send_report(r,self.config,self.state,client)
+        r['collection_run']='43001466760-2'
+        client.sent=[]
+        self.assertEqual(app.send_report(r,self.config,self.state,client)['sent'],3)
+        self.assertEqual([x[1]['content'].split('】')[0]+'】' for x in client.sent],
+                         ['【今日上线】','【明日下线】','【今日下线】'])
+        self.assertEqual(app.send_report(r,self.config,self.state,client)['sent'],0)
+        r['collection_run']='43001466760-3'
+        self.assertEqual(app.send_report(r,self.config,self.state,client)['sent'],3)
+
     def test_official_dates_exclude_capture_and_confirmation_dates(self):
         x=raw(on='');x['fields']['firstConfirmTimeStr']='2026-11-11 12:00:00';x['timestamp']='2026-11-11'
         self.assertEqual(app.normalize(x,'mobile:jiangsu','2026-11-11')['on_date'],'')
