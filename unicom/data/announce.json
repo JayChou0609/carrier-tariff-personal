@@ -3,12 +3,21 @@
  "province_name": "江苏",
  "operator": "unicom",
  "source_url": "https://www.10010.com/wt_links/index.html#/announcementPage",
- "updated": "2026-11-11 06:16",
- "checked_at": "2026-11-11 06:16",
+ "updated": "2026-11-11 18:48",
+ "checked_at": "2026-11-11 18:48",
  "status": "ok",
  "error": "",
  "count": 15,
  "items": [
+  {
+   "id": "2c1af18ca1698e4b01a1c84ead68001f",
+   "title": "完美生活99、119档金融产品授权渠道清单",
+   "date": "2026-11-11",
+   "page_url": "https://www.10010.com/wt_links/index.html#/announcementDetail?announcementId=2c1af18ca1698e4b01a1c84ead68001f&pageSize=12&pageNo=1",
+   "summary": "",
+   "content": "<p><img src=\"https://m1.img.10010.com/resources/noticeSys/20261111/jpg//17943619115464545.jpg\"><img src=\"https://m1.img.10010.com/resources/noticeSys/20261111/jpg//17943619177288576.jpg\"><img src=\"https://m1.img.10010.com/resources/noticeSys/20261111/jpg//17943619222293696.jpg\"><img src=\"https://m1.img.10010.com/resources/noticeSys/20261111/jpg//17943619265463638.jpg\"><img src=\"https://m1.img.10010.com/resources/noticeSys/20261111/jpg//17943619305343744.jpg\"><img src=\"https://m1.img.10010.com/resources/noticeSys/20261111/jpg//17943619346778569.jpg\"><img src=\"https://m1.img.10010.com/resources/noticeSys/20261111/jpg//17943619391253392.jpg\"></p>",
+   "attachments": []
+  },
   {
    "id": "2c1a9a28a1698e6101a19ac88ceb00d5",
    "title": "关于长网龄用户流量月包可销售主产品范围公告",
@@ -40,15 +49,6 @@
      "url": "https://m1.img.10010.com/resources/noticeSys/20261023/xlsx//17927406604565145.xlsx"
     }
    ]
-  },
-  {
-   "id": "2c1a61eea0ca0d6301a15d653645013b",
-   "title": "完美生活99、119档金融产品授权渠道清单",
-   "date": "2026-10-21",
-   "page_url": "https://www.10010.com/wt_links/index.html#/announcementDetail?announcementId=2c1a61eea0ca0d6301a15d653645013b&pageSize=12&pageNo=1",
-   "summary": "",
-   "content": "<p><img src=\"https://m1.img.10010.com/resources/noticeSys/20261021/jpg//17925682261763101.jpg\"><img src=\"https://m1.img.10010.com/resources/noticeSys/20261021/jpg//17925682330573279.jpg\"><img src=\"https://m1.img.10010.com/resources/noticeSys/20261021/jpg//17925682379749290.jpg\"><img src=\"https://m1.img.10010.com/resources/noticeSys/20261021/jpg//17925682422341639.jpg\"><img src=\"https://m1.img.10010.com/resources/noticeSys/20261021/jpg//17925682464029709.jpg\"><img src=\"https://m1.img.10010.com/resources/noticeSys/20261021/jpg//17925682504426830.jpg\"></p>",
-   "attachments": []
   },
   {
    "id": "2c1adc23a0ca122201a13d12a6970017",
