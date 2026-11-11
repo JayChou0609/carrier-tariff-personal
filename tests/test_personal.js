@@ -105,6 +105,7 @@
  check(!M.lifecycleMatch(undated,{lifecyclePeriod:'yesterdayConfirmed'},'2026-11-11'),'missing confirmation never uses capture time');
  const resumed={...active,reonlineDate:'2026-11-10',reonlineDates:['2026-11-10']};
  check(M.lifecycleMatch(resumed,{lifecyclePeriod:'yesterdayReonline'},'2026-11-11'),'yesterday reactivation');
+ check(M.lifecycleMatch({...resumed,saleStatus:'stopped'},{lifecyclePeriod:'yesterdayReonline'},'2026-11-11'),'yesterday event remains searchable after a later withdrawal');
  check(!M.lifecycleMatch(resumed,{lifecyclePeriod:'todayReonline'},'2026-11-11'),'yesterday reactivation is not today');
  check(M.lifecycleMatch({...resumed,reonlineDates:['2026-11-09','2026-11-10','2026-11-11']},{lifecyclePeriod:'yesterdayReonline'},'2026-11-11'),'earlier reactivation cycles remain searchable');
  check(M.lifecycleMatch({...resumed,reonlineDates:['2025-12-31']},{lifecyclePeriod:'yesterdayReonline'},'2026-01-01'),'yesterday handles year boundary in Beijing');
