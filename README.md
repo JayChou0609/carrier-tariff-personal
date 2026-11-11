@@ -1,4 +1,4 @@
-> 企业微信资费提醒：北京时间每天 **00:00 / 12:00 / 18:00** 独立触发，先发送主分支最近快照摘要；采集归档成功后仅补充新变化。GitHub 定时调度可能延迟，不保证整点送达。Webhook 仅存入 Actions Secret `WECOM_WEBHOOK`。详见 [配置说明](NOTIFY_SETUP.md)。
+> 企业微信资费提醒：北京时间每天 **00:00 / 12:00 / 18:00** 启动采集，**仅在本轮采集成功归档后推送本轮结果**。不提前发送上一轮快照摘要。实际推送随 GitHub 调度及采集耗时顺延。Webhook 仅存入 Actions Secret `WECOM_WEBHOOK`。详见 [配置说明](NOTIFY_SETUP.md)。
 
 > 定时更新：北京时间每天 **00:00 / 12:00 / 18:00**；完整历史不自动清理。详见 [更新与归档说明](SCHEDULE.md)，线上 [完整历史](https://jaychou0609.github.io/carrier-tariff-personal/history/)。
 
