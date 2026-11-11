@@ -26,10 +26,11 @@ function validConfig(d){
  return {selected:safe,includeNational:d.includeNational!==false,favorites:d.favorites||[],manual:clean,filters,theme:d.theme==='dark'?'dark':'light'};
 }
 function apply(d){selected=new Set(d.selected);includeNational=d.includeNational;favorites=new Set(d.favorites);manual=d.manual;state=d.filters;theme=d.theme;syncInputs();}
-function snapshot(){return {version:1,selected:[...selected],includeNational,favorites:[...favorites],manual,filters:state,theme};}
+function snapshot(){return {version:1,scopeRevision:2,selected:[...selected],includeNational,favorites:[...favorites],manual,filters:state,theme};}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(snapshot()));}catch(e){storageWarning();}}
 function syncInputs(){for(const k of ['carrier','region','category','saleStatus','addedPeriod','addedDate','lifecyclePeriod','sort','min','max'])$(k).value=state[k];$('addedDateLabel').hidden=state.addedPeriod!=='date';$('search').value=state.q;$('nameOnly').checked=state.nameOnly;$('national').checked=includeNational;$('favOnly').setAttribute('aria-pressed',String(state.favOnly));document.body.classList.toggle('dark',theme==='dark');}
 try{if(stored.version)apply(validConfig(stored));}catch(e){storageWarning();}
+if(stored.scopeRevision!==2){selected.add('mobile:gansu');save();}
 syncInputs();
 async function json(url){const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),45000);try{const r=await fetch(url,{cache:'no-store',signal:ctrl.signal});if(!r.ok)throw Error('HTTP '+r.status);return await r.json();}finally{clearTimeout(timer);}}
 function wanted(){return manifest ? manifest.sources.filter(s=>selected.has(s.id)||(includeNational&&s.region==='quanguo')) : [];}

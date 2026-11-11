@@ -2,8 +2,8 @@
 (function (root) {
   'use strict';
   const carriers = {mobile: '移动', telecom: '电信', unicom: '联通', gb: '广电'};
-  const regions = {jiangsu:'江苏',shanghai:'上海',zhejiang:'浙江',hebei:'河北',henan:'河南',sichuan:'四川',guangdong:'广东'};
-  const defaults = ['telecom:jiangsu','mobile:jiangsu','unicom:jiangsu','gb:jiangsu','mobile:shanghai','telecom:shanghai','unicom:shanghai','telecom:zhejiang','unicom:hebei','unicom:henan','unicom:sichuan','unicom:guangdong'];
+  const regions = {jiangsu:'江苏',shanghai:'上海',zhejiang:'浙江',hebei:'河北',henan:'河南',sichuan:'四川',guangdong:'广东',gansu:'甘肃'};
+  const defaults = ['telecom:jiangsu','mobile:jiangsu','unicom:jiangsu','gb:jiangsu','mobile:shanghai','telecom:shanghai','unicom:shanghai','telecom:zhejiang','unicom:hebei','unicom:henan','unicom:sichuan','unicom:guangdong','mobile:gansu'];
   const labels = {name:'名称',reportNo:'方案编号',codeType:'类型',feesStandard:'资费标准',feeUnit:'计费单位',minute:'国内通话',commonData:'通用流量',dataUnit:'流量单位',sms:'短信',orientTraffic:'定向流量',iptv:'电视',broadBand:'宽带',extraFees:'超出资费',serviceContent:'服务内容',useScope:'适用范围',validPeriod:'有效期限',saleChnl:'销售渠道',onDate:'上线日期',offDate:'下线日期',unsubscribe:'退订方式',responsibility:'违约责任',inNetReq:'在网要求',otherNotes:'其他说明',firstLevelType:'一级类型',secondLevelType:'二级类型',onlinePeriod:'在网期限',state:'销售状态'};
   function price(text, unit, carrier) {
     const s=String(text == null ? '' : text).trim(), u=String(unit || '');
