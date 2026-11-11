@@ -156,7 +156,8 @@ jobs:
           DINGTALK_SECRET:  ${{ secrets.DINGTALK_SECRET }}
           FEISHU_WEBHOOK:   ${{ secrets.FEISHU_WEBHOOK }}
           FEISHU_SECRET:    ${{ secrets.FEISHU_SECRET }}
-          WECOM_WEBHOOK:    ${{ secrets.WECOM_WEBHOOK }}
+          # 企业微信由 wecom-notify.yml 独立推送。
+          WECOM_WEBHOOK:    ''
           SMTP_HOST:        ${{ secrets.SMTP_HOST }}
           SMTP_PORT:        ${{ secrets.SMTP_PORT }}
           SMTP_USER:        ${{ secrets.SMTP_USER }}

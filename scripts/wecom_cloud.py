@@ -1,0 +1,221 @@
+#!/usr/bin/env python3
+"""GitHub Actions entry point. Webhook exists only in the step environment."""
+import argparse
+import base64
+import datetime as dt
+import json
+import os
+from pathlib import Path
+import re
+import tempfile
+import urllib.error
+import urllib.parse
+import urllib.request
+
+import wecom_tariffs as core
+
+REPOSITORY = 'JayChou0609/carrier-tariff-personal'
+BRANCH = 'wecom-notify-state'
+STATE_FILE = 'state.json'
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class StateError(RuntimeError):
+    pass
+
+
+def assert_no_credentials(value, forbidden):
+    text = json.dumps(value,ensure_ascii=False,sort_keys=True)
+    if any(token and token in text for token in forbidden):
+        raise StateError('Checkpoint contains a credential; refusing to publish')
+    return text
+
+
+class GitHubState:
+    def __init__(self, token, repo=REPOSITORY, branch=BRANCH, forbidden=()):
+        if repo != REPOSITORY or branch != BRANCH or not token:
+            raise StateError('Repository, checkpoint branch or GITHUB_TOKEN is invalid')
+        self.token,self.repo,self.branch = token,repo,branch
+        self.forbidden = tuple(forbidden)+(token,)
+        self.sha = None
+        self.data = {'version':1,'delivery':{},'outbox':{},'blocked':None,'verified_scope':''}
+
+    def api(self, method, path, body=None, missing=False):
+        url = 'https://api.github.com/repos/'+self.repo+'/'+path
+        payload = json.dumps(body).encode() if body is not None else None
+        request = urllib.request.Request(url,data=payload,method=method,headers={
+            'Authorization':'Bearer '+self.token,'Accept':'application/vnd.github+json',
+            'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json',
+            'User-Agent':'TariffWeComActions/1.0'})
+        try:
+            with urllib.request.urlopen(request,timeout=35) as response:
+                return json.load(response)
+        except urllib.error.HTTPError as exc:
+            if missing and exc.code == 404:
+                return None
+            raise StateError('GitHub checkpoint API failed: HTTP '+str(exc.code)) from None
+        except Exception as exc:
+            raise StateError('GitHub checkpoint connection failed: '+type(exc).__name__) from None
+
+    def load(self):
+        branch = self.api('GET','git/ref/heads/'+self.branch,missing=True)
+        if branch is None:
+            base = self.api('GET','git/ref/heads/main')
+            self.api('POST','git/refs',{'ref':'refs/heads/'+self.branch,'sha':base['object']['sha']})
+        value = self.api('GET','contents/'+STATE_FILE+'?ref='+self.branch,missing=True)
+        if value is not None:
+            if value.get('encoding') != 'base64':
+                raise StateError('Unsupported checkpoint encoding')
+            self.data = json.loads(base64.b64decode(value['content']))
+            self.sha = value['sha']
+        if (self.data.get('version') != 1 or not isinstance(self.data.get('delivery'),dict)
+                or not isinstance(self.data.get('outbox'),dict)):
+            raise StateError('Invalid checkpoint; refusing to reset delivery history')
+        assert_no_credentials(self.data,self.forbidden)
+        return self.data
+
+    def restore(self, directory):
+        directory = Path(directory)
+        core.write_json(directory/'delivery.json',self.data['delivery'])
+        for name,value in self.data['outbox'].items():
+            if not re.fullmatch(r'[0-9a-f]{64}\.json',name):
+                raise StateError('Invalid outbox checkpoint name')
+            core.write_json(directory/'outbox'/name,value)
+        if self.data.get('blocked'):
+            core.write_json(directory/'blocked.json',self.data['blocked'])
+
+    def put(self, data, backup=None):
+        text = assert_no_credentials(data,self.forbidden)
+        if backup is not None:
+            core.write_json(backup,data)
+        body = {'branch':self.branch,'message':'state: WeCom tariff delivery checkpoint',
+                'content':base64.b64encode(text.encode()).decode()}
+        if self.sha:
+            body['sha'] = self.sha
+        value = self.api('PUT','contents/'+STATE_FILE,body)
+        self.sha = value['content']['sha']
+        self.data = data
+
+    def begin(self, run):
+        if self.data.get('in_progress'):
+            raise StateError('An earlier send has an unfinished checkpoint. Restore its backup before retrying.')
+        value = dict(self.data)
+        value['in_progress'] = {'run':run,'at':core.now().isoformat()}
+        self.put(value)
+
+    def finish(self, directory, backup):
+        directory = Path(directory)
+        value = dict(self.data)
+        value.pop('in_progress',None)
+        value['delivery'] = core.read_json(directory/'delivery.json',{})
+        value['outbox'] = {p.name:core.read_json(p) for p in (directory/'outbox').glob('*.json')}
+        value['blocked'] = core.read_json(directory/'blocked.json')
+        value['updated_at'] = core.now().isoformat()
+        # Forty-five active days keep the current file bounded; Git preserves prior versions.
+        cutoff = (core.now().date()-dt.timedelta(days=45)).isoformat()
+        if any(len(k.split('|')) != 3 for k in value['delivery']):
+            raise StateError('Invalid delivery checkpoint key')
+        value['delivery'] = {k:v for k,v in value['delivery'].items() if k.split('|')[1] >= cutoff}
+        value['outbox'] = {k:v for k,v in value['outbox'].items()
+                           if not (v.get('summary_sent') and
+                                   (v.get('file_sent') or v.get('file_required') is False))}
+        self.put(value,backup)
+
+
+def report_from_checkout(root=ROOT):
+    report = core.collect(snapshot_root=root)
+    status = core.read_json(Path(root)/'data/refresh-status.json',{})
+    collection = {x['id']:x for x in ((status.get('latest') or {}).get('sources') or [])}
+    for source in report['sources']:
+        if source['status'] == 'local_preview':
+            source['status'] = 'repository_snapshot'
+        previous = collection.get(source['id'],{})
+        if previous.get('status') in ['retained','failed','not_connected']:
+            source['status'] = 'cached' if source['status'] != 'failed' else 'failed'
+            source['collection_status'] = previous['status']
+    return report
+
+
+def cloud_test(config, run_url):
+    client = core.Client(config)
+    client.send('text',{'content':'【运营商资费提醒】GitHub Actions 云端连接验证\n发送端已迁至GitHub；三类提醒：每日新增资费、今日下线、明日下线。\n'+run_url})
+    content = '\ufeff用途,结果\r\nGitHub Actions文件推送验证,此文件不是正式资费数据\r\n'.encode('utf-8')
+    media = client.upload_csv('github-actions-connection-test.csv',content)
+    client.send('file',{'media_id':media})
+    return 2
+
+
+def write_summary(result, report=None):
+    path = os.environ.get('GITHUB_STEP_SUMMARY')
+    if not path:
+        return
+    lines = ['## 企业微信资费推送','', '状态：'+str(result.get('status','')), '']
+    if report:
+        lines.extend(['| 类型 | 当前条数 |','|---|---:|'])
+        lines.extend('| '+core.BUCKETS[key]+' | '+str(len(rows))+' |' for key,rows in report['buckets'].items())
+        lines.extend(['','统计日期：'+report['day']+'（北京时间）',
+                      '数据来自主分支已归档快照，快照延迟和保留状态在消息与CSV中注明。'])
+    with open(path,'a',encoding='utf-8') as stream:
+        stream.write('\n'.join(lines)+'\n')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--action',choices=['preview','verify','send'],default='send')
+    args = parser.parse_args()
+    report = None
+    try:
+        if os.environ.get('GITHUB_REPOSITORY') != REPOSITORY:
+            raise StateError('This notification workflow is limited to its configured repository')
+        report = report_from_checkout()
+        if args.action == 'preview':
+            result = {'status':'preview','sent':0,'counts':{k:len(v) for k,v in report['buckets'].items()}}
+            print(json.dumps(result,ensure_ascii=False));write_summary(result,report)
+            return 0
+        webhook = os.environ.get('WECOM_WEBHOOK','').strip()
+        if not webhook:
+            result = {'status':'not_configured','sent':0}
+            print(json.dumps(result));write_summary(result,report)
+            return 0
+        config = core.validate_config({'wecom_webhook':webhook})
+        key = urllib.parse.parse_qs(urllib.parse.urlsplit(webhook).query)['key'][0]
+        if os.environ.get('GITHUB_ACTIONS') == 'true':
+            print('::add-mask::'+webhook,flush=True)
+            print('::add-mask::'+key,flush=True)
+        store = GitHubState(os.environ.get('GITHUB_TOKEN',''),forbidden=(webhook,key))
+        store.load()
+        scope = core.config_hash(config)
+        if args.action != 'verify' and store.data.get('verified_scope') != scope:
+            result = {'status':'not_verified','sent':0,'message':'Run workflow with action=verify first'}
+            print(json.dumps(result));write_summary(result,report)
+            return 0
+        run = os.environ.get('GITHUB_RUN_ID','manual')+'-'+os.environ.get('GITHUB_RUN_ATTEMPT','1')
+        backup = Path(os.environ.get('RUNNER_TEMP',tempfile.gettempdir()))/'wecom-checkpoint-backup.json'
+        with tempfile.TemporaryDirectory(prefix='wecom-state-',dir=os.environ.get('RUNNER_TEMP')) as td:
+            directory = Path(td)
+            store.restore(directory)
+            store.begin(run)  # Durable lease before the first external message.
+            try:
+                test_count = 0
+                if args.action == 'verify':
+                    url = 'https://github.com/'+REPOSITORY+'/actions/runs/'+os.environ.get('GITHUB_RUN_ID','')
+                    test_count = cloud_test(config,url)
+                    store.data['verified_scope'] = scope
+                    store.data['verified_at'] = core.now().isoformat()
+                    blocked = directory/'blocked.json'
+                    if blocked.exists():blocked.unlink()
+                core.write_json(directory/'ready.json',{'scope':scope})
+                result = core.send_report(report,config,state_dir=directory)
+                result['cloud_test_messages'] = test_count
+            finally:
+                store.finish(directory,backup)
+        print(json.dumps(result,ensure_ascii=False));write_summary(result,report)
+        return 0
+    except (ValueError,RuntimeError) as exc:
+        result = {'status':'failed','error':str(exc)}
+        print(json.dumps(result,ensure_ascii=False));write_summary(result,report)
+        return 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

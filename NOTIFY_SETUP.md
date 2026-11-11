@@ -1,5 +1,25 @@
 # 📮 接入你自己的通知通道（钉钉 / 飞书 / 企业微信 / 邮件）
 
+## 本仓库企业微信云端推送（2026-11-11）
+
+企业微信使用独立工作流 **WeCom Tariff Notifications**（`.github/workflows/wecom-notify.yml`）。
+本机推送任务已停用。Webhook 只存储于仓库 **Settings → Secrets and variables → Actions → Secrets → New repository secret**，名称为 `WECOM_WEBHOOK`；不要填入 Variables、网页、源码、issue 或工作流输入。
+
+- 北京时间每天 **00:00、12:00、18:00** 的 **Scheduled Tariff Refresh** 完成并成功归档后自动推送。GitHub 排队和采集耗时会使消息顺延。
+- 三类提醒：**每日新增资费**（官方上线日期为今天）、**今日下线**、**明日下线**。采集日期及 `firstConfirmTimeStr` 不作为上线日期。
+- 范围：四家全国，以及江苏四家、上海移动/电信/联通、浙江电信、河北/河南/四川/广东联通。
+- 每个时段发送分类摘要，有尚未发送或内容变化的资费时附 CSV；同一时段相同内容不重复发送。缺失、过期、保留旧快照的来源会注明，不会把全部读取失败当作零条消息。
+- 首次配置 Secret 后，在 Actions 选择 **WeCom Tariff Notifications → Run workflow → action=verify → main**。验证发送一条文本和一个测试 CSV，再发送尚未提醒的数据。`preview` 不推送；`send` 要求已验证目标群。
+- 旧 `dingtalk-summary.yml`、`province-notify.yml` 的企业微信入口已关闭；其他通道保留。
+
+发送记录保存于独立 **wecom-notify-state** 分支的 `state.json`，仅含凭据哈希、业务版本、已发送时段和未完成消息，不含 Webhook、key 或 GitHub token。首次迁移沿用本机已发送记录，防止重新群发。当前文件保留45天活动去重记录，Git提交保留此前版本；资费完整历史仍由 `tariff-history` 分支保存。
+
+推送前先写入持久发送标记。如果 runner 被中断或最后的状态写入失败，后续发送会停止，避免盲目重试。失败任务会保存经过凭据检查的 `wecom-checkpoint-recovery-*` 恢复文件（7天）；核对已发送消息后恢复 `state.json`，再运行 `verify`。不要直接清空记录。
+
+Secret 仅注入发送步骤；工作流仅允许本仓库主分支和可信采集完成事件，第三方 Actions 固定提交版本。能修改主分支工作流的管理员仍能通过修改代码使用 Secret，因此应保护账号和仓库写入权限。公开仓库的标准 runner 可免费运行，但定时任务不保证准点；长时间无活动可能被 GitHub 暂停。
+
+以下是项目原有多通道说明；本仓库企业微信以本节的独立入口为准。
+
 > 本项目已开源。任何人 fork 后，填入**自己的**凭据，
 > 资费变化就能推送到**自己的**钉钉 / 飞书 / 企业微信 / 邮箱。
 >

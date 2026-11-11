@@ -277,8 +277,8 @@ jobs:
           # 飞书（仅定时推送；手动触发置空跳过）
           FEISHU_WEBHOOK:   ${{ github.event_name == 'workflow_dispatch' && '' || secrets.FEISHU_WEBHOOK }}
           FEISHU_SECRET:    ${{ github.event_name == 'workflow_dispatch' && '' || secrets.FEISHU_SECRET }}
-          # 企业微信机器人（仅定时推送；手动触发置空跳过）
-          WECOM_WEBHOOK:    ${{ github.event_name == 'workflow_dispatch' && '' || secrets.WECOM_WEBHOOK }}
+          # 企业微信由 wecom-notify.yml 独立推送，防止旧时刻重复通知。
+          WECOM_WEBHOOK:    ''
           # 邮件（仅定时推送；手动触发置空跳过）
           SMTP_HOST:        ${{ github.event_name == 'workflow_dispatch' && '' || secrets.SMTP_HOST }}
           SMTP_PORT:        ${{ github.event_name == 'workflow_dispatch' && '' || secrets.SMTP_PORT }}
