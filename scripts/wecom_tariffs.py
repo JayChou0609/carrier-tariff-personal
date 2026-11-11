@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Shared tariff classification and group-robot delivery, credentials are supplied in memory."""
 import argparse
+import base64
 import concurrent.futures
 import csv
 import datetime as dt
@@ -13,6 +14,7 @@ import os
 from pathlib import Path
 import re
 import tempfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -130,6 +132,9 @@ def normalize(raw, sid, stamp):
     # Capture timestamps and firstConfirmTimeStr do not define new launches.
     business_fields = {k:v for k,v in fields.items() if k not in ['firstConfirmTimeStr','firstConfirmTime','timestamp','captureTime']}
     item['version'] = digest([item['identity'], fee, unit, on, off, business_fields])
+    item['lifecycle_key'] = json.dumps([str(raw.get('id') or ''),title,
+        str(fields.get('归属') or raw.get('firstLevel') or ''),
+        str(fields.get('资费类型') or raw.get('secondLevel') or '')],ensure_ascii=False,separators=(',',':'))
     return item
 
 
@@ -145,6 +150,7 @@ def collect(day=None, snapshot_root=None, state_dir=PRIVATE, loader=fetch_json):
               'timezone':'Asia/Shanghai', 'buckets':{k:[] for k in BUCKETS}, 'sources':[]}
     targets = [('{}:{}'.format(c,r), ('data/' if c == 'mobile' else c+'/data/')+r+'.json')
                for c, regions in SCOPES.items() for r in regions]
+    registry = read_json(Path(snapshot_root)/'data/lifecycle.json',{}) if snapshot_root else {}
     def work(target):
         sid, path = target
         cache = Path(state_dir)/'cache'/(sid.replace(':','-')+'.json')
@@ -165,6 +171,13 @@ def collect(day=None, snapshot_root=None, state_dir=PRIVATE, loader=fetch_json):
             status = 'cached'
         stamp = str(data.get('timestamp') or '')[:80]
         rows = [normalize(x, sid, stamp) for x in data['items'] if isinstance(x, dict) and not x.get('manual')]
+        events_by_key=((registry.get('sources') or {}).get(sid) or {}).get('items') or {}
+        for row in rows:
+            events=events_by_key.get(row['lifecycle_key']) or []
+            if events:
+                event=events[-1]
+                row['reonline_date']=date_day(event.get('date'))
+                row['reonline_basis']=str(event.get('basis') or '')
         if not rows:
             return {'id':sid,'status':'failed','error':'InvalidItems'}, []
         metadata = {'id':sid,'status':status,'snapshot':stamp,'count':len(rows)}
@@ -264,6 +277,7 @@ class Client:
     def __init__(self, config):
         self.config = validate_config(config)
         self.key = urllib.parse.parse_qs(urllib.parse.urlsplit(self.config['wecom_webhook']).query)['key'][0]
+        self.next_send=0
 
     def redact(self, text):
         for value in [self.config['wecom_webhook'], self.key]:
@@ -290,6 +304,9 @@ class Client:
         return value
 
     def send(self, kind, body):
+        if os.environ.get('WECOM_TARIFF_CARDS')=='1':
+            time.sleep(max(0,self.next_send-time.monotonic()))
+            self.next_send=time.monotonic()+3.3
         value = self.request('webhook/send?key='+urllib.parse.quote(self.key), {'msgtype':kind,kind:body})
         return value.get('msgid','accepted')
 
@@ -333,6 +350,7 @@ def _send_report(report, config, state_dir=PRIVATE, client=None):
     ledger_path = state_dir/'delivery.json'
     ledger = read_json(ledger_path, {})
     delivered = 0
+    cards_enabled=os.environ.get('WECOM_TARIFF_CARDS')=='1'
     slot = next(x for x in [18,12,0] if now().hour >= x)
     for key in BUCKETS:
         rows = report['buckets'][key]
@@ -340,12 +358,13 @@ def _send_report(report, config, state_dir=PRIVATE, client=None):
         known = ledger.get(ledger_key, {'versions':[], 'zero_sent':False, 'slots':[]})
         versions = {digest([x['identity'],x['version']]):x for x in rows}
         pending = [x for version,x in versions.items() if version not in set(known['versions'])]
+        pending_cards=[(v,x) for v,x in versions.items() if v not in known.get('card_versions',[])] if cards_enabled else []
         collection = report.get('collection_run','')
         already_reported = (collection in known.get('collections',[]) if collection
                             else slot in known.get('slots',[]))
-        if not pending and already_reported:
+        if not pending and not pending_cards and already_reported:
             continue
-        delivery_id = digest([ledger_key, slot, collection, sorted(versions), sorted(digest([x['identity'],x['version']]) for x in pending)])
+        delivery_id = digest([ledger_key, slot, collection, sorted(versions), sorted(digest([x['identity'],x['version']]) for x in pending),cards_enabled])
         path = state_dir/'outbox'/(delivery_id+'.json')
         outbox = read_json(path)
         if not outbox:
@@ -357,6 +376,20 @@ def _send_report(report, config, state_dir=PRIVATE, client=None):
                 outbox['summary_sent'] = True
                 write_json(path,outbox)
                 delivered += 1
+            if pending_cards:
+                from wecom_cards import render_card,text_card
+                for version,row in pending_cards:
+                    progress=outbox.setdefault('cards',{}).setdefault(version,{'image':False,'text':False})
+                    if not progress['image']:
+                        content=render_card(row,BUCKETS[key])
+                        client.send('image',{'base64':base64.b64encode(content).decode(),
+                            'md5':hashlib.md5(content).hexdigest()})
+                        progress['image']=True;write_json(path,outbox);delivered+=1
+                    if not progress['text']:
+                        client.send('text',{'content':text_card(row,BUCKETS[key])})
+                        progress['text']=True;write_json(path,outbox);delivered+=1
+                    known['card_versions']=sorted(set(known.get('card_versions',[]))|{version})
+                    ledger[ledger_key]=known;write_json(ledger_path,ledger)
             if pending and not outbox['file_sent']:
                 media = client.upload_csv(key+'-'+report['day']+'.csv', csv_bytes(pending))
                 client.send('file', {'media_id':media})

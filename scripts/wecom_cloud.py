@@ -118,7 +118,8 @@ class GitHubState:
         value['delivery'] = {k:v for k,v in value['delivery'].items() if k.split('|')[1] >= cutoff}
         value['outbox'] = {k:v for k,v in value['outbox'].items()
                            if not (v.get('summary_sent') and
-                                   (v.get('file_sent') or v.get('file_required') is False))}
+                                   (v.get('file_sent') or v.get('file_required') is False) and
+                                   all(p.get('image') and p.get('text') for p in v.get('cards',{}).values()))}
         self.put(value,backup)
 
 
