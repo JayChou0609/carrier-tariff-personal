@@ -37,6 +37,26 @@ class DummyClient:
 
 
 class PushTests(unittest.TestCase):
+    def test_three_beijing_slots_use_correct_day_and_tomorrow_across_midnight(self):
+        for hour in [0,12,18]:
+            moment=dt.datetime(2026,11,12,hour,0,tzinfo=app.TZ)
+            with tempfile.TemporaryDirectory() as td,patch.object(app,'now',return_value=moment):
+                state=Path(td)
+                r=app.collect(state_dir=state,loader=lambda u:{'timestamp':'2026-11-12T00:00:00+08:00','items':[raw(on='2026-11-12',off='2026-11-13')]})
+                self.assertEqual(r['day'],'2026-11-12')
+                self.assertEqual(len(r['buckets']['new']),16)
+                self.assertEqual(len(r['buckets']['tomorrow_off']),16)
+                self.assertFalse(r['buckets']['today_off'])
+                config=app.validate_config(CONFIG)
+                app.write_json(state/'ready.json',{'scope':app.config_hash(config)})
+                app.send_report(r,config,state,DummyClient())
+                ledger=app.read_json(state/'delivery.json')
+                self.assertTrue(all(v['slots']==[hour] for v in ledger.values()))
+
+    def test_summary_shows_source_snapshot_dates_even_without_new_rows(self):
+        r=report();r['sources'][0]['snapshot']='2026-11-11T06:18:37+08:00'
+        self.assertIn('2026-11-11T06:18:37+08:00',app.summary(r,'new',[]))
+
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
         self.state=Path(self.temp.name)/'.private'
