@@ -241,6 +241,9 @@ def summary(report, key, pending):
                  sum(s['status'] != 'failed' for s in report['sources']),len(imperfect)))
     if imperfect:
         lines.append('需留意：'+', '.join(s['id'] for s in imperfect[:5]))
+    stamps = sorted({s['snapshot'] for s in report['sources'] if s.get('snapshot')})
+    if stamps:
+        lines.append('源快照时间：'+stamps[0]+(' ～ '+stamps[-1] if len(stamps)>1 else ''))
     for row in pending[:6]:
         lines.append('{}{}｜{}｜{} {}｜编号 {}'.format(row['region'], row['carrier'],
                      clip(row['title'],110), clip(row['fee'],80), row['unit'], row['report_no'] or '未提供'))
