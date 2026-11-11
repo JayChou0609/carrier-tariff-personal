@@ -33,6 +33,48 @@ class LifecycleTest(unittest.TestCase):
         self.assertIn('确认日期',event['basis'])
         self.assertEqual(event['onDate'],'2020-04-01')
 
+    def test_first_confirm_dates_an_already_proven_return(self):
+        r=Registry();a=tariff(off='2026-11-08');b=tariff(off='2027-12-31')
+        b['detail']['firstConfirmTimeStr']='2026-11-10 16:10:43'
+        r.observe([a],'2026-11-09T12:00:00+08:00',False)
+        r.observe([b],'2026-11-11T12:00:00+08:00')
+        event=r.current[entry_key(b)][0]
+        self.assertEqual(event['date'],'2026-11-10')
+        self.assertIn('firstConfirmTimeStr',event['basis'])
+        self.assertEqual(event['firstConfirmTimeStr'],'2026-11-10 16:10:43')
+        self.assertEqual(event['onDate'],'2020-04-01')
+
+    def test_confirmation_alone_is_not_reactivation(self):
+        r=Registry();a=tariff(off='2030-01-01');b=copy.deepcopy(a)
+        b['detail']['firstConfirmTimeStr']='2026-11-10 16:10:43'
+        r.observe([a],'2026-11-09T12:00:00+08:00',False)
+        r.observe([b],'2026-11-11T12:00:00+08:00')
+        self.assertEqual(r.current,{})
+
+    def test_confirmation_cannot_predate_a_later_known_stopped_snapshot(self):
+        r=Registry();a=tariff(off='2026-11-08');b=tariff(off='2030-01-01')
+        b['detail']['firstConfirmTimeStr']='2026-11-09 16:10:43'
+        r.observe([a],'2026-11-10T12:00:00+08:00',False)
+        r.observe([b],'2026-11-11T12:00:00+08:00')
+        self.assertEqual(r.current[entry_key(b)][0]['date'],'2026-11-11')
+        self.assertNotIn('firstConfirmTimeStr',r.current[entry_key(b)][0]['basis'])
+
+    def test_same_day_explicit_stop_and_later_confirm_can_date_return(self):
+        r=Registry();a=tariff(off='2030-01-01');a['detail']['state']='已停售'
+        b=tariff(off='2030-01-01');b['detail']['firstConfirmTimeStr']='2026-11-10 16:10:43'
+        r.observe([a],'2026-11-10T12:00:00+08:00',False)
+        r.observe([b],'2026-11-11T12:00:00+08:00')
+        self.assertEqual(r.current[entry_key(b)][0]['date'],'2026-11-10')
+
+    def test_old_future_or_invalid_confirmation_cannot_backdate_return(self):
+        for value in ['2026-11-08 16:00:00','2026-11-12 12:00:00','2026-02-30 12:00:00','bad']:
+            r=Registry();a=tariff(off='2026-11-09');b=tariff(off='2030-01-01')
+            b['detail']['firstConfirmTimeStr']=value
+            r.observe([a],'2026-11-10T12:00:00+08:00',False)
+            r.observe([b],'2026-11-11T12:00:00+08:00')
+            self.assertEqual(r.current[entry_key(b)][0]['date'],'2026-11-11')
+            self.assertNotIn('firstConfirmTimeStr',r.current[entry_key(b)][0]['basis'])
+
     def test_first_seen_missing_reappearance_and_ordinary_edit_are_not_reactivation(self):
         r=Registry();a=tariff(off='2030-01-01')
         r.observe([a],'2026-11-09T12:00:00+08:00',False)
