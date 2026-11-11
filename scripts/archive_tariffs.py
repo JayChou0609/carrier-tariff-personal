@@ -109,13 +109,13 @@ def publish_indexes(archive, root, repository):
     base = 'https://raw.githubusercontent.com/' + repository + '/tariff-history/'
     write(root / 'history/data/index.json', {
         'version': 1, 'updated': now(), 'timezone': 'Asia/Shanghai',
-        'schedule': ['00:00', '12:00'], 'retention': '不自动清理，完整历史存储在 tariff-history 分支',
+        'schedule': ['00:00', '12:00', '18:00'], 'retention': '不自动清理，完整历史存储在 tariff-history 分支',
         'archiveBase': base, 'repository': 'https://github.com/' + repository + '/tree/tariff-history',
         'years': years, 'legacy': [{'carrier': c, 'name': CARRIER_CN[c],
                                   'path': 'legacy/' + c + '-history.json.gz'}
                                  for c in FOLDERS if (archive / 'legacy' / (c + '-history.json.gz')).exists()]})
     write(root / 'data/refresh-status.json', {
-        'updated': now(), 'schedule': ['00:00', '12:00'], 'timezone': 'Asia/Shanghai',
+        'updated': now(), 'schedule': ['00:00', '12:00', '18:00'], 'timezone': 'Asia/Shanghai',
         'history': '../history/', 'latest': read(root / 'history/data' / (years[0]['year'] + '.json'))['runs'][0]
         if years else None})
 

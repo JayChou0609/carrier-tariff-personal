@@ -276,20 +276,34 @@ def _fetch_cell(opener, tariff_attr: str, type1: str, type2: str,
     }
     plain = _post(opener, _encrypt(params), ua)
     data = json.loads(plain)
-    beans = ((data or {}).get("data") or {}).get("beans") or []
-    items_by_name = {}
-    for b in beans:
-        for nm in (b.get("nonModuleList") or []):
-            name = _s(nm.get("name"))
+    return _parse_items(data)
+
+
+def _business_key(item):
+    f = item.get("fields") or {}
+    return tuple([item.get("name", "")] + [f.get(k, "") for k in ["归属", "资费类型", "方案编号"]])
+
+
+def _parse_items(data):
+    """Both ordinary tariffs and moduleList[].tariffList[] are official businesses."""
+    items = {}
+    for bean in ((data or {}).get("data") or {}).get("beans") or []:
+        rows = [(row, None) for row in bean.get("nonModuleList") or []]
+        for module in bean.get("moduleList") or []:
+            rows.extend((row, module) for row in module.get("tariffList") or [])
+        for row, module in rows:
+            name = _s(row.get("name"))
             if not name:
                 continue
-            if name not in items_by_name:
-                mapped = _nm_to_fields(nm)
-                items_by_name[name] = {
-                    "name": name,
-                    "fields": {k: (mapped.get(k) or "") for k in FIELD_KEYS},
-                }
-    return list(items_by_name.values())
+            mapped = _nm_to_fields(row)
+            fields = {key: mapped.get(key) or "" for key in FIELD_KEYS}
+            if module is not None:
+                fields["所属套餐"] = _s(bean.get("tariffName"))
+                fields["套餐模块"] = _s(module.get("moduleName"))
+            item = {"name": name, "fields": fields}
+            items.setdefault(_business_key(item), item)
+    return list(items.values())
+
 
 
 # 分类历史峰值文件路径（伴随快照目录持久化）
@@ -408,8 +422,8 @@ def _fetch_board(sec: str, attr: str, code: str, opener) -> tuple:
             items = _fetch_cell(opener, attr, t1, t2, code, ua)
             with lock:
                 for it in items:
-                    # 板块内跨分类业务名不重复；重复时保留首个
-                    merged.setdefault(it["name"], it)
+                    # 同名但不同编号或分类的业务分别保留
+                    merged.setdefault(_business_key(it), it)
                 cell_counts[key] = len(items)
         except Exception as e:
             with lock:

@@ -33,7 +33,7 @@
     if(types.some(x=>/^停售(?:套餐|业务|资费)?$/.test(x)))return result('stopped','源站分类标记为停售');
     const explicit=String(f['销售状态']||f['停售状态']||f.state||raw.state||'').trim();
     if(/^(?:已)?停售$|^停止销售$|^(?:已)?下架$/.test(explicit))return result('stopped','源站销售状态：'+explicit);
-    const off=dateDay(f['下线日期']||f.offDate),on=dateDay(f['上线日期']||f.onDate);
+    const off=offInfo(raw).date,on=launchInfo(raw).date;
     // Dates are Beijing calendar days. An end date stays active through that day.
     if(off&&off<today)return result('stopped','下线日期 '+off+' 已过（按北京时间 '+today+' 判断）');
     if(on&&on>today)return result('upcoming','尚未到上线日期 '+on+'（按北京时间 '+today+' 判断）');
@@ -42,10 +42,10 @@
     if(on&&on<=today&&/^(?:长期|长期有效|永久|无期限)$/.test(String(f['下线日期']||f.offDate||'').trim()))return result('onsale','已上线，源站标注长期有效');
     return result('unknown','源站未提供可判断的销售状态或下线日期');
   }
-  function launchInfo(raw) {
+  function officialDateInfo(raw, keys, label) {
     if(raw.manual)return {date:'',source:'未提供官方日期'};
     const fields=raw.fields||raw.detail||{};
-    const groups=[['官方上线日期',['上线日期','onDate','onlineDay','startDate']]];
+    const groups=[[label,keys]];
     for(const [source,keys] of groups)for(const field of keys)for(const data of [fields,raw]){
       const value=data[field];
       if(value===null||value===undefined||value==='')continue;
@@ -57,7 +57,29 @@
       }
       if(date)return {date,source};
     }
-    return {date:'',source:'官方未提供可解析的上线日期'};
+    return {date:'',source:'未提供可解析的'+label};
+  }
+  function launchInfo(raw) {return officialDateInfo(raw,['上线日期','onDate','onlineDay','startDate'],'官方上线日期');}
+  function offInfo(raw) {return officialDateInfo(raw,['下线日期','offDate','offineDay','offlineDay','endDate'],'官方下线日期');}
+  function lifecycleKey(raw) {
+    const f=raw.fields||raw.detail||{};
+    return JSON.stringify([String(raw.id||''),String(raw.fields?raw.name||'':raw.title||raw.name||''),String(raw.fields?f['归属']||'':raw.firstLevel||''),String(raw.fields?f['资费类型']||'':raw.secondLevel||'')]);
+  }
+  function applyLifecycle(item, registry) {
+    const events=registry&&registry.sources&&registry.sources[item.source]&&registry.sources[item.source].items[item.lifecycleKey];
+    const latest=Array.isArray(events)?events[events.length-1]:null;
+    item.reonlineDate=latest?dateDay(latest.date):'';
+    item.reonlineBasis=latest?String(latest.basis||''):'';
+    if(latest&&item.reonlineDate)item.details.push(['重新上线日期 / 恢复确认日期',item.reonlineDate],['重新上线判断依据',item.reonlineBasis],['此前下线日期 / 停售确认日期',String(latest.previousStopDate||'')],['恢复在售确认时间',String(latest.confirmedAt||'')]);
+    return item;
+  }
+  function lifecycleMatch(item,state,today) {
+    const period=state.lifecyclePeriod||'',day=today||beijingDay();
+    if(!period)return true;
+    if(item.manual)return false;
+    if(period==='todayOff')return !!item.offDate&&item.offDate===day;
+    if(period==='todayReonline')return item.saleStatus==='onsale'&&!!item.reonlineDate&&item.reonlineDate===day;
+    return false;
   }
   function addedMatch(item,state,today) {
     const period=state.addedPeriod||'';
@@ -80,17 +102,18 @@
     const id=String(raw.id || fields['方案编号'] || fields.reportNo || (title+'|'+index));
     const details=Object.entries(fields).filter(([,v])=>v!==null && v!==undefined && String(v)!=='').map(([k,v])=>[labels[k] || k, String(v)+(k==='commonData' && fields.dataUnit ? ' '+fields.dataUnit : k==='minute' && /^\d+(?:\.\d+)?$/.test(String(v)) ? ' 分钟' : '')]);
     const sale=saleState(raw);
-    const launched=launchInfo(raw);
+    const launched=launchInfo(raw),ended=offInfo(raw);
+    const offDate=ended.date,offSource=ended.source;
     const launchDate=launched.date,launchSource=launched.source;
-    details.unshift(['资费上线日期',launchDate||'未提供'],['日期来源',launchSource]);
+    details.unshift(['资费上线日期',launchDate||'未提供'],['上线日期来源',launchSource],['资费下线日期',offDate||'未提供'],['下线日期来源',offSource]);
     details.unshift(['销售状态',sale.label],['状态判断依据',sale.reason]);
-    return {launchDate,launchSource,saleStatus:sale.value,saleLabel:sale.label,saleReason:sale.reason,key:source.id+':'+id,id,title,fee,unit,category,details,carrier:source.carrier,region:source.region,source:source.id,label:source.name,timestamp:source.timestamp || '',official:source.official || '',monthly:price(fee,unit,source.carrier),manual:!!raw.manual,search:(title+' '+category+' '+details.map(x=>x.join(' ')).join(' ')).toLowerCase()};
+    return {offDate,offSource,reonlineDate:'',reonlineBasis:'',lifecycleKey:lifecycleKey(raw),launchDate,launchSource,saleStatus:sale.value,saleLabel:sale.label,saleReason:sale.reason,key:source.id+':'+id,id,title,fee,unit,category,details,carrier:source.carrier,region:source.region,source:source.id,label:source.name,timestamp:source.timestamp || '',official:source.official || '',monthly:price(fee,unit,source.carrier),manual:!!raw.manual,search:(title+' '+category+' '+details.map(x=>x.join(' ')).join(' ')).toLowerCase()};
   }
   function filter(items, state, favorites) {
     const q=String(state.q || '').trim().toLowerCase();
     const lo=state.min==='' || state.min==null ? null : Number(state.min);
     const hi=state.max==='' || state.max==null ? null : Number(state.max);
-    return items.filter(x=>(!q || (state.nameOnly ? x.title.toLowerCase() : x.search).includes(q)) && (!state.carrier || x.carrier===state.carrier) && (!state.region || x.region===state.region) && (!state.category || x.category===state.category) && (!state.saleStatus || x.saleStatus===state.saleStatus) && addedMatch(x,state) && (!state.favOnly || favorites.has(x.key)) && ((lo===null && hi===null) || (x.monthly!==null && (lo===null || x.monthly>=lo) && (hi===null || x.monthly<=hi))));
+    return items.filter(x=>(!q || (state.nameOnly ? x.title.toLowerCase() : x.search).includes(q)) && (!state.carrier || x.carrier===state.carrier) && (!state.region || x.region===state.region) && (!state.category || x.category===state.category) && (!state.saleStatus || x.saleStatus===state.saleStatus) && addedMatch(x,state) && lifecycleMatch(x,state) && (!state.favOnly || favorites.has(x.key)) && ((lo===null && hi===null) || (x.monthly!==null && (lo===null || x.monthly>=lo) && (hi===null || x.monthly<=hi))));
   }
   function sort(items, order) {
     return items.slice().sort((a,b)=>{
@@ -106,6 +129,6 @@
   function escape(s) {return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function csvCell(s) {const v=String(s==null?'':s);return '"'+(/^[\s]*[=+@-]/.test(v)?"'":'')+v.replace(/"/g,'""')+'"';}
   function safeURL(s) {try {const u=new URL(s);return u.protocol==='https:'?u.href:'';}catch(e){return '';}}
-  root.TariffModel={carriers,regions,defaults,labels,launchInfo,addedMatch,saleLabels,dateDay,beijingDay,saleState,price,normalize,filter,sort,escape,csvCell,safeURL};
+  root.TariffModel={carriers,regions,defaults,labels,launchInfo,offInfo,lifecycleKey,applyLifecycle,lifecycleMatch,addedMatch,saleLabels,dateDay,beijingDay,saleState,price,normalize,filter,sort,escape,csvCell,safeURL};
   if(typeof module!=='undefined')module.exports=root.TariffModel;
 })(typeof globalThis!=='undefined'?globalThis:this);
