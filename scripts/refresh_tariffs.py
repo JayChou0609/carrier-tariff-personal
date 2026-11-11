@@ -18,14 +18,14 @@ sys.path.insert(0, str(ROOT / 'pipelines'))
 from pipeline_common import diff_items, filter_test_items, slim_change
 
 TARGETS = {
-    'mobile': ['quanguo', 'jiangsu', 'shanghai'],
+    'mobile': ['quanguo', 'jiangsu', 'shanghai', 'gansu'],
     'telecom': ['quanguo', 'jiangsu', 'shanghai', 'zhejiang'],
     'unicom': ['quanguo', 'jiangsu', 'shanghai', 'hebei', 'henan', 'sichuan', 'guangdong'],
     'gb': ['quanguo', 'jiangsu'],
 }
 FOLDERS = {'mobile': 'data', **{c: c + '/data' for c in ['telecom', 'unicom', 'gb']}}
 CN = {'quanguo': '全国', 'jiangsu': '江苏', 'shanghai': '上海', 'zhejiang': '浙江',
-      'hebei': '河北', 'henan': '河南', 'sichuan': '四川', 'guangdong': '广东'}
+      'hebei': '河北', 'henan': '河南', 'sichuan': '四川', 'guangdong': '广东', 'gansu': '甘肃'}
 CARRIER_CN = {'mobile': '移动', 'telecom': '电信', 'unicom': '联通', 'gb': '广电'}
 
 

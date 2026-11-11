@@ -2,7 +2,7 @@
 
 > 定时更新：北京时间每天 **00:00 / 12:00 / 18:00**；完整历史不自动清理。详见 [更新与归档说明](SCHEDULE.md)，线上 [完整历史](https://jaychou0609.github.io/carrier-tariff-personal/history/)。
 
-> 本次扩展：新增 [我的资费](custom/) 页面，默认关注指定 12 个地区组合及四家全国资费。完整说明与发布状态见 [DELIVERY.md](DELIVERY.md)。省份快照覆盖情况以 `data/coverage.json` 为准，江苏、上海、浙江电信现已补齐并纳入定时更新。
+> 本次扩展：新增 [我的资费](custom/) 页面，默认关注指定 13 个地区组合（含甘肃移动）及四家全国资费。完整说明与发布状态见 [DELIVERY.md](DELIVERY.md)。省份快照覆盖情况以 `data/coverage.json` 为准，江苏、上海、浙江电信现已补齐并纳入定时更新。
 
 # 运营商资费监控 · 数据展示站（移动 / 联通 / 电信 / 广电）
 
@@ -77,7 +77,7 @@ fork 本项目后，填入**你自己的**凭据，资费变化就能推送到**
 
 | 工作流 | 频率（北京） | 说明 |
 |---|---|---|
-| `scheduled-refresh.yml` | 00:00 / 12:00 / 18:00 | 四家全国 + 指定 12 个省级组合，保留完整历史 |
+| `scheduled-refresh.yml` | 00:00 / 12:00 / 18:00 | 四家全国 + 指定 13 个省级组合，保留完整历史 |
 | `mobile-build.yml` / `telecom-gb-fetch.yml` / `unicom-fetch.yml` | 手动运行 | 旧抓取入口，不再按旧时刻定时执行 |
 | `dingtalk-summary.yml` | 10:00 / 20:00 | 汇总推送（钉钉/飞书/邮件；企业微信使用独立工作流） |
 

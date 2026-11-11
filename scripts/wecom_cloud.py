@@ -180,7 +180,7 @@ def write_summary(result, report=None):
         lines.extend(['| 类型 | 当前条数 |','|---|---:|'])
         lines.extend('| '+core.BUCKETS[key]+' | '+str(len(rows))+' |' for key,rows in report['buckets'].items())
         lines.extend(['','统计日期：'+report['day']+'（北京时间）',
-                      '正式推送要求本轮16个范围全部更新并与归档一致；不完整时不推送。'])
+                      '正式推送要求本轮全部关注范围更新并与归档一致；不完整时不推送。'])
         if report.get('collection_run'):
             lines.append('本轮采集批次：'+report['collection_run'])
     with open(path,'a',encoding='utf-8') as stream:
