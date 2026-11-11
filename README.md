@@ -1,3 +1,5 @@
+> 企业微信资费提醒：北京时间每天 **00:00 / 12:00 / 18:00** 独立触发，先发送主分支最近快照摘要；采集归档成功后仅补充新变化。GitHub 定时调度可能延迟，不保证整点送达。Webhook 仅存入 Actions Secret `WECOM_WEBHOOK`。详见 [配置说明](NOTIFY_SETUP.md)。
+
 > 定时更新：北京时间每天 **00:00 / 12:00 / 18:00**；完整历史不自动清理。详见 [更新与归档说明](SCHEDULE.md)，线上 [完整历史](https://jaychou0609.github.io/carrier-tariff-personal/history/)。
 
 > 本次扩展：新增 [我的资费](custom/) 页面，默认关注指定 12 个地区组合及四家全国资费。完整说明与发布状态见 [DELIVERY.md](DELIVERY.md)。省份快照覆盖情况以 `data/coverage.json` 为准，江苏、上海、浙江电信现已补齐并纳入定时更新。
@@ -77,6 +79,6 @@ fork 本项目后，填入**你自己的**凭据，资费变化就能推送到**
 |---|---|---|
 | `scheduled-refresh.yml` | 00:00 / 12:00 / 18:00 | 四家全国 + 指定 12 个省级组合，保留完整历史 |
 | `mobile-build.yml` / `telecom-gb-fetch.yml` / `unicom-fetch.yml` | 手动运行 | 旧抓取入口，不再按旧时刻定时执行 |
-| `dingtalk-summary.yml` | 10:00 / 20:00 | 汇总推送（钉钉/飞书/企微/邮件） |
+| `dingtalk-summary.yml` | 10:00 / 20:00 | 汇总推送（钉钉/飞书/邮件；企业微信使用独立工作流） |
 
 fork 后如需停掉自动抓取，删除对应 workflow 文件即可。
