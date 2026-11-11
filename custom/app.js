@@ -55,7 +55,7 @@ async function load(){
 function render(){
  if(state.min!==''&&state.max!==''&&Number(state.min)>Number(state.max)){$('resultCount').textContent='最低月费不能高于最高月费';visible=[];}else{visible=M.sort(M.filter(items,state,favorites),state.sort);$('resultCount').textContent='找到 '+visible.length.toLocaleString()+' 条 · '+loading.size+' 个数据源载入中';}
  const pages=Math.max(1,Math.ceil(visible.length/SIZE));page=Math.min(page,pages);const list=visible.slice((page-1)*SIZE,page*SIZE);
- $('list').innerHTML=list.length?list.map(card).join(''):'<div class="empty">'+(state.addedPeriod==='date'&&!state.addedDate?'请选择要查看资费上线的日期。':loading.size?'正在载入数据快照…':!wanted().length?'请在左侧选择关注地区或全国资费。':'没有匹配的资费，试试调整关键词或筛选条件。')+'</div>';
+ $('list').innerHTML=list.length?list.map(card).join(''):'<div class="empty">'+(state.addedPeriod==='date'&&!state.addedDate?'请选择要查看资费上线的日期。':loading.size?'正在载入数据快照…':!wanted().length?'请在左侧选择关注地区或全国资费。':state.lifecyclePeriod==='yesterdayReonline'?'当前筛选下没有昨日已核实的重新上架资费。江苏移动可切换“移动昨日确认（候选）”查看官方确认记录。':'没有匹配的资费，试试调整关键词或筛选条件。')+'</div>';
  $('pager').innerHTML='<button data-page="'+(page-1)+'" '+(page<=1?'disabled':'')+'>上一页</button><span>'+page+' / '+pages+'</span><button data-page="'+(page+1)+'" '+(page>=pages?'disabled':'')+'>下一页</button>';
  const currentKeys=new Set(items.map(x=>x.key));for(const k of compared)if(!currentKeys.has(k))compared.delete(k);
  $('compareBar').hidden=!compared.size;$('compareCount').textContent='已选 '+compared.size+' / 4 条';$('favCount').textContent=favorites.size.toLocaleString();$('favOnly').setAttribute('aria-pressed',String(state.favOnly));
