@@ -37,6 +37,43 @@ class DummyClient:
 
 
 class PushTests(unittest.TestCase):
+    def test_cards_send_image_then_text_and_do_not_repeat(self):
+        import base64,hashlib
+        self.ready();client=DummyClient();r=report()
+        with patch.dict(app.os.environ,{'WECOM_TARIFF_CARDS':'1'}),patch('wecom_cards.render_card',return_value=b'image-data'):
+            app.send_report(r,self.config,self.state,client)
+            images=[body for kind,body in client.sent if kind=='image']
+            self.assertEqual(len(images),2)
+            self.assertEqual(base64.b64decode(images[0]['base64']),b'image-data')
+            self.assertEqual(images[0]['md5'],hashlib.md5(b'image-data').hexdigest())
+            before=len(client.sent)
+            self.assertEqual(app.send_report(r,self.config,self.state,client)['sent'],0)
+            self.assertEqual(before,len(client.sent))
+
+    def test_card_does_not_call_confirmation_a_second_launch(self):
+        from wecom_cards import text_card
+        row=app.normalize(raw(),'mobile:jiangsu','2026-11-11')
+        fields=json.loads(row['details']);fields['firstConfirmTimeStr']='2026-11-10 16:10:43'
+        row['details']=json.dumps(fields,ensure_ascii=False)
+        content=text_card(row,'今日下线')
+        self.assertIn('重新上线日期：无已确认记录',content)
+        self.assertIn('官方确认时间：2026-11-10 16:10:43',content)
+
+    def test_card_text_failure_resumes_without_repeating_accepted_image(self):
+        class FailAfterImage(DummyClient):
+            fail_once=True
+            def send(self,kind,body):
+                if self.fail_once and kind=='text' and self.sent and self.sent[-1][0]=='image':
+                    self.fail_once=False
+                    raise app.WeComError('text connection failed')
+                return super().send(kind,body)
+        self.ready();client=FailAfterImage();r=report()
+        with patch.dict(app.os.environ,{'WECOM_TARIFF_CARDS':'1'}),patch('wecom_cards.render_card',return_value=b'image'):
+            with self.assertRaises(app.WeComError):app.send_report(r,self.config,self.state,client)
+            (self.state/'blocked.json').unlink()
+            app.send_report(r,self.config,self.state,client)
+        self.assertEqual(sum(kind=='image' for kind,_ in client.sent),2)
+
     def test_three_beijing_slots_use_correct_day_and_tomorrow_across_midnight(self):
         for hour in [0,12,18]:
             moment=dt.datetime(2026,11,12,hour,0,tzinfo=app.TZ)

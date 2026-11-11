@@ -100,5 +100,15 @@ class CloudTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             with self.assertRaises(cloud.StateError):state.restore(td)
 
+    def test_unfinished_card_is_preserved_in_checkpoint(self):
+        state=MemoryState();state.begin('run-card')
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);state.restore(root)
+            name='c'*64+'.json'
+            cloud.core.write_json(root/'outbox'/name,{'summary_sent':True,'file_sent':True,
+                'cards':{'v1':{'image':True,'text':False}}})
+            state.finish(root,root/'backup.json')
+            self.assertIn(name,state.data['outbox'])
+
 
 if __name__=='__main__':unittest.main()
