@@ -154,6 +154,12 @@ def run(root, archive, incoming, repository, run_id, archive_only=False):
     return reports
 
 
+def collection_complete(rows):
+    expected = {c+':'+s for c,scopes in TARGETS.items() for s in scopes}
+    return (len(rows) == len(expected) and {r['id'] for r in rows} == expected
+            and all(r['status'] == 'updated' for r in rows))
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('--archive', type=Path, required=True)
@@ -167,7 +173,7 @@ if __name__ == '__main__':
                'not_connected': sum(x['status'] == 'not_connected' for x in rows),
                'retained_or_failed': sum(x['status'] in ['retained', 'failed'] for x in rows)}
     print(json.dumps(summary, ensure_ascii=False))
-    # Do not call a wholly unsuccessful collection a success. Artifacts/history are still saved
+    # Do not call a partially unsuccessful collection a success. Artifacts/history are still saved
     # and the workflow publishes the latest reliable data before this result is reported.
-    if not args.archive_only and not summary['updated']:
+    if not args.archive_only and not collection_complete(rows):
         sys.exit(2)

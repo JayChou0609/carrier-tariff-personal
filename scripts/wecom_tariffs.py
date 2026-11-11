@@ -30,7 +30,7 @@ SCOPES = {'mobile':['quanguo','jiangsu','shanghai'],
           'telecom':['quanguo','jiangsu','shanghai','zhejiang'],
           'unicom':['quanguo','jiangsu','shanghai','hebei','henan','sichuan','guangdong'],
           'gb':['quanguo','jiangsu']}
-BUCKETS = {'new':'每日新增资费', 'today_off':'今日下线', 'tomorrow_off':'明日下线'}
+BUCKETS = {'new':'今日上线', 'tomorrow_off':'明日下线', 'today_off':'今日下线'}
 
 
 def now():
@@ -244,6 +244,8 @@ def summary(report, key, pending):
     stamps = sorted({s['snapshot'] for s in report['sources'] if s.get('snapshot')})
     if stamps:
         lines.append('源快照时间：'+stamps[0]+(' ～ '+stamps[-1] if len(stamps)>1 else ''))
+    if report.get('collection_run'):
+        lines.append('本轮采集批次：'+report['collection_run'])
     for row in pending[:6]:
         lines.append('{}{}｜{}｜{} {}｜编号 {}'.format(row['region'], row['carrier'],
                      clip(row['title'],110), clip(row['fee'],80), row['unit'], row['report_no'] or '未提供'))
@@ -332,14 +334,18 @@ def _send_report(report, config, state_dir=PRIVATE, client=None):
     ledger = read_json(ledger_path, {})
     delivered = 0
     slot = next(x for x in [18,12,0] if now().hour >= x)
-    for key, rows in report['buckets'].items():
+    for key in BUCKETS:
+        rows = report['buckets'][key]
         ledger_key = '|'.join([scope, report['day'], key])
         known = ledger.get(ledger_key, {'versions':[], 'zero_sent':False, 'slots':[]})
         versions = {digest([x['identity'],x['version']]):x for x in rows}
         pending = [x for version,x in versions.items() if version not in set(known['versions'])]
-        if not pending and slot in known.get('slots', []):
+        collection = report.get('collection_run','')
+        already_reported = (collection in known.get('collections',[]) if collection
+                            else slot in known.get('slots',[]))
+        if not pending and already_reported:
             continue
-        delivery_id = digest([ledger_key, slot, sorted(versions), sorted(digest([x['identity'],x['version']]) for x in pending)])
+        delivery_id = digest([ledger_key, slot, collection, sorted(versions), sorted(digest([x['identity'],x['version']]) for x in pending)])
         path = state_dir/'outbox'/(delivery_id+'.json')
         outbox = read_json(path)
         if not outbox:
@@ -363,6 +369,8 @@ def _send_report(report, config, state_dir=PRIVATE, client=None):
             raise
         known['versions'] = sorted(set(known['versions']) | set(versions))
         known['slots'] = sorted(set(known.get('slots', [])) | {slot})
+        if collection:
+            known['collections'] = sorted(set(known.get('collections',[])) | {collection})
         known['zero_sent'] = known['zero_sent'] or not rows
         ledger[ledger_key] = known
         write_json(ledger_path, ledger)

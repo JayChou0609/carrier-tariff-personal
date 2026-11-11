@@ -136,9 +136,32 @@ def report_from_checkout(root=ROOT):
     return report
 
 
+def require_complete_collection(report, root=ROOT, expected_run=''):
+    latest = (core.read_json(Path(root)/'data/refresh-status.json',{}) or {}).get('latest') or {}
+    run_id = str(latest.get('id') or '')
+    if (latest.get('baseline') or not re.fullmatch(r'\d+-\d+',run_id)
+            or (expected_run and not run_id.startswith(str(expected_run)+'-'))
+            or core.date_day(latest.get('timestamp')) != report['day']):
+        raise StateError('未找到与本次触发匹配的当日采集归档；不发送旧快照摘要')
+    rows = latest.get('sources') or []
+    collection = {x['id']:x for x in rows}
+    expected = {c+':'+r for c,regions in core.SCOPES.items() for r in regions}
+    incomplete = sorted(sid for sid in expected if collection.get(sid,{}).get('status') != 'updated')
+    if len(rows) != len(expected) or set(collection) != expected or incomplete:
+        raise StateError('本轮采集不完整，停止正式推送：'+', '.join(incomplete or ['来源清单不匹配']))
+    for source in report['sources']:
+        row = collection[source['id']]
+        stamp = row.get('snapshotTimestamp') or row.get('timestamp')
+        if source['status'] != 'repository_snapshot' or not stamp or stamp != source.get('snapshot'):
+            raise StateError('资费文件与本轮归档不一致，停止正式推送：'+source['id'])
+    report['collection_run'] = run_id
+    report['collection_time'] = latest['timestamp']
+    return report
+
+
 def cloud_test(config, run_url):
     client = core.Client(config)
-    client.send('text',{'content':'【运营商资费提醒】GitHub Actions 云端连接验证\n发送端已迁至GitHub；三类提醒：每日新增资费、今日下线、明日下线。\n'+run_url})
+    client.send('text',{'content':'【运营商资费提醒】GitHub Actions 云端连接验证\n发送端已迁至GitHub；三类提醒：今日上线、明日下线、今日下线。\n'+run_url})
     content = '\ufeff用途,结果\r\nGitHub Actions文件推送验证,此文件不是正式资费数据\r\n'.encode('utf-8')
     media = client.upload_csv('github-actions-connection-test.csv',content)
     client.send('file',{'media_id':media})
@@ -150,11 +173,15 @@ def write_summary(result, report=None):
     if not path:
         return
     lines = ['## 企业微信资费推送','', '状态：'+str(result.get('status','')), '']
+    if result.get('error'):
+        lines.extend(['说明：'+str(result['error']),''])
     if report:
         lines.extend(['| 类型 | 当前条数 |','|---|---:|'])
         lines.extend('| '+core.BUCKETS[key]+' | '+str(len(rows))+' |' for key,rows in report['buckets'].items())
         lines.extend(['','统计日期：'+report['day']+'（北京时间）',
-                      '数据来自主分支已归档快照，快照延迟和保留状态在消息与CSV中注明。'])
+                      '正式推送要求本轮16个范围全部更新并与归档一致；不完整时不推送。'])
+        if report.get('collection_run'):
+            lines.append('本轮采集批次：'+report['collection_run'])
     with open(path,'a',encoding='utf-8') as stream:
         stream.write('\n'.join(lines)+'\n')
 
@@ -172,6 +199,7 @@ def main():
             result = {'status':'preview','sent':0,'counts':{k:len(v) for k,v in report['buckets'].items()}}
             print(json.dumps(result,ensure_ascii=False));write_summary(result,report)
             return 0
+        require_complete_collection(report,expected_run=os.environ.get('COLLECTION_RUN_ID',''))
         webhook = os.environ.get('WECOM_WEBHOOK','').strip()
         if not webhook:
             result = {'status':'not_configured','sent':0}
