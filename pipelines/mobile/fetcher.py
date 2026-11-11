@@ -102,7 +102,7 @@ PROV_CN = {
 # 统一输出字段键（缺失/为空补空串，保证快照字段集稳定可比）
 FIELD_KEYS = [
     "资费标准", "方案编号", "资费类型", "归属", "适用范围", "适用地区", "销售渠道",
-    "上线日期", "下线日期", "有效期限", "在网要求", "退订方式", "违约责任",
+    "上线日期", "下线日期", "firstConfirmTimeStr", "有效期限", "在网要求", "退订方式", "违约责任",
     "国内通话", "国内通用流量", "定向流量", "宽带", "移动高清", "权益",
     "超出资费说明", "其他服务内容", "其他说明",
 ]
@@ -168,6 +168,8 @@ def _nm_to_fields(nm):
     f["销售渠道"] = _s(nm.get("channel"))
     f["上线日期"] = _fmt_day(nm.get("onlineDay"))
     f["下线日期"] = _fmt_day(nm.get("offineDay"))
+    # Keep the official confirmation timestamp separate from onlineDay.
+    f["firstConfirmTimeStr"] = _s(nm.get("firstConfirmTimeStr"))
     f["有效期限"] = _s(nm.get("validPeriod"))
     f["在网要求"] = _s(nm.get("duration"))
     f["退订方式"] = _s(nm.get("unsubscribe"))

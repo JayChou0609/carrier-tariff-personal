@@ -38,6 +38,18 @@ def dates(raw):
     return value(['上线日期','onDate','onlineDay','startDate']), value(['下线日期','offDate','offineDay','offlineDay','endDate'])
 
 
+def confirmation(raw):
+    f = raw.get('fields') or raw.get('detail') or {}
+    value = str(f.get('firstConfirmTimeStr') or raw.get('firstConfirmTimeStr') or '')
+    if not value or not day(value):
+        return '', None
+    try:
+        stamp = stamp_time(str(value))
+    except ValueError:
+        return '', None
+    return str(value), stamp
+
+
 def state(raw, today):
     f = raw.get('fields') or raw.get('detail') or {}
     types = [raw.get('firstLevel'), f.get('codeType'), f.get('资费类型')]
@@ -85,7 +97,7 @@ class Registry:
         for i, raw in enumerate(items):
             if i not in assigned:
                 assigned[i] = len(self.records)
-                self.records.append({'raw': None, 'stopped': '', 'events': []})
+                self.records.append({'raw': None, 'stopped': '', 'stoppedAt': None, 'events': []})
             record = self.records[assigned[i]]
             old, stopped = record['raw'], record['stopped']
             # Disappearance is never a stop signal. An elapsed official end date is.
@@ -95,15 +107,28 @@ class Registry:
             status = state(raw, today)
             on, off = dates(raw)
             if stopped and status == 'onsale' and emit:
-                official = on if on and stopped < on <= today else ''
-                record['events'].append({'date': official or today, 'confirmedAt': stamp,
-                    'basis': '官方重新上线日期' if official else '历史停售后恢复在售的确认日期（官方未更新上线日期）',
+                stopped_at = stamp_time(record['stoppedAt']) if record['stoppedAt'] else None
+                official = on if on and stopped < on <= today and (not stopped_at or on >= stopped_at.date().isoformat()) else ''
+                confirmed, confirmed_time = confirmation(raw)
+                # A newer confirmation can date an already-proven return to sale;
+                # a confirmation alone never establishes a previous withdrawal.
+                confirm_day = confirmed_time.date().isoformat() if confirmed_time else ''
+                after_stop = confirm_day > stopped or (confirm_day == stopped and stopped_at and confirmed_time > stopped_at)
+                confirm_day = confirm_day if after_stop and confirm_day <= today and confirmed_time <= stamp_time(stamp) and (not stopped_at or confirmed_time > stopped_at) else ''
+                basis = ('官方重新上线日期' if official else
+                         '历史停售后恢复在售，按官方确认时间 firstConfirmTimeStr' if confirm_day else
+                         '历史停售后恢复在售的确认日期（官方未更新上线日期）')
+                record['events'].append({'date': official or confirm_day or today, 'confirmedAt': stamp,
+                    'basis': basis, 'firstConfirmTimeStr': confirmed,
                     'previousStopDate': stopped, 'onDate': on, 'offDate': off})
                 stopped = ''
+                record['stoppedAt'] = None
             elif status == 'onsale':
                 stopped = ''
+                record['stoppedAt'] = None
             if status == 'stopped':
                 stopped = stopped or (off if off and off < today else today)
+                record['stoppedAt'] = stamp
             record.update(raw=raw, day=today, stopped=stopped)
             for stage, key in enumerate(functions):
                 if key(values[i]):
@@ -143,7 +168,7 @@ def build_lifecycle(archive, root=ROOT):
             registries.setdefault(sid, Registry()).observe(snapshot['items'], stamp, emit=not baseline and s.get('status') == 'updated')
             tracked.setdefault(sid, stamp)
     result = {'version': 1, 'timezone': 'Asia/Shanghai', 'updated': runs[-1]['timestamp'] if runs else '',
-        'definition': '只有历史官方停售或下线日期已过，之后恢复在售才算重新上线；接口缺项、首次上线和普通修改均不算。优先用新的官方上线日期，否则单列监测确认日期。',
+        'definition': '只有历史官方停售或下线日期已过，之后恢复在售才算重新上线；接口缺项、首次上线和普通修改均不算。优先用新的官方上线日期，其次核对停售后的官方确认时间 firstConfirmTimeStr，最后单列监测确认日期。确认时间本身不是重新上架证明。',
         'sources': {sid: {'trackedFrom': tracked[sid], 'items': registry.current} for sid, registry in sorted(registries.items())}}
     write(root/'data/lifecycle.json', result)
     return result

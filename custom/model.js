@@ -61,6 +61,11 @@
   }
   function launchInfo(raw) {return officialDateInfo(raw,['上线日期','onDate','onlineDay','startDate'],'官方上线日期');}
   function offInfo(raw) {return officialDateInfo(raw,['下线日期','offDate','offineDay','offlineDay','endDate'],'官方下线日期');}
+  function confirmationInfo(raw) {
+    const f=raw.fields||raw.detail||{},value=f.firstConfirmTimeStr||raw.firstConfirmTimeStr||'';
+    const info=officialDateInfo(raw,['firstConfirmTimeStr'],'官方确认时间 firstConfirmTimeStr');
+    return {...info,time:info.date?String(value):''};
+  }
   function lifecycleKey(raw) {
     const f=raw.fields||raw.detail||{};
     return JSON.stringify([String(raw.id||''),String(raw.fields?raw.name||'':raw.title||raw.name||''),String(raw.fields?f['归属']||'':raw.firstLevel||''),String(raw.fields?f['资费类型']||'':raw.secondLevel||'')]);
@@ -70,6 +75,7 @@
     const latest=Array.isArray(events)?events[events.length-1]:null;
     item.reonlineDate=latest?dateDay(latest.date):'';
     item.reonlineBasis=latest?String(latest.basis||''):'';
+    item.reonlineDates=Array.isArray(events)?events.map(x=>dateDay(x.date)).filter(Boolean):[];
     if(latest&&item.reonlineDate)item.details.push(['重新上线日期 / 恢复确认日期',item.reonlineDate],['重新上线判断依据',item.reonlineBasis],['此前下线日期 / 停售确认日期',String(latest.previousStopDate||'')],['恢复在售确认时间',String(latest.confirmedAt||'')]);
     return item;
   }
@@ -78,7 +84,9 @@
     if(!period)return true;
     if(item.manual)return false;
     if(period==='todayOff')return !!item.offDate&&item.offDate===day;
-    if(period==='todayReonline')return item.saleStatus==='onsale'&&!!item.reonlineDate&&item.reonlineDate===day;
+    const yesterday=new Date(Date.parse(day+'T00:00:00Z')-86400000).toISOString().slice(0,10);
+    if(period==='todayReonline'||period==='yesterdayReonline')return item.saleStatus==='onsale'&&(item.reonlineDates||[item.reonlineDate]).includes(period==='todayReonline'?day:yesterday);
+    if(period==='todayConfirmed'||period==='yesterdayConfirmed')return item.carrier==='mobile'&&!!item.confirmDate&&item.confirmDate===(period==='todayConfirmed'?day:yesterday);
     return false;
   }
   function addedMatch(item,state,today) {
@@ -102,12 +110,13 @@
     const id=String(raw.id || fields['方案编号'] || fields.reportNo || (title+'|'+index));
     const details=Object.entries(fields).filter(([,v])=>v!==null && v!==undefined && String(v)!=='').map(([k,v])=>[labels[k] || k, String(v)+(k==='commonData' && fields.dataUnit ? ' '+fields.dataUnit : k==='minute' && /^\d+(?:\.\d+)?$/.test(String(v)) ? ' 分钟' : '')]);
     const sale=saleState(raw);
-    const launched=launchInfo(raw),ended=offInfo(raw);
+    const launched=launchInfo(raw),ended=offInfo(raw),confirmed=confirmationInfo(raw);
     const offDate=ended.date,offSource=ended.source;
     const launchDate=launched.date,launchSource=launched.source;
     details.unshift(['资费上线日期',launchDate||'未提供'],['上线日期来源',launchSource],['资费下线日期',offDate||'未提供'],['下线日期来源',offSource]);
+    if(confirmed.time)details.unshift(['官方确认时间（firstConfirmTimeStr）',confirmed.time]);
     details.unshift(['销售状态',sale.label],['状态判断依据',sale.reason]);
-    return {offDate,offSource,reonlineDate:'',reonlineBasis:'',lifecycleKey:lifecycleKey(raw),launchDate,launchSource,saleStatus:sale.value,saleLabel:sale.label,saleReason:sale.reason,key:source.id+':'+id,id,title,fee,unit,category,details,carrier:source.carrier,region:source.region,source:source.id,label:source.name,timestamp:source.timestamp || '',official:source.official || '',monthly:price(fee,unit,source.carrier),manual:!!raw.manual,search:(title+' '+category+' '+details.map(x=>x.join(' ')).join(' ')).toLowerCase()};
+    return {confirmDate:confirmed.date,confirmTime:confirmed.time,offDate,offSource,reonlineDate:'',reonlineBasis:'',lifecycleKey:lifecycleKey(raw),launchDate,launchSource,saleStatus:sale.value,saleLabel:sale.label,saleReason:sale.reason,key:source.id+':'+id,id,title,fee,unit,category,details,carrier:source.carrier,region:source.region,source:source.id,label:source.name,timestamp:source.timestamp || '',official:source.official || '',monthly:price(fee,unit,source.carrier),manual:!!raw.manual,search:(title+' '+category+' '+details.map(x=>x.join(' ')).join(' ')).toLowerCase()};
   }
   function filter(items, state, favorites) {
     const q=String(state.q || '').trim().toLowerCase();
@@ -129,6 +138,6 @@
   function escape(s) {return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function csvCell(s) {const v=String(s==null?'':s);return '"'+(/^[\s]*[=+@-]/.test(v)?"'":'')+v.replace(/"/g,'""')+'"';}
   function safeURL(s) {try {const u=new URL(s);return u.protocol==='https:'?u.href:'';}catch(e){return '';}}
-  root.TariffModel={carriers,regions,defaults,labels,launchInfo,offInfo,lifecycleKey,applyLifecycle,lifecycleMatch,addedMatch,saleLabels,dateDay,beijingDay,saleState,price,normalize,filter,sort,escape,csvCell,safeURL};
+  root.TariffModel={carriers,regions,defaults,labels,launchInfo,offInfo,confirmationInfo,lifecycleKey,applyLifecycle,lifecycleMatch,addedMatch,saleLabels,dateDay,beijingDay,saleState,price,normalize,filter,sort,escape,csvCell,safeURL};
   if(typeof module!=='undefined')module.exports=root.TariffModel;
 })(typeof globalThis!=='undefined'?globalThis:this);
