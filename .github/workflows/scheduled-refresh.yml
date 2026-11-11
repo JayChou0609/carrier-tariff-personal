@@ -30,7 +30,8 @@ jobs:
           ref: main
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          # Mobile fetcher uses ssl.OP_LEGACY_SERVER_CONNECT (Python 3.12+).
+          python-version: '3.12'
       - run: pip install -r requirements.txt
       - name: Fetch national and requested provincial tariffs
         env:

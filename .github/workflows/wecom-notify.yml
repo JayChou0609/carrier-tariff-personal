@@ -49,6 +49,7 @@ jobs:
         env:
           WECOM_WEBHOOK: ${{ secrets.WECOM_WEBHOOK }}
           GITHUB_TOKEN: ${{ github.token }}
+          COLLECTION_RUN_ID: ${{ github.event.workflow_run.id || '' }}
           NOTIFY_ACTION: ${{ github.event_name == 'workflow_dispatch' && inputs.action || 'send' }}
         run: python3 -B scripts/wecom_cloud.py --action "$NOTIFY_ACTION"
       # Sanitized backup is generated before the checkpoint API write. It never
