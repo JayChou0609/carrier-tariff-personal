@@ -31,7 +31,7 @@ def prepare(root, out, repo=''):
         wanted.update(Path(s['path']).name for s in coverage['sources']
                       if s['available'] and str(Path(s['path']).parent) == folder)
         if folder == 'data':
-            wanted.update(['refresh-status.json', 'additions.json'])
+            wanted.update(['refresh-status.json', 'additions.json', 'lifecycle.json'])
         if folder in ['data', 'unicom/data', 'telecom/data']:
             wanted.add('announce.json')
         if folder == 'unicom/data':

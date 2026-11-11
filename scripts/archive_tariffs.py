@@ -12,6 +12,7 @@ import re
 import sys
 
 from build_additions import build_additions
+from build_lifecycle import build_lifecycle
 from refresh_tariffs import (ROOT, TARGETS, FOLDERS, CN, CARRIER_CN, now, read, write,
                              changes, merge_reports, update_recent_history, rebuild_indexes)
 
@@ -119,6 +120,7 @@ def publish_indexes(archive, root, repository):
         if years else None})
 
     build_additions(archive, root)
+    build_lifecycle(archive, root)
 
 
 def initial_reports(root):
