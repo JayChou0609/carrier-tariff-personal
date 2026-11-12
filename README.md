@@ -1,6 +1,6 @@
 > 企业微信资费提醒：北京时间每天 **00:00 / 12:00 / 18:00** 启动采集，**仅在本轮采集成功归档后推送本轮结果**。不提前发送上一轮快照摘要。实际推送随 GitHub 调度及采集耗时顺延。Webhook 仅存入 Actions Secret `WECOM_WEBHOOK`。详见 [配置说明](NOTIFY_SETUP.md)。
 
-> 定时更新：北京时间每天 **00:00 / 12:00 / 18:00**；完整历史不自动清理。详见 [更新与归档说明](SCHEDULE.md)，线上 [完整历史](https://jaychou0609.github.io/carrier-tariff-personal/history/)。
+> 定时更新：北京时间每天 **00:00 / 12:00 / 18:00**，每小时 07、27、47 分检查漏采并补采，当期完整则跳过；完整历史不自动清理。详见 [更新与归档说明](SCHEDULE.md)，线上 [完整历史](https://jaychou0609.github.io/carrier-tariff-personal/history/)。
 
 > 本次扩展：新增 [我的资费](custom/) 页面，默认关注指定 13 个地区组合（含甘肃移动）及四家全国资费。完整说明与发布状态见 [DELIVERY.md](DELIVERY.md)。省份快照覆盖情况以 `data/coverage.json` 为准，江苏、上海、浙江电信现已补齐并纳入定时更新。
 
