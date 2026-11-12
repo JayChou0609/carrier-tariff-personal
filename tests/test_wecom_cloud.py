@@ -25,6 +25,13 @@ class MemoryState(cloud.GitHubState):
 
 
 class CloudTests(unittest.TestCase):
+    def test_watchdog_without_new_archive_never_uses_old_data(self):
+        from unittest.mock import patch
+        with patch.object(cloud.core,'read_json',return_value={'latest':{'id':'111-1'}}):
+            self.assertFalse(cloud.upstream_archived(expected_run='222'))
+            self.assertTrue(cloud.upstream_archived(expected_run='111'))
+        with patch.object(cloud.core,'read_json',return_value={'latest':{'id':'111-1','baseline':True}}):
+            self.assertFalse(cloud.upstream_archived(expected_run='111'))
     def complete_report(self):
         stamp='2026-11-11T18:49:26+08:00'
         ids=[c+':'+r for c,regions in cloud.core.SCOPES.items() for r in regions]
