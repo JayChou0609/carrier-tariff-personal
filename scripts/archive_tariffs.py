@@ -78,6 +78,8 @@ def capture(archive, root, reports, stamp, run_id, previous=None, baseline=False
         rows.append(row)
     record = {'version': 1, 'id': run_id, 'timestamp': stamp, 'timezone': 'Asia/Shanghai',
               'baseline': baseline, 'sources': rows}
+    if os.environ.get('TARGET_SLOT'):
+        record['targetSlot']=os.environ['TARGET_SLOT']
     write(run_path, record)
     return record
 

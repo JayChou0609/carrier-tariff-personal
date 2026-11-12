@@ -160,6 +160,11 @@ def require_complete_collection(report, root=ROOT, expected_run=''):
     return report
 
 
+def upstream_archived(root=ROOT,expected_run=''):
+    latest=(core.read_json(Path(root)/'data/refresh-status.json',{}) or {}).get('latest') or {}
+    return bool(not latest.get('baseline') and str(latest.get('id','')).startswith(str(expected_run)+'-'))
+
+
 def cloud_test(config, run_url):
     client = core.Client(config)
     client.send('text',{'content':'【运营商资费提醒】GitHub Actions 云端连接验证\n发送端已迁至GitHub；三类提醒：今日上线、明日下线、今日下线。\n'+run_url})
@@ -189,18 +194,30 @@ def write_summary(result, report=None):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--action',choices=['preview','verify','send'],default='send')
+    parser.add_argument('--action',choices=['preview','verify','send','gate'],default='send')
     args = parser.parse_args()
     report = None
     try:
         if os.environ.get('GITHUB_REPOSITORY') != REPOSITORY:
             raise StateError('This notification workflow is limited to its configured repository')
+        expected_run=os.environ.get('COLLECTION_RUN_ID','')
+        if expected_run and not upstream_archived(expected_run=expected_run):
+            if os.environ.get('GITHUB_OUTPUT'):
+                with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('notify=false\n')
+            result={'status':'no_collection_for_trigger','sent':0,
+                    'message':'补偿检查未产生本轮归档，不推送既有快照'}
+            print(json.dumps(result,ensure_ascii=False));write_summary(result)
+            return 0
+        if args.action=='gate':
+            if os.environ.get('GITHUB_OUTPUT'):
+                with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('notify=true\n')
+            return 0
         report = report_from_checkout()
         if args.action == 'preview':
             result = {'status':'preview','sent':0,'counts':{k:len(v) for k,v in report['buckets'].items()}}
             print(json.dumps(result,ensure_ascii=False));write_summary(result,report)
             return 0
-        require_complete_collection(report,expected_run=os.environ.get('COLLECTION_RUN_ID',''))
+        require_complete_collection(report,expected_run=expected_run)
         webhook = os.environ.get('WECOM_WEBHOOK','').strip()
         if not webhook:
             result = {'status':'not_configured','sent':0}

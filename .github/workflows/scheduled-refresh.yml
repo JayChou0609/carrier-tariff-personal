@@ -1,7 +1,10 @@
 name: Scheduled Tariff Refresh
 on:
   schedule:
-    - cron: "0 4,10,16 * * *" # UTC -> Asia/Shanghai 每天 12:00 / 18:00 / 00:00
+    - cron: "0 0,12,18 * * *"
+      timezone: Asia/Shanghai
+    - cron: "7,27,47 * * * *" # 补偿检查：已完整的时段跳过，未完成的时段补采
+      timezone: Asia/Shanghai
   workflow_dispatch:
     inputs:
       archive_only:
@@ -16,8 +19,29 @@ concurrency:
 env:
   TZ: Asia/Shanghai
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      collect: ${{ steps.guard.outputs.collect }}
+      target_slot: ${{ steps.guard.outputs.target_slot }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check current Beijing collection slot
+        id: guard
+        env:
+          FORCE_COLLECTION: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          python3 -B -m unittest discover -s tests -p 'test_schedule_guard.py' -q
+          python3 -B scripts/schedule_guard.py
   fetch:
-    if: inputs.archive_only != true
+    needs: plan
+    if: needs.plan.outputs.collect == 'true' && inputs.archive_only != true
     runs-on: ubuntu-latest
     timeout-minutes: 180
     strategy:
@@ -47,8 +71,8 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
   archive:
-    needs: fetch
-    if: always() && !cancelled()
+    needs: [plan, fetch]
+    if: always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.collect == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -91,6 +115,7 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           RUN_KEY: ${{ github.run_id }}-${{ github.run_attempt }}
           ARCHIVE_ONLY: ${{ inputs.archive_only }}
+          TARGET_SLOT: ${{ needs.plan.outputs.target_slot }}
         run: |
           set -euo pipefail
           FLAGS=()

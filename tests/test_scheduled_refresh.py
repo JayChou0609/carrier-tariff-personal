@@ -34,7 +34,9 @@ class ScheduledTest(unittest.TestCase):
         self.assertEqual(TARGETS['unicom'], ['quanguo','jiangsu','shanghai','hebei','henan','sichuan','guangdong'])
         path = ROOT / '.github/workflows'
         text = (path / 'scheduled-refresh.yml').read_text()
-        self.assertIn('"0 4,10,16 * * *"', text)
+        self.assertIn('"0 0,12,18 * * *"', text)
+        self.assertIn('timezone: Asia/Shanghai',text)
+        self.assertIn('"7,27,47 * * * *"',text)
         self.assertIn('cancel-in-progress: false', text)
         for filename in ['mobile-build.yml','telecom-gb-fetch.yml','unicom-fetch.yml','province-notify.yml']:
             self.assertNotIn('\n  schedule:', (path / filename).read_text())
