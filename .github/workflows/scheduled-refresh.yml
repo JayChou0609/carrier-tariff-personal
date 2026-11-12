@@ -1,5 +1,8 @@
 name: Scheduled Tariff Refresh
 on:
+  push:
+    branches: [main]
+    paths: ['.github/collection-request.json']
   schedule:
     - cron: "0 0,12,18 * * *"
       timezone: Asia/Shanghai
