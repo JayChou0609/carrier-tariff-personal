@@ -358,8 +358,11 @@ def _send_report(report, config, state_dir=PRIVATE, client=None):
         known = ledger.get(ledger_key, {'versions':[], 'zero_sent':False, 'slots':[]})
         versions = {digest([x['identity'],x['version']]):x for x in rows}
         pending = [x for version,x in versions.items() if version not in set(known['versions'])]
-        pending_cards=[(v,x) for v,x in versions.items() if v not in known.get('card_versions',[])] if cards_enabled else []
         collection = report.get('collection_run','')
+        # Each complete collection sends a full set of cards. Delivery retries
+        # keep the same collection ID, so accepted image/text pairs stay deduped.
+        card_versions = {(digest([collection,v]) if collection else v):x for v,x in versions.items()}
+        pending_cards=[(v,x) for v,x in card_versions.items() if v not in known.get('card_versions',[])] if cards_enabled else []
         already_reported = (collection in known.get('collections',[]) if collection
                             else slot in known.get('slots',[]))
         if not pending and not pending_cards and already_reported:
