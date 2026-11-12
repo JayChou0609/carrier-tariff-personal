@@ -50,6 +50,37 @@ class PushTests(unittest.TestCase):
             self.assertEqual(app.send_report(r,self.config,self.state,client)['sent'],0)
             self.assertEqual(before,len(client.sent))
 
+    def test_each_completed_collection_sends_full_cards_but_retry_does_not(self):
+        self.ready();client=DummyClient();r=report()
+        with patch.dict(app.os.environ,{'WECOM_TARIFF_CARDS':'1'}),patch('wecom_cards.render_card',return_value=b'image'):
+            for collection in ['morning-1','noon-1','evening-1']:
+                r['collection_run']=collection
+                client.sent=[]
+                result=app.send_report(r,self.config,self.state,client)
+                self.assertEqual(sum(kind=='image' for kind,_ in client.sent),2)
+                self.assertEqual(sum(kind=='text' for kind,_ in client.sent),5)
+                self.assertGreaterEqual(result['sent'],7)
+                self.assertEqual(app.send_report(r,self.config,self.state,client)['sent'],0)
+            self.assertEqual(len(client.uploads),2) # Business CSV remains daily-deduped.
+
+    def test_new_batch_card_text_failure_resumes_after_accepted_image(self):
+        class FailingClient(DummyClient):
+            fail_once=False
+            def send(self,kind,body):
+                if self.fail_once and kind=='text' and self.sent and self.sent[-1][0]=='image':
+                    self.fail_once=False
+                    raise app.WeComError('interrupted card text')
+                return super().send(kind,body)
+        self.ready();client=FailingClient();r=report();r['collection_run']='morning-1'
+        with patch.dict(app.os.environ,{'WECOM_TARIFF_CARDS':'1'}),patch('wecom_cards.render_card',return_value=b'image'):
+            app.send_report(r,self.config,self.state,client)
+            r['collection_run']='noon-1';client.sent=[];client.fail_once=True
+            with self.assertRaises(app.WeComError):app.send_report(r,self.config,self.state,client)
+            (self.state/'blocked.json').unlink()
+            app.send_report(r,self.config,self.state,client)
+            self.assertEqual(sum(kind=='image' for kind,_ in client.sent),2)
+            self.assertEqual(app.send_report(r,self.config,self.state,client)['sent'],0)
+
     def test_card_does_not_call_confirmation_a_second_launch(self):
         from wecom_cards import text_card
         row=app.normalize(raw(),'mobile:jiangsu','2026-11-11')
