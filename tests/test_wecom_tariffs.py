@@ -142,8 +142,31 @@ class PushTests(unittest.TestCase):
         self.assertEqual([x[1]['content'].split('】')[0]+'】' for x in client.sent],
                          ['【今日上线】','【明日下线】','【今日下线】'])
         self.assertEqual(app.send_report(r,self.config,self.state,client)['sent'],0)
-        r['collection_run']='43001466760-3'
+        r['collection_run']='43001466761-1'
         self.assertEqual(app.send_report(r,self.config,self.state,client)['sent'],3)
+
+    def test_collector_retry_keeps_batch_and_does_not_repeat_cards(self):
+        self.ready();client=DummyClient();r=report();r['collection_run']='12345-1'
+        with patch.dict(app.os.environ,{'WECOM_TARIFF_CARDS':'1'}),patch('wecom_cards.render_card',return_value=b'image'):
+            app.send_report(r,self.config,self.state,client)
+            r['collection_run']='12345-2'
+            before=len(client.sent)
+            self.assertEqual(app.send_report(r,self.config,self.state,client)['sent'],0)
+            self.assertEqual(len(client.sent),before)
+            r['buckets']['new'][0]['version']='officially-changed'
+            self.assertGreater(app.send_report(r,self.config,self.state,client)['sent'],0)
+
+    def test_collector_retry_recognizes_legacy_attempt_based_card_receipts(self):
+        self.ready();r=report();r['collection_run']='12345-2';scope=app.config_hash(self.config)
+        ledger={}
+        for key,rows in r['buckets'].items():
+            versions=[app.digest([x['identity'],x['version']]) for x in rows]
+            ledger['|'.join([scope,r['day'],key])]={'versions':versions,'slots':[12],
+                'collections':['12345-1'],'card_versions':[app.digest(['12345-1',v]) for v in versions],
+                'zero_sent':not rows}
+        app.write_json(self.state/'delivery.json',ledger)
+        with patch.dict(app.os.environ,{'WECOM_TARIFF_CARDS':'1'}):
+            self.assertEqual(app.send_report(r,self.config,self.state,DummyClient())['sent'],0)
 
     def test_official_dates_exclude_capture_and_confirmation_dates(self):
         x=raw(on='');x['fields']['firstConfirmTimeStr']='2026-11-11 12:00:00';x['timestamp']='2026-11-11'
