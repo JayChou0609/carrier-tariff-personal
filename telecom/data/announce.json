@@ -4,9 +4,9 @@
  "operator": "telecom",
  "source_url": "https://img.189.cn/js/notice_list/",
  "updated": "2026-11-13 00:45",
- "checked_at": "2026-11-13 00:45",
- "status": "ok",
- "error": "",
+ "checked_at": "2026-11-13 13:34",
+ "status": "failed",
+ "error": "<urlopen error [Errno 101] Network is unreachable>",
  "count": 15,
  "items": [
   {

@@ -3,12 +3,21 @@
  "province_name": "江苏",
  "operator": "unicom",
  "source_url": "https://www.10010.com/wt_links/index.html#/announcementPage",
- "updated": "2026-11-13 00:44",
- "checked_at": "2026-11-13 00:44",
+ "updated": "2026-11-13 13:32",
+ "checked_at": "2026-11-13 13:32",
  "status": "ok",
  "error": "",
  "count": 15,
  "items": [
+  {
+   "id": "2c1af18ca1698e4b01a1d2c578710027",
+   "title": "关于“江苏U+会员”系列产品更名的公告",
+   "date": "2026-11-13",
+   "page_url": "https://www.10010.com/wt_links/index.html#/announcementDetail?announcementId=2c1af18ca1698e4b01a1d2c578710027&pageSize=12&pageNo=1",
+   "summary": "",
+   "content": "<p><img src=\"https://m1.img.10010.com/resources/noticeSys/20261113/jpg//17945375063182779.jpg\"></p>",
+   "attachments": []
+  },
   {
    "id": "2c1af18ca1698e4b01a1c84ead68001f",
    "title": "完美生活99、119档金融产品授权渠道清单",
@@ -147,15 +156,6 @@
    "page_url": "https://www.10010.com/wt_links/index.html#/announcementDetail?announcementId=2c1adc0b9e74ac38019ed9757ba00214&pageSize=12&pageNo=1",
    "summary": "",
    "content": "<p><img src=\"https://m1.img.10010.com/resources/noticeSys/20260618/jpg//17817648043646643.jpg\"></p>",
-   "attachments": []
-  },
-  {
-   "id": "2c1a61c49760b0480197f38a85d800b6",
-   "title": "江苏联通关于为用户升级开通来电来信免打扰功能的通知",
-   "date": "2025-07-10",
-   "page_url": "https://www.10010.com/wt_links/index.html#/announcementDetail?announcementId=2c1a61c49760b0480197f38a85d800b6&pageSize=12&pageNo=1",
-   "summary": "",
-   "content": "<p><img src=\"https://m1.img.10010.com/resources/noticeSys/20250710/jpg//17521375989766901.jpg\"></p>",
    "attachments": []
   }
  ]
