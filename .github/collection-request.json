@@ -1,4 +1,4 @@
 {
-  "requestedSlot": "2026-11-12T18:00:00+08:00",
-  "reason": "18:00 collection absent at 19:05 Beijing; collect current missing slot and notify only after full archive"
+  "requestedSlot": "2026-11-13T12:00:00+08:00",
+  "reason": "No noon collection run at 12:49 Beijing; request current missing slot and notify only after all sources archive successfully"
 }
