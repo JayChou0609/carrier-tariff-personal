@@ -324,7 +324,7 @@ class Client:
         return value['media_id']
 
 
-def send_report(report, config, state_dir=PRIVATE, client=None):
+def send_report(report, config, state_dir=PRIVATE, client=None, checkpoint=None):
     state_dir = Path(state_dir)
     state_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
     lock_fd = os.open(state_dir/'run.lock', os.O_CREAT | os.O_RDWR, 0o600)
@@ -333,7 +333,7 @@ def send_report(report, config, state_dir=PRIVATE, client=None):
             fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             return {'status':'already_running','sent':0}
-        return _send_report(report,config,state_dir,client)
+        return _send_report(report,config,state_dir,client,checkpoint)
 
 
 def collection_key(value):
@@ -342,7 +342,12 @@ def collection_key(value):
     return match.group(1) if match else str(value)
 
 
-def _send_report(report, config, state_dir=PRIVATE, client=None):
+def _send_report(report, config, state_dir=PRIVATE, client=None, checkpoint=None):
+    def persist(path, value):
+        write_json(path, value)
+        if checkpoint:
+            checkpoint()
+
     config = validate_config(config)
     state_dir = Path(state_dir)
     scope = config_hash(config)
@@ -357,7 +362,7 @@ def _send_report(report, config, state_dir=PRIVATE, client=None):
     ledger = read_json(ledger_path, {})
     delivered = 0
     cards_enabled=os.environ.get('WECOM_TARIFF_CARDS')=='1'
-    slot = next(x for x in [18,12,0] if now().hour >= x)
+    slot = report.get('collection_slot', next(x for x in [18,12,0] if now().hour >= x))
     for key in BUCKETS:
         rows = report['buckets'][key]
         ledger_key = '|'.join([scope, report['day'], key])
@@ -383,17 +388,17 @@ def _send_report(report, config, state_dir=PRIVATE, client=None):
                             else slot in known.get('slots',[]))
         if not pending and not pending_cards and already_reported:
             continue
-        delivery_id = digest([ledger_key, slot, collection, sorted(versions), sorted(digest([x['identity'],x['version']]) for x in pending),cards_enabled])
+        delivery_id = digest([ledger_key, slot, batch, sorted(versions), sorted(digest([x['identity'],x['version']]) for x in pending),cards_enabled])
         path = state_dir/'outbox'/(delivery_id+'.json')
         outbox = read_json(path)
         if not outbox:
             outbox = {'text':summary(report,key,pending)+'\n报告时段：{:02d}:00'.format(slot),'summary_sent':False,'file_sent':False,'file_required':bool(pending)}
-            write_json(path,outbox)
+            persist(path,outbox)
         try:
             if not outbox['summary_sent']:
                 client.send('text', {'content':outbox['text']})
                 outbox['summary_sent'] = True
-                write_json(path,outbox)
+                persist(path,outbox)
                 delivered += 1
             if pending_cards:
                 from wecom_cards import render_card,text_card
@@ -403,21 +408,21 @@ def _send_report(report, config, state_dir=PRIVATE, client=None):
                         content=render_card(row,BUCKETS[key])
                         client.send('image',{'base64':base64.b64encode(content).decode(),
                             'md5':hashlib.md5(content).hexdigest()})
-                        progress['image']=True;write_json(path,outbox);delivered+=1
+                        progress['image']=True;persist(path,outbox);delivered+=1
                     if not progress['text']:
                         client.send('text',{'content':text_card(row,BUCKETS[key])})
-                        progress['text']=True;write_json(path,outbox);delivered+=1
+                        progress['text']=True;persist(path,outbox);delivered+=1
                     known['card_versions']=sorted(set(known.get('card_versions',[]))|{version})
-                    ledger[ledger_key]=known;write_json(ledger_path,ledger)
+                    ledger[ledger_key]=known;persist(ledger_path,ledger)
             if pending and not outbox['file_sent']:
                 media = client.upload_csv(key+'-'+report['day']+'.csv', csv_bytes(pending))
                 client.send('file', {'media_id':media})
                 outbox['file_sent'] = True
-                write_json(path,outbox)
+                persist(path,outbox)
                 delivered += 1
         except WeComError:
             # Avoid repeating successful recipients or summaries every six hours.
-            write_json(state_dir/'blocked.json', {'scope':scope,'at':now().isoformat(),'delivery':delivery_id})
+            persist(state_dir/'blocked.json', {'scope':scope,'at':now().isoformat(),'delivery':delivery_id})
             raise
         known['versions'] = sorted(set(known['versions']) | set(versions))
         known['slots'] = sorted(set(known.get('slots', [])) | {slot})
@@ -425,7 +430,7 @@ def _send_report(report, config, state_dir=PRIVATE, client=None):
             known['collections'] = sorted(set(known.get('collections',[])) | {collection})
         known['zero_sent'] = known['zero_sent'] or not rows
         ledger[ledger_key] = known
-        write_json(ledger_path, ledger)
+        persist(ledger_path, ledger)
     return {'status':'sent' if delivered else 'unchanged','sent':delivered,
             'counts':{k:len(v) for k,v in report['buckets'].items()}}
 

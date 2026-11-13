@@ -1,0 +1,33 @@
+name: Independent Cloud Recovery
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: write # Only dispatch existing collector/notifier; no repository writes.
+concurrency:
+  group: tariff-independent-recovery
+  cancel-in-progress: false
+jobs:
+  recover:
+    if: github.repository == 'JayChou0609/carrier-tariff-personal' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify independent cloud scheduler
+        run: node cloudflare/tariff-watchdog/worker.test.mjs
+      - name: Verify recovery decisions
+        run: python3 -B -m unittest discover -s tests -p 'test_recover_automation.py' -v
+      - name: Recover missing collection or image and text notification
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 -B scripts/recover_automation.py

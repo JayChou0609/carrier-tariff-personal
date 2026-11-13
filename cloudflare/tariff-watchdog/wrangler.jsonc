@@ -1,0 +1,7 @@
+{
+  "name": "carrier-tariff-watchdog",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-13",
+  "triggers": { "crons": ["2,12,22,32,42,52 * * * *"] },
+  "observability": { "enabled": true }
+}

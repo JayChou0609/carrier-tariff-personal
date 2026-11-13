@@ -64,10 +64,12 @@ class GitHubState:
             self.api('POST','git/refs',{'ref':'refs/heads/'+self.branch,'sha':base['object']['sha']})
         value = self.api('GET','contents/'+STATE_FILE+'?ref='+self.branch,missing=True)
         if value is not None:
+            self.sha = value['sha']
+            if value.get('encoding') != 'base64' or not value.get('content'):
+                value = self.api('GET','git/blobs/'+self.sha)
             if value.get('encoding') != 'base64':
                 raise StateError('Unsupported checkpoint encoding')
             self.data = json.loads(base64.b64decode(value['content']))
-            self.sha = value['sha']
         if (self.data.get('version') != 1 or not isinstance(self.data.get('delivery'),dict)
                 or not isinstance(self.data.get('outbox'),dict)):
             raise StateError('Invalid checkpoint; refusing to reset delivery history')
@@ -103,10 +105,11 @@ class GitHubState:
         value['in_progress'] = {'run':run,'at':core.now().isoformat()}
         self.put(value)
 
-    def finish(self, directory, backup):
+    def checkpoint(self, directory, backup, release=False):
         directory = Path(directory)
         value = dict(self.data)
-        value.pop('in_progress',None)
+        if release:
+            value.pop('in_progress',None)
         value['delivery'] = core.read_json(directory/'delivery.json',{})
         value['outbox'] = {p.name:core.read_json(p) for p in (directory/'outbox').glob('*.json')}
         value['blocked'] = core.read_json(directory/'blocked.json')
@@ -116,11 +119,45 @@ class GitHubState:
         if any(len(k.split('|')) != 3 for k in value['delivery']):
             raise StateError('Invalid delivery checkpoint key')
         value['delivery'] = {k:v for k,v in value['delivery'].items() if k.split('|')[1] >= cutoff}
-        value['outbox'] = {k:v for k,v in value['outbox'].items()
-                           if not (v.get('summary_sent') and
-                                   (v.get('file_sent') or v.get('file_required') is False) and
-                                   all(p.get('image') and p.get('text') for p in v.get('cards',{}).values()))}
+        if release:
+            value['outbox'] = {k:v for k,v in value['outbox'].items()
+                               if not (v.get('summary_sent') and
+                                       (v.get('file_sent') or v.get('file_required') is False) and
+                                       all(p.get('image') and p.get('text') for p in v.get('cards',{}).values()))}
         self.put(value,backup)
+
+
+    def finish(self, directory, backup):
+        self.checkpoint(directory, backup, release=True)
+
+    def recover(self):
+        """Only resume after the GitHub run holding the durable lease has ended."""
+        lease = self.data.get('in_progress') or {}
+        if lease:
+            match = re.fullmatch(r'(\d+)-\d+', str(lease.get('run', '')))
+            if not match:
+                raise StateError('Invalid notification lease; manual review is required')
+            run = self.api('GET', 'actions/runs/'+match.group(1))
+            if (run.get('status') != 'completed' or run.get('head_branch') != 'main'
+                    or run.get('path') != '.github/workflows/wecom-notify.yml'):
+                raise StateError('The previous notification run is still active or cannot be verified')
+        value = dict(self.data)
+        value.pop('in_progress', None)
+        value.pop('blocked', None)
+        value['recovered_at'] = core.now().isoformat()
+        self.put(value)
+
+    def mark_success(self, report):
+        health = {'version':1, 'status':'complete', 'collection_run':report['collection_run'],
+                  'target_slot':report.get('target_slot',''), 'day':report['day'],
+                  'buckets':sorted(core.BUCKETS), 'cards':True,
+                  'completed_at':core.now().isoformat()}
+        current = self.api('GET','contents/health.json?ref='+self.branch,missing=True)
+        body = {'branch':self.branch, 'message':'state: completed tariff image and text delivery',
+                'content':base64.b64encode(assert_no_credentials(health,self.forbidden).encode()).decode()}
+        if current:
+            body['sha'] = current['sha']
+        self.api('PUT','contents/health.json',body)
 
 
 def report_from_checkout(root=ROOT):
@@ -157,6 +194,16 @@ def require_complete_collection(report, root=ROOT, expected_run=''):
             raise StateError('资费文件与本轮归档不一致，停止正式推送：'+source['id'])
     report['collection_run'] = run_id
     report['collection_time'] = latest['timestamp']
+    target = str(latest.get('targetSlot') or '')
+    if target:
+        try:
+            slot = dt.datetime.fromisoformat(target).astimezone(core.TZ)
+            if slot.hour not in [0,12,18] or slot.minute or slot.second:
+                raise ValueError('Invalid collection slot')
+        except ValueError:
+            raise StateError('归档的目标时段无效') from None
+        report['target_slot'] = target
+        report['collection_slot'] = slot.hour
     return report
 
 
@@ -194,7 +241,7 @@ def write_summary(result, report=None):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--action',choices=['preview','verify','send','gate'],default='send')
+    parser.add_argument('--action',choices=['preview','verify','send','recover','gate'],default='send')
     args = parser.parse_args()
     report = None
     try:
@@ -222,7 +269,7 @@ def main():
         if not webhook:
             result = {'status':'not_configured','sent':0}
             print(json.dumps(result));write_summary(result,report)
-            return 0
+            return 1
         config = core.validate_config({'wecom_webhook':webhook})
         key = urllib.parse.parse_qs(urllib.parse.urlsplit(webhook).query)['key'][0]
         if os.environ.get('GITHUB_ACTIONS') == 'true':
@@ -234,7 +281,9 @@ def main():
         if args.action != 'verify' and store.data.get('verified_scope') != scope:
             result = {'status':'not_verified','sent':0,'message':'Run workflow with action=verify first'}
             print(json.dumps(result));write_summary(result,report)
-            return 0
+            return 1
+        if args.action == 'recover':
+            store.recover()
         run = os.environ.get('GITHUB_RUN_ID','manual')+'-'+os.environ.get('GITHUB_RUN_ATTEMPT','1')
         backup = Path(os.environ.get('RUNNER_TEMP',tempfile.gettempdir()))/'wecom-checkpoint-backup.json'
         with tempfile.TemporaryDirectory(prefix='wecom-state-',dir=os.environ.get('RUNNER_TEMP')) as td:
@@ -251,10 +300,13 @@ def main():
                     blocked = directory/'blocked.json'
                     if blocked.exists():blocked.unlink()
                 core.write_json(directory/'ready.json',{'scope':scope})
-                result = core.send_report(report,config,state_dir=directory)
+                result = core.send_report(report,config,state_dir=directory,
+                    checkpoint=lambda: store.checkpoint(directory,backup))
                 result['cloud_test_messages'] = test_count
             finally:
                 store.finish(directory,backup)
+        if result.get('status') in ['sent','unchanged']:
+            store.mark_success(report)
         print(json.dumps(result,ensure_ascii=False));write_summary(result,report)
         return 0
     except (ValueError,RuntimeError) as exc:

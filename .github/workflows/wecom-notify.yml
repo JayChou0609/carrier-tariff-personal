@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "preview 仅预览；verify 验证云端文本/CSV并发送未提醒数据；send 正式推送"
+        description: "preview 仅预览；verify 验证云端文本/CSV并发送未提醒数据；send 正式推送；recover 自动恢复未完成推送"
         type: choice
-        options: [preview, verify, send]
+        options: [preview, verify, send, recover]
         default: preview
 
 permissions:

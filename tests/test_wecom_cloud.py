@@ -118,4 +118,48 @@ class CloudTests(unittest.TestCase):
             self.assertIn(name,state.data['outbox'])
 
 
+
+class RecoveryCheckpointTests(unittest.TestCase):
+    def test_checkpoint_keeps_lease_until_final_finish(self):
+        state=MemoryState();state.begin('123-1')
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);state.restore(root)
+            name='d'*64+'.json'
+            cloud.core.write_json(root/'outbox'/name,{'summary_sent':True,'file_required':False,'cards':{'v':{'image':True,'text':True}}})
+            state.checkpoint(root,root/'backup.json')
+            self.assertIn(name,state.data['outbox'])
+            self.assertIn('in_progress',state.data)
+            state.finish(root,root/'backup.json')
+            self.assertNotIn('in_progress',state.data)
+    def test_recovery_requires_original_run_to_be_completed(self):
+        state=MemoryState();state.data['in_progress']={'run':'123-1'}
+        with patch.object(state,'api',return_value={'status':'in_progress','head_branch':'main','path':'.github/workflows/wecom-notify.yml'}):
+            with self.assertRaises(cloud.StateError):state.recover()
+        state.data['blocked']={'scope':'x'}
+        def api(method,path,body=None,missing=False):
+            if method=='GET':return {'status':'completed','head_branch':'main','path':'.github/workflows/wecom-notify.yml'}
+            return {'content':{'sha':'new'}}
+        with patch.object(state,'api',side_effect=api):state.recover()
+        self.assertNotIn('in_progress',state.data);self.assertNotIn('blocked',state.data)
+    def test_success_receipt_contains_three_buckets_but_no_credentials(self):
+        state=MemoryState();report={'collection_run':'123-1','target_slot':'2026-11-13T12:00:00+08:00','day':'2026-11-13'}
+        with patch.object(state,'api',side_effect=lambda method,path,body=None,missing=False: None if method=='GET' else state.requests.append((method,path,body))):
+            state.mark_success(report)
+        body=state.requests[-1][2];health=json.loads(base64.b64decode(body['content']))
+        self.assertEqual(sorted(health['buckets']),['new','today_off','tomorrow_off'])
+        self.assertTrue(health['cards']);self.assertEqual(health['collection_run'],'123-1')
+        self.assertNotIn('test-github-token',json.dumps(health))
+
+    def test_large_state_uses_blob_api_when_contents_omits_payload(self):
+        state=MemoryState()
+        payload={'version':1,'delivery':{},'outbox':{}}
+        def api(method,path,body=None,missing=False):
+            if path.startswith('git/ref/'):return {'object':{'sha':'branch'}}
+            if path.startswith('contents/'):return {'sha':'stateblob','encoding':'none','content':''}
+            if path=='git/blobs/stateblob':return {'encoding':'base64','content':base64.b64encode(json.dumps(payload).encode()).decode()}
+            raise AssertionError(path)
+        with patch.object(state,'api',side_effect=api):self.assertEqual(state.load(),payload)
+        self.assertEqual(state.sha,'stateblob')
+
+
 if __name__=='__main__':unittest.main()

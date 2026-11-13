@@ -10,6 +10,10 @@ on:
       timezone: Asia/Shanghai
   workflow_dispatch:
     inputs:
+      catch_up:
+        description: "云端补偿检查：当期已完整时跳过，不强制重复采集"
+        type: boolean
+        default: false
       archive_only:
         description: "仅建立现有数据的历史基线（不重新采集）"
         type: boolean
@@ -38,7 +42,7 @@ jobs:
       - name: Check current Beijing collection slot
         id: guard
         env:
-          FORCE_COLLECTION: ${{ github.event_name == 'workflow_dispatch' }}
+          FORCE_COLLECTION: ${{ github.event_name == 'workflow_dispatch' && inputs.catch_up != true }}
         run: |
           python3 -B -m unittest discover -s tests -p 'test_schedule_guard.py' -q
           python3 -B scripts/schedule_guard.py

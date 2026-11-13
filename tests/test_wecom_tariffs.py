@@ -81,6 +81,26 @@ class PushTests(unittest.TestCase):
             self.assertEqual(sum(kind=='image' for kind,_ in client.sent),2)
             self.assertEqual(app.send_report(r,self.config,self.state,client)['sent'],0)
 
+    def test_cloud_checkpoint_keeps_accepted_image_across_retry_and_attempt_change(self):
+        class FailAfterImage(DummyClient):
+            def send(self, kind, body):
+                if kind=='text' and self.sent and self.sent[-1][0]=='image':
+                    raise app.WeComError('interrupted')
+                return super().send(kind,body)
+        self.ready();r=report();r.update(collection_run='123-1',collection_slot=12)
+        checkpoints=[]
+        def checkpoint():
+            checkpoints.append({p.name:app.read_json(p) for p in (self.state/'outbox').glob('*.json')})
+        with patch.dict(app.os.environ,{'WECOM_TARIFF_CARDS':'1'}),patch('wecom_cards.render_card',return_value=b'image'):
+            with self.assertRaises(app.WeComError):
+                app.send_report(r,self.config,self.state,FailAfterImage(),checkpoint=checkpoint)
+            self.assertTrue(any(c.get('image') for snapshot in checkpoints for box in snapshot.values() for c in box.get('cards',{}).values()))
+            (self.state/'blocked.json').unlink()
+            r['collection_run']='123-2';client=DummyClient()
+            app.send_report(r,self.config,self.state,client)
+            self.assertEqual(sum(kind=='image' for kind,_ in client.sent),1)
+            self.assertEqual(app.send_report(r,self.config,self.state,client)['sent'],0)
+
     def test_card_does_not_call_confirmation_a_second_launch(self):
         from wecom_cards import text_card
         row=app.normalize(raw(),'mobile:jiangsu','2026-11-11')
