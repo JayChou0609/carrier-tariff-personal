@@ -336,6 +336,12 @@ def send_report(report, config, state_dir=PRIVATE, client=None):
         return _send_report(report,config,state_dir,client)
 
 
+def collection_key(value):
+    # Re-running a collector job changes the attempt, not its daily batch.
+    match = re.fullmatch(r'(\d+)-\d+', str(value))
+    return match.group(1) if match else str(value)
+
+
 def _send_report(report, config, state_dir=PRIVATE, client=None):
     config = validate_config(config)
     state_dir = Path(state_dir)
@@ -359,11 +365,21 @@ def _send_report(report, config, state_dir=PRIVATE, client=None):
         versions = {digest([x['identity'],x['version']]):x for x in rows}
         pending = [x for version,x in versions.items() if version not in set(known['versions'])]
         collection = report.get('collection_run','')
+        batch = collection_key(collection)
         # Each complete collection sends a full set of cards. Delivery retries
         # keep the same collection ID, so accepted image/text pairs stay deduped.
-        card_versions = {(digest([collection,v]) if collection else v):x for v,x in versions.items()}
-        pending_cards=[(v,x) for v,x in card_versions.items() if v not in known.get('card_versions',[])] if cards_enabled else []
-        already_reported = (collection in known.get('collections',[]) if collection
+        previous = [c for c in known.get('collections',[]) if collection_key(c) == batch]
+        sent_cards = set(known.get('card_versions', []))
+        pending_cards = []
+        if cards_enabled:
+            for version, row in versions.items():
+                card_version = digest([batch, version]) if collection else version
+                # Recognize accepted cards written before attempt IDs were normalized.
+                accepted = card_version in sent_cards or any(
+                    digest([c, version]) in sent_cards for c in previous)
+                if not accepted:
+                    pending_cards.append((card_version, row))
+        already_reported = (bool(previous) if collection
                             else slot in known.get('slots',[]))
         if not pending and not pending_cards and already_reported:
             continue
