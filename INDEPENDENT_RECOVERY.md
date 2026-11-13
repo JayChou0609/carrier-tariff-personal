@@ -25,9 +25,9 @@ GitHub 保留北京时间 00:00、12:00、18:00 主采集及原有补偿 cron。
 
 源码及 Wrangler 配置在 `cloudflare/tariff-watchdog/`，Worker 名称固定为 `carrier-tariff-watchdog`。不需要域名，不需要开启付费套餐。只部署该目录的 Worker，不把现有资费站点改为 Cloudflare 托管。
 
-唯一绑定：`GITHUB_ACTIONS_TOKEN`，类型 **Secret**。使用仅选择 `JayChou0609/carrier-tariff-personal` 的 fine-grained GitHub token，仓库权限只开 **Actions: Read and write**（Metadata 自动只读）。不要开 Contents 写权限，不要授权所有仓库。设置合理的到期日并在到期前轮换。
+唯一绑定：`GITHUB_ACTIONS_TOKEN`，类型 **Secret**。使用仅选择 `JayChou0609/carrier-tariff-personal` 的 fine-grained GitHub token，仓库权限只开 **Actions: Read and write**（Metadata 自动只读）。不要开 Contents 写权限，不要授权所有仓库。本次按用户明确要求设置为 **No expiration**；仍仅允许上述单一仓库和 Actions 权限。
 
-不要把 token 写入源码、Wrangler 文件、普通变量、Pages 或聊天。创建或更换该凭据须由账号所有者确认并直接在 Cloudflare Secret 界面保存。
+不要把 token 写入源码、Wrangler 文件、普通变量、Pages 或聊天。新增授权已由账号所有者明确确认，并在 Cloudflare 生产环境以 Secret 类型保存。后续更换时仍使用同一最小权限范围。
 
 部署后配置 Cron `2,12,22,32,42,52 * * * *`，通过一次 Cloudflare scheduled 测试核对 GitHub 工作流已生成。HTTP 地址仅返回服务说明，访问它不会触发任何采集或发送。
 
@@ -44,3 +44,11 @@ GitHub → Actions → **Independent Cloud Recovery** → Run workflow → main�
 - `python3 -B -m unittest discover -s tests -p 'test_schedule_guard.py' -v`
 
 参考：[GitHub workflow_dispatch](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event)、[Cloudflare Cron Triggers](https://developers.cloudflare.com/workers/configuration/cron-triggers/)、[Cloudflare Secrets](https://developers.cloudflare.com/workers/configuration/secrets/)。
+
+## 已部署验证（2026-11-13）
+
+- GitHub 补偿代码提交：`05bb2d58e4eaaaa03ee2d96f76e5b6169cfb5ba6`。
+- Cloudflare Worker：`carrier-tariff-watchdog`，生产 Cron：`2,12,22,32,42,52 * * * *`。
+- Cloudflare 源码构建及 Worker 单元检查成功，运行时 `GITHUB_ACTIONS_TOKEN` 已加密保存；凭据按用户要求 No expiration。
+- [实际恢复检查](https://github.com/JayChou0609/carrier-tariff-personal/actions/runs/43396782503) 首次发现推送回执缺失，仅触发推送恢复；第二次返回 `complete`、`dispatched=false`。
+- [推送恢复](https://github.com/JayChou0609/carrier-tariff-personal/actions/runs/43396848446) 返回 `unchanged`、`sent=0`，补齐成功回执，没有重复发送当天已确认消息。
