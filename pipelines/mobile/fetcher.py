@@ -2,7 +2,7 @@
 # 抓取模块（纯 HTTP 接口版，零浏览器依赖）
 # 相比旧版（Playwright 开浏览器渲染 DOM，约 20 秒）：
 #   1) 直接请求数据接口 getTariffListInfo，拿到加密响应后 AES-128-CBC 解密
-#   2) 全量一次拉取，无翻页、无渲染等待，两次请求 1~2 秒完成
+#   2) 分类使用官方目录，列表按接口返回的页数拉取，保留普通及模块化资费
 #   3) 彻底绕开 GitHub Actions 出口 IP 被源站风控、JS 资源加载失败等浏览器路径问题
 #
 # 接口协议（逆向自页面前端 JS）：
@@ -109,10 +109,10 @@ FIELD_KEYS = [
 
 # 分类映射：type1=个人/政企，type2=套餐/加装包/营销活动
 TYPE1_CN = {"1": "个人资费", "2": "政企资费"}
-TYPE2_CN = {"1": "套餐", "2": "加装包", "3": "营销活动"}
-# 每个板块要抓的分类组合 (type1, type2)，覆盖 六大类 全量
-TYPE_COMBOS = [("1", "1"), ("1", "2"), ("1", "3"),
-               ("2", "1"), ("2", "2"), ("2", "3")]
+TYPE2_CN = {"1": "套餐", "2": "加装包", "3": "营销活动",
+            "4": "港澳台/国际资费", "5": "标准资费",
+            "6": "国际及港澳台标准资费", "7": "其他"}
+# 每个省份以官方 getType2List 返回的分类组合为准，包含标准及国际资费。
 # 分类间请求间隔（秒）。连续请求序列中后段分类会被源站瞬时限流降级(缺量)，
 # 实测 8s 间隔可保证 6 个分类全量返回；间隔过大则单轮耗时过久，取 8s 均衡。
 # 并发模式下该值仅作为批次间的基础间隔，实际等待远小于串行模式。
@@ -161,8 +161,8 @@ def _nm_to_fields(nm):
     t2 = str(nm.get("type2") or "1")
     f["资费标准"] = (_s(nm.get("fees")) + _s(nm.get("feesUnit"))).strip()
     f["方案编号"] = _s(nm.get("reportNo")) or _s(nm.get("goodsid"))
-    f["资费类型"] = TYPE2_CN.get(t2, "套餐")
-    f["归属"] = TYPE1_CN.get(t1, "个人资费")
+    f["资费类型"] = TYPE2_CN.get(t2, "官方类型" + t2)
+    f["归属"] = TYPE1_CN.get(t1, "官方类型" + t1)
     f["适用范围"] = _s(nm.get("applicablePeople"))
     f["适用地区"] = _area_cn(nm.get("applicableArea"))
     f["销售渠道"] = _s(nm.get("channel"))
@@ -229,7 +229,7 @@ def _is_conn_error(e) -> bool:
     return "Network is unreachable" in s or "Errno 101" in s or "timed out" in s.lower()
 
 
-def _post(opener, body_hex: str, ua: str = None) -> str:
+def _post(opener, body_hex: str, ua: str = None, api_url: str = API_URL) -> str:
     """POST 加密请求。单请求 60s 超时。
 
     ua: 本次请求使用的 UA 指纹（由 _pick_ua() 轮换得到）。
@@ -244,7 +244,7 @@ def _post(opener, body_hex: str, ua: str = None) -> str:
     for i in range(6):
         try:
             req = urllib.request.Request(
-                API_URL, data=body_hex.encode(), method="POST", headers={
+                api_url, data=body_hex.encode(), method="POST", headers={
                     "User-Agent": ua or UA,
                     "Referer": PAGE_URL,
                     "Accept": "application/json, text/plain, */*",
@@ -268,17 +268,56 @@ def _post(opener, body_hex: str, ua: str = None) -> str:
     raise last
 
 
+def _fetch_combos(opener, tariff_attr: str, prov_code: str):
+    """Use the same published category directory as the official PC page.
+
+    The official page treats tariffAttr=3 as provincial (2). Empty or failed
+    directory responses must not silently fall back to an incomplete six cells.
+    """
+    data = json.loads(_post(opener, _encrypt({"province": prov_code, "isPublic": "1"}),
+                            ua=_pick_ua(), api_url=API_URL.rsplit("/", 1)[0] + "/getType2List"))
+    if str(data.get("returnCode")) != "0" or not isinstance(data.get("data"), list):
+        raise ValueError("官方资费分类目录查询失败")
+    combos = set()
+    for row in data["data"]:
+        if not isinstance(row, dict):
+            raise ValueError("官方资费分类目录结构不完整")
+        attr = str(row.get("tariffAttr", ""))
+        if ("2" if attr == "3" else attr) != tariff_attr:
+            continue
+        t1, t2 = str(row.get("type1", "")), str(row.get("type2", ""))
+        if not t1.isdigit() or not t2.isdigit():
+            raise ValueError("官方资费分类编码不完整")
+        combos.add((t1, t2))
+    if not combos:
+        raise ValueError("官方资费分类目录未返回当前范围，保留旧快照")
+    return sorted(combos, key=lambda x: (int(x[0]), int(x[1])))
+
+
 def _fetch_cell(opener, tariff_attr: str, type1: str, type2: str,
                 prov_code: str = "731", ua: str = None):
-    """拉取一个板块(tariffAttr)下某个分类(type1/type2)的全量资费，返回 [{name, fields}]（按 name 去重）"""
+    """拉取某分类的全部页，按名称、编号和分类保留不同业务。"""
     params = {
         "cellNum": "99999999999", "province": prov_code, "isPublic": "1",
         "linkScn": "1", "tariffAttr": tariff_attr, "type1": type1, "type2": type2,
         "page": 1, "limit": 10000, "xk": str(uuid.uuid4()),
     }
-    plain = _post(opener, _encrypt(params), ua)
-    data = json.loads(plain)
-    return _parse_items(data)
+    items = {}
+    while True:
+        data = json.loads(_post(opener, _encrypt(params), ua))
+        if str(data.get("returnCode")) != "0":
+            raise ValueError("官方资费列表查询失败")
+        rows = _parse_items(data)
+        before = len(items)
+        for item in rows:
+            items.setdefault(_business_key(item), item)
+        pages = int(((data.get("data") or {}).get("page") or {}).get("pages") or 1)
+        if not rows or (params["page"] > 1 and len(items) == before) or pages > 1000:
+            if params["page"] > 1 or pages > 1:
+                raise ValueError("官方资费分页不完整，保留旧快照")
+        if params["page"] >= pages:
+            return list(items.values())
+        params["page"] += 1
 
 
 def _business_key(item):
@@ -406,7 +445,7 @@ def _evaluate_degrade(cell_counts: dict, peaks: dict, failed_keys: set):
 
 
 def _fetch_board(sec: str, attr: str, code: str, opener) -> tuple:
-    """抓取单个板块六大分类并合并（fetch_all / fetch_section 共用）。
+    """按官方目录抓取单个板块的全部分类并合并（fetch_all / fetch_section 共用）。
 
     并发度 FETCH_WORKERS：同一板块内并行发起多个分类请求，每个分类用独立 UA 指纹。
     返回 (items, errors, cell_counts, failed_keys)。
@@ -416,6 +455,10 @@ def _fetch_board(sec: str, attr: str, code: str, opener) -> tuple:
     cell_counts = {}
     failed_keys = set()
     lock = threading.Lock()
+    try:
+        combos = _fetch_combos(opener, attr, code)
+    except Exception as e:
+        return [], ["官方分类目录：" + str(e)], {}, {"catalog"}
 
     def work(t1, t2):
         ua = _pick_ua()  # 每个分类独立 UA 指纹池，避免同一池被打满降级
@@ -435,11 +478,10 @@ def _fetch_board(sec: str, attr: str, code: str, opener) -> tuple:
                     errors.append(err)
             print(f"[fetch] 板块 {sec} 分类({t1},{t2}) 抓取失败: {e}")
 
-    workers = min(FETCH_WORKERS, len(TYPE_COMBOS))
+    workers = min(FETCH_WORKERS, len(combos))
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
         # 逐批提交：每批 workers 个分类并发，批间留 FETCH_INTERVAL 降温，
         # 避免一次性 6 并发被源站判定为异常流量。
-        combos = list(TYPE_COMBOS)
         for i in range(0, len(combos), workers):
             batch = combos[i:i + workers]
             list(ex.map(lambda c: work(*c), batch))
