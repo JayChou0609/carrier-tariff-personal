@@ -3,10 +3,10 @@
  "province_name": "江苏",
  "operator": "telecom",
  "source_url": "https://img.189.cn/js/notice_list/",
- "updated": "2026-11-13 00:45",
- "checked_at": "2026-11-13 13:34",
- "status": "failed",
- "error": "<urlopen error [Errno 101] Network is unreachable>",
+ "updated": "2026-11-13 13:50",
+ "checked_at": "2026-11-13 13:50",
+ "status": "ok",
+ "error": "",
  "count": 15,
  "items": [
   {
