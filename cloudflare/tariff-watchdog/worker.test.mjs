@@ -8,6 +8,7 @@ function transport({status=archive,receipt=health,runs=[],dispatchStatus=204}={}
   const calls=[];
   return {calls,async request(url,options={}) {
     calls.push({url,options});
+    assert.equal(options.redirect,'manual');
     if (url.includes('/dispatches')) return {status:dispatchStatus};
     if (url.includes('/actions/runs?')) return {status:200,json:async()=>({workflow_runs:runs})};
     if (url.includes('/health.json?')) return receipt===null?{status:404}:{status:200,json:async()=>receipt};
@@ -26,7 +27,7 @@ export async function runChecks() {
   assert.equal(t.calls.length,2);assert(t.calls.every(c=>!c.options.headers.Authorization));
   t=transport({receipt:null});assert.equal((await check({GITHUB_ACTIONS_TOKEN:'test-token'},t.request,moment)).status,'recovery_check_dispatched');
   let dispatch=t.calls.find(c=>c.options.method==='POST');assert(dispatch.url.endsWith('/recovery-watchdog.yml/dispatches'));
-  assert.equal(JSON.parse(dispatch.options.body).ref,'main');assert.equal(dispatch.options.redirect,'error');
+  assert.equal(JSON.parse(dispatch.options.body).ref,'main');assert.equal(dispatch.options.redirect,'manual');
   for (const active of ['queued','in_progress','waiting']) {
     t=transport({receipt:null,runs:[{path:'.github/workflows/scheduled-refresh.yml',status:active}]});
     assert.equal((await check({GITHUB_ACTIONS_TOKEN:'test-token'},t.request,moment)).status,'waiting_for_active_run');

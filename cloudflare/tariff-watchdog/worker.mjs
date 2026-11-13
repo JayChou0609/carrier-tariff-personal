@@ -30,7 +30,7 @@ export async function check(env, request=fetch, moment=new Date()) {
     'Content-Type':'application/json','User-Agent':'TariffIndependentWatchdog/1.0','X-GitHub-Api-Version':'2022-11-28'};
   async function publicJSON(branch,path,missing=false) {
     const response=await request(`https://raw.githubusercontent.com/${REPO}/${branch}/${path}?watchdog=${stamp}`,
-      {redirect:'error',headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(20000)});
+      {redirect:'manual',headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(20000)});
     if (missing && response.status===404) return {};
     if (response.status!==200) throw new Error(`Public completion check HTTP ${response.status}`);
     return response.json();
@@ -46,7 +46,7 @@ export async function check(env, request=fetch, moment=new Date()) {
     reason='public_completion_check_unavailable';
   }
   const runsResponse=await request(`https://api.github.com/repos/${REPO}/actions/runs?branch=main&per_page=100`,
-    {headers,redirect:'error',signal:AbortSignal.timeout(20000)});
+    {headers,redirect:'manual',signal:AbortSignal.timeout(20000)});
   if (runsResponse.status!==200) throw new Error(`GitHub run check HTTP ${runsResponse.status}`);
   const runs=(await runsResponse.json()).workflow_runs || [];
   if (runs.some(run=>PATHS.includes(run.path) && run.status!=='completed')) return {status:'waiting_for_active_run',target_slot:slot,dispatched:false};
@@ -54,7 +54,7 @@ export async function check(env, request=fetch, moment=new Date()) {
     return {status:'retry_cooldown',target_slot:slot,dispatched:false};
   }
   const response=await request(`https://api.github.com/repos/${REPO}/actions/workflows/${WORKFLOW}/dispatches`, {
-    method:'POST',redirect:'error',headers,body:JSON.stringify({ref:'main'}),signal:AbortSignal.timeout(20000)
+    method:'POST',redirect:'manual',headers,body:JSON.stringify({ref:'main'}),signal:AbortSignal.timeout(20000)
   });
   if (![200,204].includes(response.status)) throw new Error(`GitHub recovery dispatch HTTP ${response.status}`);
   return {status:'recovery_check_dispatched',target_slot:slot,reason,dispatched:true};
