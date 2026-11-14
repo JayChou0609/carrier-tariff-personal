@@ -3,6 +3,7 @@ import io
 import json
 import os
 from pathlib import Path
+from tariff_areas import display_area
 
 
 def card_fields(row):
@@ -12,7 +13,7 @@ def card_fields(row):
         ('方案编号',row.get('report_no') or '未公示'),
         ('资费标准',(row.get('fee') or '未公示')+(' '+row['unit'] if row.get('unit') else '')),
         ('适用范围',str(fields.get('适用范围') or fields.get('applicablePeople') or '未公示')),
-        ('适用地区',str(fields.get('适用地区') or row['region'])),
+        ('适用地区',display_area(fields.get('适用地区') or fields.get('applicableArea') or fields.get('applyArea') or row['region'], row.get('source','').split(':')[0])),
         ('上线日期',row.get('on_date') or '未公示'),
         ('重新上线日期',row.get('reonline_date') or '无已确认记录'),
         ('下线日期',row.get('off_date') or '未公示'),

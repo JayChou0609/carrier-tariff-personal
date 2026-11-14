@@ -695,7 +695,7 @@ function briefTable(o) {
   if (!entries.length) return '<div class="tl-none">该记录未保存配置详情。</div>';
   return '<table class="gen-table"><tbody>' + entries.map(([k, v]) =>
     '<tr><th>' + esc(PLAN_LABELS[k] || k) + '</th><td>' +
-      esc(cleanVal(typeof v === "object" ? JSON.stringify(v) : v)) + "</td></tr>"
+      esc(cleanVal(window.TariffAreas.field(k, typeof v === "object" ? JSON.stringify(v) : v, "gb"))) + "</td></tr>"
   ).join("") + "</tbody></table>";
 }
 

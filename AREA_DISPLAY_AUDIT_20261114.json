@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-14",
+  "commit": "fd30bb853adc55637c3e16df26636ef61c226543",
+  "source_snapshots": 32,
+  "records_with_area": 43509,
+  "coded_records": 7508,
+  "resolved_records": 7496,
+  "pending_records": 12,
+  "pending": {
+    "!AH": 9,
+    "!GS": 2,
+    "!AH、!HI": 1
+  },
+  "policy": "只统一展示，不改原始快照、历史、业务版本或推送去重。未知编码显示适用地区待核验。"
+}

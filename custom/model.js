@@ -1,6 +1,7 @@
 /* Shared, pure data transformations for the personal tariff page. */
 (function (root) {
   'use strict';
+  const Areas=typeof module!=='undefined'?require('./area-names.js'):root.TariffAreas;
   const carriers = {mobile: '移动', telecom: '电信', unicom: '联通', gb: '广电'};
   const regions = {jiangsu:'江苏',shanghai:'上海',zhejiang:'浙江',hebei:'河北',henan:'河南',sichuan:'四川',guangdong:'广东',gansu:'甘肃'};
   const defaults = ['telecom:jiangsu','mobile:jiangsu','unicom:jiangsu','gb:jiangsu','mobile:shanghai','telecom:shanghai','unicom:shanghai','telecom:zhejiang','unicom:hebei','unicom:henan','unicom:sichuan','unicom:guangdong','mobile:gansu'];
@@ -111,7 +112,7 @@
     const unit=mobile ? '' : String(fields.feeUnit || '');
     const category=String(mobile ? fields['资费类型'] || '其他' : raw.firstLevel || fields.codeType || '其他');
     const id=String(raw.id || fields['方案编号'] || fields.reportNo || (title+'|'+index));
-    const details=Object.entries(fields).filter(([,v])=>v!==null && v!==undefined && String(v)!=='').map(([k,v])=>[labels[k] || k, String(v)+(k==='commonData' && fields.dataUnit ? ' '+fields.dataUnit : k==='minute' && /^\d+(?:\.\d+)?$/.test(String(v)) ? ' 分钟' : '')]);
+    const details=Object.entries(fields).filter(([,v])=>v!==null && v!==undefined && String(v)!=='').map(([k,v])=>[labels[k] || (['applicableArea','applyArea'].includes(k)?'适用地区':k), String(Areas?Areas.field(k,v,source.carrier):v)+(k==='commonData' && fields.dataUnit ? ' '+fields.dataUnit : k==='minute' && /^\d+(?:\.\d+)?$/.test(String(v)) ? ' 分钟' : '')]);
     const sale=saleState(raw);
     const launched=launchInfo(raw),ended=offInfo(raw),confirmed=confirmationInfo(raw);
     const offDate=ended.date,offSource=ended.source;

@@ -215,9 +215,11 @@ def collect(day=None, snapshot_root=None, state_dir=PRIVATE, loader=fetch_json):
 def csv_bytes(rows):
     output = io.StringIO(newline='')
     writer = csv.writer(output)
-    writer.writerow(['运营商','地区','资费名称','方案编号','类型','资费标准','单位','官方上线日期','官方下线日期','快照时间','完整原始字段'])
+    from tariff_areas import display_fields
+    writer.writerow(['运营商','地区','资费名称','方案编号','类型','资费标准','单位','官方上线日期','官方下线日期','快照时间','完整字段（适用地区中文展示）'])
     for x in rows:
         values = [x[k] for k in ['carrier','region','title','report_no','category','fee','unit','on_date','off_date','snapshot','details']]
+        values[-1] = json.dumps(display_fields(json.loads(x['details']), x['source'].split(':')[0]), ensure_ascii=False, sort_keys=True)
         writer.writerow(["'"+str(v) if re.match(r'^\s*[=+@-]', str(v)) else v for v in values])
     return ('\ufeff'+output.getvalue()).encode('utf-8')
 

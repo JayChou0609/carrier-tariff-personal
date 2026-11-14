@@ -40,6 +40,8 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_scheduled*.py' -v
           python3 -m unittest discover -s tests -p 'test_announcements.py' -v
           node tests/test_personal.js
+          node tests/test_tariff_areas.js
+          python3 -B -m unittest discover -s tests -p test_wecom_areas.py -v
           node --check app.js
           node --check unicom/app.js
           node --check custom/app.js
