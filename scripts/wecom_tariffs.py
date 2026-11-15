@@ -26,12 +26,7 @@ TZ = dt.timezone(dt.timedelta(hours=8))
 SITE = 'https://jaychou0609.github.io/carrier-tariff-personal/'
 API = 'https://qyapi.weixin.qq.com/cgi-bin/'
 CARRIERS = {'mobile':'移动', 'telecom':'电信', 'unicom':'联通', 'gb':'广电'}
-REGIONS = {'quanguo':'全国','jiangsu':'江苏','shanghai':'上海','zhejiang':'浙江',
-           'hebei':'河北','henan':'河南','sichuan':'四川','guangdong':'广东','gansu':'甘肃'}
-SCOPES = {'mobile':['quanguo','jiangsu','shanghai','gansu'],
-          'telecom':['quanguo','jiangsu','shanghai','zhejiang'],
-          'unicom':['quanguo','jiangsu','shanghai','hebei','henan','sichuan','guangdong'],
-          'gb':['quanguo','jiangsu']}
+from monitoring_scopes import REGIONS, TARGETS as SCOPES
 BUCKETS = {'new':'今日上线', 'tomorrow_off':'明日下线', 'today_off':'今日下线'}
 
 

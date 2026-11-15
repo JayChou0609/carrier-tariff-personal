@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "regions": {
+    "quanguo": "全国",
+    "jiangsu": "江苏",
+    "shanghai": "上海",
+    "zhejiang": "浙江",
+    "hebei": "河北",
+    "henan": "河南",
+    "sichuan": "四川",
+    "guangdong": "广东",
+    "gansu": "甘肃"
+  },
+  "carriers": [
+    "mobile",
+    "telecom",
+    "unicom",
+    "gb"
+  ],
+  "slots": [
+    "00:00",
+    "12:00",
+    "18:00"
+  ]
+}

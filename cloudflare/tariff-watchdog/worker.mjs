@@ -1,9 +1,6 @@
 const REPO = 'JayChou0609/carrier-tariff-personal';
 const WORKFLOW = 'recovery-watchdog.yml';
-const SOURCES = ['mobile:quanguo','mobile:jiangsu','mobile:shanghai','mobile:gansu',
-  'telecom:quanguo','telecom:jiangsu','telecom:shanghai','telecom:zhejiang',
-  'unicom:quanguo','unicom:jiangsu','unicom:shanghai','unicom:hebei','unicom:henan','unicom:sichuan','unicom:guangdong',
-  'gb:quanguo','gb:jiangsu'];
+const SOURCES = ["mobile:quanguo","mobile:jiangsu","mobile:shanghai","mobile:zhejiang","mobile:hebei","mobile:henan","mobile:sichuan","mobile:guangdong","mobile:gansu","telecom:quanguo","telecom:jiangsu","telecom:shanghai","telecom:zhejiang","telecom:hebei","telecom:henan","telecom:sichuan","telecom:guangdong","telecom:gansu","unicom:quanguo","unicom:jiangsu","unicom:shanghai","unicom:zhejiang","unicom:hebei","unicom:henan","unicom:sichuan","unicom:guangdong","unicom:gansu","gb:quanguo","gb:jiangsu","gb:shanghai","gb:zhejiang","gb:hebei","gb:henan","gb:sichuan","gb:guangdong","gb:gansu"];
 const PATHS = ['.github/workflows/scheduled-refresh.yml','.github/workflows/wecom-notify.yml','.github/workflows/recovery-watchdog.yml'];
 const batch = value => String(value || '').replace(/^(\d+)-\d+$/, '$1');
 export function slotAt(moment) {

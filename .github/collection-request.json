@@ -1,4 +1,5 @@
 {
-  "requestedSlot": "2026-11-13T12:00:00+08:00",
-  "reason": "No noon collection run at 12:49 Beijing; request current missing slot and notify only after all sources archive successfully"
+  "requested_at": "2026-11-15",
+  "reason": "Collect all four carriers in the eight confirmed provinces plus national scopes, archive all 36 sources, then send WeCom launch and delisting image/text reports",
+  "scope_version": 3
 }

@@ -17,15 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'pipelines'))
 from pipeline_common import diff_items, filter_test_items, slim_change
 
-TARGETS = {
-    'mobile': ['quanguo', 'jiangsu', 'shanghai', 'gansu'],
-    'telecom': ['quanguo', 'jiangsu', 'shanghai', 'zhejiang'],
-    'unicom': ['quanguo', 'jiangsu', 'shanghai', 'hebei', 'henan', 'sichuan', 'guangdong'],
-    'gb': ['quanguo', 'jiangsu'],
-}
+from monitoring_scopes import TARGETS, REGIONS as CN
 FOLDERS = {'mobile': 'data', **{c: c + '/data' for c in ['telecom', 'unicom', 'gb']}}
-CN = {'quanguo': '全国', 'jiangsu': '江苏', 'shanghai': '上海', 'zhejiang': '浙江',
-      'hebei': '河北', 'henan': '河南', 'sichuan': '四川', 'guangdong': '广东', 'gansu': '甘肃'}
 CARRIER_CN = {'mobile': '移动', 'telecom': '电信', 'unicom': '联通', 'gb': '广电'}
 
 
@@ -132,13 +125,16 @@ def collect(carrier, scope, context):
     return d['items'], '列表请求不完整' if d.get('partial') else ''
 
 
-def fetch_carrier(carrier, root=ROOT, output=None, collector=collect):
+def fetch_carrier(carrier, root=ROOT, output=None, collector=collect, scopes=None):
+    scopes = TARGETS[carrier] if scopes is None else scopes
+    if not scopes or len(set(scopes)) != len(scopes) or any(scope not in TARGETS[carrier] for scope in scopes):
+        raise ValueError("采集范围必须是该运营商配置中的非重复子集")
     output = output or root / '_refresh' / ('refresh-' + carrier)
     started = now()
     context, report = {}, []
     state_path = Path(FOLDERS[carrier]) / '_scheduled_sampling.json'
     sampling = read(root / state_path, {}) if carrier == 'unicom' else {}
-    for scope in TARGETS[carrier]:
+    for scope in scopes:
         path = Path(FOLDERS[carrier]) / (scope + '.json')
         old = read(root / path, {'items': []})
         row = {'id': carrier + ':' + scope, 'carrier': carrier, 'region': scope,
@@ -177,7 +173,7 @@ def fetch_carrier(carrier, root=ROOT, output=None, collector=collect):
                                        'finished': now(), 'sources': report})
         print(row['id'], row['status'], row['count'], flush=True)
     if carrier == 'unicom':
-        write(output / 'files' / state_path, sampling)
+        write(output / 'files' / state_path, {scope: sampling.get(scope, {}) for scope in scopes})
     write(output / 'status.json', {'carrier': carrier, 'started': started, 'finished': now(), 'sources': report})
     return report
 
@@ -186,9 +182,18 @@ def merge_reports(root, incoming):
     """Only allow known scoped files from workflow artifacts, never code or secrets."""
     reports = []
     for carrier, scopes in TARGETS.items():
-        base = incoming / ('refresh-' + carrier)
-        result = read(base / 'status.json', {})
-        rows = {r['region']: r for r in result.get('sources', []) if r.get('carrier') == carrier}
+        names = ['refresh-' + carrier] + ['refresh-' + carrier + '-' + group for group in ['all','a','b','c']]
+        bases = [incoming / name for name in names if (incoming / name / 'status.json').exists()]
+        rows, origins = {}, {}
+        for base in bases:
+            result = read(base / 'status.json', {})
+            for row in result.get('sources', []):
+                if row.get('carrier') != carrier or row.get('region') not in scopes:
+                    raise ValueError('采集分片包含未授权的数据源')
+                scope = row['region']
+                if scope in rows:
+                    raise ValueError('采集分片重复：' + carrier + ':' + scope)
+                rows[scope], origins[scope] = row, base
         for scope in scopes:
             path = Path(FOLDERS[carrier]) / (scope + '.json')
             row = rows.get(scope, {'id': carrier + ':' + scope, 'carrier': carrier,
@@ -197,7 +202,7 @@ def merge_reports(root, incoming):
             # Fixed identity/path; artifact-provided path strings never control writes.
             row.update(id=carrier + ':' + scope, path=path.as_posix(), carrier=carrier, region=scope)
             if row['status'] == 'updated':
-                data = read(base / 'files' / path)
+                data = read(origins[scope] / 'files' / path)
                 old = read(root / path, {'items': []})
                 try:
                     acceptable(old['items'], (data or {}).get('items'))
@@ -206,9 +211,13 @@ def merge_reports(root, incoming):
                     row.update(status='retained' if old['items'] else 'failed', message=str(e))
             reports.append(row)
         if carrier == 'unicom':
-            state = base / 'files' / FOLDERS[carrier] / '_scheduled_sampling.json'
-            if state.exists():
-                write(root / FOLDERS[carrier] / state.name, read(state))
+            state_path = Path(FOLDERS[carrier]) / '_scheduled_sampling.json'
+            sampling = read(root / state_path, {})
+            for base in bases:
+                for scope, counters in read(base / 'files' / state_path, {}).items():
+                    if scope in scopes and origins.get(scope) == base:
+                        sampling[scope] = counters
+            write(root / state_path, sampling)
     return reports
 
 
@@ -255,8 +264,10 @@ def rebuild_indexes(root):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--carrier', choices=list(TARGETS), required=True)
+    ap.add_argument('--scopes', default='', help='内部工作流分片：逗号分隔，必须属于配置范围')
+    ap.add_argument('--output', type=Path, default=None)
     args = ap.parse_args()
-    fetch_carrier(args.carrier)
+    fetch_carrier(args.carrier, output=args.output, scopes=args.scopes.split(',') if args.scopes else None)
 
 
 if __name__ == '__main__':

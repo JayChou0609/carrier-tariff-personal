@@ -54,7 +54,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        carrier: [mobile, telecom, unicom, gb]
+        include:
+          - {carrier: mobile, group: all, scopes: ''}
+          - {carrier: telecom, group: all, scopes: ''}
+          - {carrier: gb, group: all, scopes: ''}
+          - {carrier: unicom, group: a, scopes: 'quanguo,jiangsu,shanghai'}
+          - {carrier: unicom, group: b, scopes: 'zhejiang,hebei,henan'}
+          - {carrier: unicom, group: c, scopes: 'sichuan,guangdong,gansu'}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -67,14 +73,16 @@ jobs:
       - name: Fetch national and requested provincial tariffs
         env:
           CARRIER: ${{ matrix.carrier }}
+          GROUP: ${{ matrix.group }}
+          SCOPES: ${{ matrix.scopes }}
           UNICOM_TIME_BUDGET: '300'
           UNICOM_FEE_SEGMENT: '1'
-        run: python3 -u scripts/refresh_tariffs.py --carrier "$CARRIER"
+        run: python3 -u scripts/refresh_tariffs.py --carrier "$CARRIER" --scopes "$SCOPES" --output "_refresh/refresh-${CARRIER}-${GROUP}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: refresh-${{ matrix.carrier }}
-          path: _refresh/refresh-${{ matrix.carrier }}
+          name: refresh-${{ matrix.carrier }}-${{ matrix.group }}
+          path: _refresh/refresh-${{ matrix.carrier }}-${{ matrix.group }}
           if-no-files-found: warn
           retention-days: 7
   archive:

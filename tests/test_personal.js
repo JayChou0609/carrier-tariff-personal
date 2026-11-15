@@ -5,6 +5,7 @@
  if(!isNode)load('custom/model.js');
  const M=isNode?require('../custom/model.js'):globalThis.TariffModel;
  const say=isNode?console.log:print;
+ for(const region of Object.keys(M.regions))for(const carrier of Object.keys(M.carriers))if(!M.defaults.includes(carrier+':'+region))throw Error('missing default '+carrier+':'+region);
  let count=0;
  function check(ok,label){if(!ok)throw Error(label);count++;}
  const source={id:'mobile:jiangsu',carrier:'mobile',region:'jiangsu',name:'江苏移动'};
@@ -111,7 +112,7 @@
  check(M.lifecycleMatch({...resumed,reonlineDates:['2025-12-31']},{lifecyclePeriod:'yesterdayReonline'},'2026-01-01'),'yesterday handles year boundary in Beijing');
  const alpha={...sh,title:'A plan',label:'上海联通'},zulu={...a,title:'Z plan',label:'江苏移动'};
  check(M.sort([zulu,alpha],'name')[0]===alpha,'name sorting is independent of region');
- check(new Set(M.defaults).size===13,'13 requested sources including Gansu Mobile');
+ check(new Set(M.defaults).size===32,'four carriers across eight requested provinces');
  check(M.escape('<img src=x onerror=1>').includes('&lt;img'),'HTML escape');
  check(M.csvCell('=HYPERLINK("evil")').startsWith('"\''),'CSV formula protection');
  if(isNode){

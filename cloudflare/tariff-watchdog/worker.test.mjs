@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import worker,{check,collected,notified,slotAt} from './worker.mjs';
 const moment=new Date('2026-11-13T04:22:00Z'), slot='2026-11-13T12:00:00+08:00';
-const ids=['mobile:quanguo','mobile:jiangsu','mobile:shanghai','mobile:gansu','telecom:quanguo','telecom:jiangsu','telecom:shanghai','telecom:zhejiang','unicom:quanguo','unicom:jiangsu','unicom:shanghai','unicom:hebei','unicom:henan','unicom:sichuan','unicom:guangdong','gb:quanguo','gb:jiangsu'];
+const ids=['mobile','telecom','unicom','gb'].flatMap(c=>['quanguo','jiangsu','shanghai','zhejiang','hebei','henan','sichuan','guangdong','gansu'].map(r=>c+':'+r));
 const archive={latest:{id:'123-2',sources:ids.map(id=>({id,status:'updated',started:'2026-11-13T12:01:00+08:00',snapshotTimestamp:'2026-11-13T12:10:00+08:00'}))}};
 const health={version:1,status:'complete',cards:true,target_slot:slot,collection_run:'123-1',buckets:['new','today_off','tomorrow_off']};
 function transport({status=archive,receipt=health,runs=[],dispatchStatus=204}={}) {

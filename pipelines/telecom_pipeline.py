@@ -19,13 +19,8 @@ KEY = b"telecom_wap_2018"
 UA = "Mozilla/5.0 (Linux; Android 13; SM-S9110) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36"
 API = "https://www.189.cn/wapportalweb/wapportalweb/tariffSection.do"
 
-SCOPES = {
-    "hunan": {"prov": "600203", "name": "湖南"},
-    "jiangsu": {"prov": "600103", "name": "江苏"},
-    "shanghai": {"prov": "600102", "name": "上海"},
-    "zhejiang": {"prov": "600104", "name": "浙江"},
-    "quanguo": {"prov": "1000000037", "name": "全国"},
-}
+# 新增五省编码已逐一核对 tariffSectionHome 返回的 provinceName（2026-11-15）。
+SCOPES = {'quanguo': {'prov': '1000000037', 'name': '全国'}, 'jiangsu': {'prov': '600103', 'name': '江苏'}, 'shanghai': {'prov': '600102', 'name': '上海'}, 'zhejiang': {'prov': '600104', 'name': '浙江'}, 'hebei': {'prov': '609906', 'name': '河北'}, 'henan': {'prov': '609904', 'name': '河南'}, 'sichuan': {'prov': '600201', 'name': '四川'}, 'guangdong': {'prov': '600101', 'name': '广东'}, 'gansu': {'prov': '600401', 'name': '甘肃'}, 'hunan': {'prov': '600203', 'name': '湖南'}}
 
 
 def encrypt(m):
