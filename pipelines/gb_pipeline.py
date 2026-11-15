@@ -16,6 +16,31 @@
   python3 gb_pipeline.py --prev-dir PATH --out-dir PATH [--scopes hunan,quanguo] [--rebuild]
 """
 import json, time, os, sys, urllib.request, ssl, hashlib, argparse
+import contextlib
+import signal
+import threading
+
+
+@contextlib.contextmanager
+def request_deadline(seconds):
+    """Bound the whole HTTP operation on the Actions collector's main thread."""
+    if not hasattr(signal, 'setitimer') or threading.current_thread() is not threading.main_thread():
+        yield
+        return
+    previous_handler = signal.getsignal(signal.SIGALRM)
+    previous_timer = signal.setitimer(signal.ITIMER_REAL, 0)
+    started = time.monotonic()
+    def expired(signum, frame):
+        raise TimeoutError('GB HTTP total deadline exceeded')
+    signal.signal(signal.SIGALRM, expired)
+    signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous_handler)
+        if previous_timer[0]:
+            signal.setitimer(signal.ITIMER_REAL, max(.001, previous_timer[0] - (time.monotonic()-started)), previous_timer[1])
 
 from pipeline_common import (is_sampling_noise, mark_noise, has_real_change,
                              modified_details_for, filter_test_items, slim_change, diff_items, stable_business_key)
@@ -80,8 +105,9 @@ def _post(path, body):
     timeout = max(5, min(40, float(os.getenv("GB_HTTP_TIMEOUT", "15"))))
     for a in range(attempts):
         try:
-            with urllib.request.urlopen(req, timeout=timeout, context=_ctx) as r:
-                return json.loads(r.read().decode("utf-8"))
+            with request_deadline(timeout):
+                with urllib.request.urlopen(req, timeout=timeout, context=_ctx) as r:
+                    return json.loads(r.read().decode("utf-8"))
         except Exception as e:
             last = e
             if a + 1 < attempts:
@@ -101,26 +127,38 @@ def query(page_tree, area):
                 leaves.append((t1, t2, ""))
             for (t3,) in sub2:
                 leaves.append((t1, t2, t3))
-    for t1, t2, t3 in leaves:
-        body = {"channelId": CHANNEL, "type1": t1, "type2": t2, "type3": t3,
-                "productName": "", "stateFlag": "1", "minPrice": "", "maxPrice": "",
-                "applicableArea": area, "timestamp": int(time.time() * 1000)}
-        try:
-            d = _post("queryTariffAllByCond", body)
-        except Exception as e:
-            print("    %s/%s/%s 失败: %s" % (t1 or "-", t2 or "-", t3 or "-", repr(e)[:80]))
-            failed += 1
-            continue
-        lst = d.get("data") or []
-        for x in lst:
-            x["_gb_key"] = t2 or t1
-            x["_gb_subkey"] = t3 or (t2 if t1 != "ZQ" else "")
-            if x.get("id") in seen:
-                continue
-            seen.add(x.get("id"))
-            items.append(x)
-        time.sleep(0.3)
-    return items, failed
+    results, pending = {}, list(leaves)
+    for round_number in range(2):
+        if not pending:
+            break
+        if round_number:
+            time.sleep(2)
+        retry = []
+        for t1, t2, t3 in pending:
+            print('    [GB request] %s %s/%s/%s pass=%d' % (area, t1, t2, t3, round_number+1), flush=True)
+            body = {"channelId": CHANNEL, "type1": t1, "type2": t2, "type3": t3,
+                    "productName": "", "stateFlag": "1", "minPrice": "", "maxPrice": "",
+                    "applicableArea": area, "timestamp": int(time.time() * 1000)}
+            try:
+                response = _post("queryTariffAllByCond", body)
+                rows = response.get("data") or []
+                if not isinstance(rows, list):
+                    raise ValueError('GB category response is not a list')
+                results[(t1,t2,t3)] = rows
+            except Exception as exc:
+                print('    %s/%s/%s 失败: %s' % (t1,t2,t3,repr(exc)[:120]), flush=True)
+                retry.append((t1,t2,t3))
+            time.sleep(.3)
+        pending = retry
+    # Rebuild in official category order so retries cannot change duplicate classification.
+    for t1,t2,t3 in leaves:
+        for raw in results.get((t1,t2,t3), []):
+            x = dict(raw)
+            x['_gb_key'], x['_gb_subkey'] = t2 or t1, t3 or (t2 if t1 != 'ZQ' else '')
+            if x.get('id') not in seen:
+                seen.add(x.get('id'))
+                items.append(x)
+    return items, len(pending)
 
 
 def _fmt_date(s):

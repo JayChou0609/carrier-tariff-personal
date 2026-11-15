@@ -178,9 +178,10 @@ def fetch_carrier(carrier, root=ROOT, output=None, collector=collect, scopes=Non
     return report
 
 
-def merge_reports(root, incoming):
+def merge_reports(root, incoming, collector=collect):
     """Only allow known scoped files from workflow artifacts, never code or secrets."""
     reports = []
+    gb_archive_retries = 0
     for carrier, scopes in TARGETS.items():
         names = ['refresh-' + carrier] + ['refresh-' + carrier + '-' + group for group in ['all','a','b','c']]
         bases = [incoming / name for name in names if (incoming / name / 'status.json').exists()]
@@ -201,6 +202,28 @@ def merge_reports(root, incoming):
                                   'path': path.as_posix(), 'status': 'failed', 'message': '采集任务未产出报告'})
             # Fixed identity/path; artifact-provided path strings never control writes.
             row.update(id=carrier + ':' + scope, path=path.as_posix(), carrier=carrier, region=scope)
+            if carrier == 'gb' and scope in origins and row['status'] != 'updated' and gb_archive_retries < 2:
+                gb_archive_retries += 1
+                retry_started = now()
+                previous_status = row['status']
+                try:
+                    fresh, error = collector(carrier, scope, {})
+                    fresh = filter_test_items(fresh)
+                    acceptable(read(root / path, {'items': []})['items'], fresh, error)
+                    stamp = now()
+                    repair_base = incoming / 'archive-retry-gb'
+                    write(repair_base / 'files' / path, {'scope': scope, 'timestamp': stamp, 'items': fresh})
+                    origins[scope] = repair_base
+                    row['previousCollectionStarted'] = row.get('started', '')
+                    row['previousCollectionMessage'] = row.pop('message', '')
+                    row.pop('archiveRetryError', None)
+                    row.update(status='updated', started=retry_started, finished=stamp, timestamp=stamp,
+                               count=len(fresh), observed=len(fresh), recovery='archive_retry',
+                               previousCollectionStatus=previous_status,
+                               note='归档前已重新请求官方全部分类，校验通过；非旧快照替代')
+                    print(carrier+':'+scope, 'archive_retry updated', len(fresh), flush=True)
+                except Exception as exc:
+                    row['archiveRetryError'] = str(exc)[:250]
             if row['status'] == 'updated':
                 data = read(origins[scope] / 'files' / path)
                 old = read(root / path, {'items': []})
