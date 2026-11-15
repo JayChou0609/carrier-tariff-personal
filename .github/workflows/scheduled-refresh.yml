@@ -92,6 +92,9 @@ jobs:
     if: always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.collect == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write
+      actions: write # Explicit output dispatch also works for token-triggered catch-up runs.
     steps:
       - uses: actions/checkout@v4
         with:
@@ -164,3 +167,8 @@ jobs:
         run: |
           echo '::error::本轮未取得可接受的更新，已保留旧快照；请检查采集报告及历史状态。'
           exit 1
+      - name: Dispatch Pages and WeCom after complete archival
+        if: steps.refresh.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 -B scripts/dispatch_collection_outputs.py
