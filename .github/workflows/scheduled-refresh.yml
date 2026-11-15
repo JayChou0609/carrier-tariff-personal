@@ -57,7 +57,9 @@ jobs:
         include:
           - {carrier: mobile, group: all, scopes: ''}
           - {carrier: telecom, group: all, scopes: ''}
-          - {carrier: gb, group: all, scopes: ''}
+          - {carrier: gb, group: a, scopes: 'quanguo,jiangsu,shanghai'}
+          - {carrier: gb, group: b, scopes: 'zhejiang,hebei,henan'}
+          - {carrier: gb, group: c, scopes: 'sichuan,guangdong,gansu'}
           - {carrier: unicom, group: a, scopes: 'quanguo,jiangsu,shanghai'}
           - {carrier: unicom, group: b, scopes: 'zhejiang,hebei,henan'}
           - {carrier: unicom, group: c, scopes: 'sichuan,guangdong,gansu'}

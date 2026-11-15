@@ -76,13 +76,16 @@ def _post(path, body):
     data = json.dumps(body).encode("utf-8")
     req = urllib.request.Request(API + path, data=data, headers=HDRS, method="POST")
     last = None
-    for a in range(4):
+    attempts = max(1, min(4, int(os.getenv("GB_HTTP_ATTEMPTS", "2"))))
+    timeout = max(5, min(40, float(os.getenv("GB_HTTP_TIMEOUT", "15"))))
+    for a in range(attempts):
         try:
-            with urllib.request.urlopen(req, timeout=40, context=_ctx) as r:
+            with urllib.request.urlopen(req, timeout=timeout, context=_ctx) as r:
                 return json.loads(r.read().decode("utf-8"))
         except Exception as e:
             last = e
-            time.sleep(2 * (a + 1))
+            if a + 1 < attempts:
+                time.sleep(2 * (a + 1))
     raise last
 
 

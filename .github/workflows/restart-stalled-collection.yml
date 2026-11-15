@@ -1,0 +1,21 @@
+name: Restart requested collection
+on:
+  push:
+    branches: [main]
+    paths: ['.github/restart-collection-request.json']
+permissions:
+  actions: write
+  contents: read
+jobs:
+  restart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Restart the explicitly requested collection
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B scripts/restart_requested_collection.py
