@@ -26,6 +26,9 @@ def main():
             time.sleep(5)
         else:
             raise RuntimeError('Cancellation is still pending; do not dispatch a concurrent collection')
+    if request.get('action') == 'cancel_only':
+        print(json.dumps({'status':'cancelled_superseded_collection','previous_run':run_id}))
+        return
     github.api('POST','actions/workflows/scheduled-refresh.yml/dispatches',{'ref':'main','inputs':{'catch_up':True}})
     print(json.dumps({'status':'recovery_dispatched','previous_run':run_id,'deduplication':'preserved'}))
 

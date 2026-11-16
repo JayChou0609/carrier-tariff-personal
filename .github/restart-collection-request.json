@@ -1,5 +1,6 @@
 {
-  "run_id": "43722042132",
-  "requested_at": "2026-11-15",
-  "reason": "Replace the unusually slow GB job with three bounded parallel shards; rerun with complete 36-source archival before WeCom delivery"
+  "run_id": "43780154883",
+  "action": "cancel_only",
+  "requested_at": "2026-11-16",
+  "reason": "Prioritize the targeted archive retry of run 43779043706, reusing 35 successful source artifacts instead of recollecting them"
 }
