@@ -211,10 +211,9 @@ def _decrypt(hexstr: str) -> str:
 
 def _build_opener():
     ctx = ssl.create_default_context()
-    try:
-        ctx.options |= ssl.OP_LEGACY_SERVER_CONNECT
-    except AttributeError:
-        pass
+    # OpenSSL's documented flag is 0x4; Python exposes the name from 3.12.
+    # Keep the same official-server compatibility during archive recovery on 3.11.
+    ctx.options |= getattr(ssl, "OP_LEGACY_SERVER_CONNECT", 0x4)
     opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=ctx))
     return opener
 
