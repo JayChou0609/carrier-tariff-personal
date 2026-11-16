@@ -181,7 +181,7 @@ def fetch_carrier(carrier, root=ROOT, output=None, collector=collect, scopes=Non
 def merge_reports(root, incoming, collector=collect):
     """Only allow known scoped files from workflow artifacts, never code or secrets."""
     reports = []
-    gb_archive_retries = 0
+    archive_retries = {}
     for carrier, scopes in TARGETS.items():
         names = ['refresh-' + carrier] + ['refresh-' + carrier + '-' + group for group in ['all','a','b','c']]
         bases = [incoming / name for name in names if (incoming / name / 'status.json').exists()]
@@ -202,18 +202,32 @@ def merge_reports(root, incoming, collector=collect):
                                   'path': path.as_posix(), 'status': 'failed', 'message': '采集任务未产出报告'})
             # Fixed identity/path; artifact-provided path strings never control writes.
             row.update(id=carrier + ':' + scope, path=path.as_posix(), carrier=carrier, region=scope)
-            if carrier == 'gb' and scope in origins and row['status'] != 'updated' and gb_archive_retries < 2:
-                gb_archive_retries += 1
+            data_base = origins.get(scope)
+            if carrier in ['gb', 'mobile', 'unicom'] and scope in origins and row['status'] != 'updated' and archive_retries.get(carrier, 0) < (1 if carrier == 'unicom' else 2):
+                archive_retries[carrier] = archive_retries.get(carrier, 0) + 1
                 retry_started = now()
                 previous_status = row['status']
                 try:
                     fresh, error = collector(carrier, scope, {})
                     fresh = filter_test_items(fresh)
-                    acceptable(read(root / path, {'items': []})['items'], fresh, error)
+                    previous = read(root / path, {'items': []})
+                    if carrier == 'unicom':
+                        acceptable([], fresh, error)
+                        if any(not item.get('detail') for item in fresh):
+                            raise ValueError('联通补采详情不完整，不覆盖已知字段')
+                        sampling_path = Path(FOLDERS[carrier]) / '_scheduled_sampling.json'
+                        sampling = read(origins[scope] / 'files' / sampling_path, {})
+                        counters = dict(sampling.get(scope, {}))
+                        fresh = merge_sample(previous['items'], fresh, counters,
+                            dt.datetime.now(dt.timezone(dt.timedelta(hours=8))).date())
+                        sampling[scope] = counters
+                    acceptable(previous['items'], fresh, error)
                     stamp = now()
-                    repair_base = incoming / 'archive-retry-gb'
+                    repair_base = origins[scope] / 'archive-retry'
+                    if carrier == 'unicom':
+                        write(origins[scope] / 'files' / sampling_path, sampling)
                     write(repair_base / 'files' / path, {'scope': scope, 'timestamp': stamp, 'items': fresh})
-                    origins[scope] = repair_base
+                    data_base = repair_base
                     row['previousCollectionStarted'] = row.get('started', '')
                     row['previousCollectionMessage'] = row.pop('message', '')
                     row.pop('archiveRetryError', None)
@@ -225,7 +239,7 @@ def merge_reports(root, incoming, collector=collect):
                 except Exception as exc:
                     row['archiveRetryError'] = str(exc)[:250]
             if row['status'] == 'updated':
-                data = read(origins[scope] / 'files' / path)
+                data = read(data_base / 'files' / path)
                 old = read(root / path, {'items': []})
                 try:
                     acceptable(old['items'], (data or {}).get('items'))

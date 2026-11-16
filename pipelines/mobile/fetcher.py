@@ -300,13 +300,20 @@ def _fetch_cell(opener, tariff_attr: str, type1: str, type2: str,
     params = {
         "cellNum": "99999999999", "province": prov_code, "isPublic": "1",
         "linkScn": "1", "tariffAttr": tariff_attr, "type1": type1, "type2": type2,
-        "page": 1, "limit": 10000, "xk": str(uuid.uuid4()),
+        "page": 1, "limit": 500, "xk": str(uuid.uuid4()),
     }
     items = {}
     while True:
-        data = json.loads(_post(opener, _encrypt(params), ua))
-        if str(data.get("returnCode")) != "0":
-            raise ValueError("官方资费列表查询失败")
+        for attempt in range(3):
+            data = json.loads(_post(opener, _encrypt(params), ua))
+            if str(data.get("returnCode")) == "0":
+                break
+            if attempt < 2:
+                time.sleep(2 * (attempt + 1))
+                params["xk"] = str(uuid.uuid4())
+        else:
+            raise ValueError("官方资费列表查询失败(returnCode=%s,page=%s,limit=%s)" %
+                             (data.get("returnCode"), params["page"], params["limit"]))
         rows = _parse_items(data)
         before = len(items)
         for item in rows:

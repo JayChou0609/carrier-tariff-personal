@@ -16,6 +16,15 @@ def page(report, pages=1):
 
 
 class MobileCatalogTest(unittest.TestCase):
+    def test_small_pages_and_business_error_retry_do_not_skip_rows(self):
+        replies=[page('A',3),json.dumps({'returnCode':'01_9999'}),page('B',3),page('C',3)]
+        with patch.object(f,'_encrypt',side_effect=json.dumps),patch.object(f,'_post',side_effect=replies) as post,patch.object(f.time,'sleep'):
+            rows=f._fetch_cell(object(),'2','1','1','371')
+        params=[json.loads(call.args[1]) for call in post.call_args_list]
+        self.assertEqual([p['page'] for p in params],[1,2,2,3])
+        self.assertTrue(all(p['limit']==500 for p in params))
+        self.assertEqual(len(rows),3)
+
     def test_directory_includes_provincial_standard_and_deduplicates_alias(self):
         data = {'returnCode': '0', 'data': [
             {'tariffAttr': a, 'type1': 1, 'type2': t}
