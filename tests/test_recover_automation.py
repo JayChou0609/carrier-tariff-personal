@@ -4,6 +4,7 @@ import datetime as dt
 import sys
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
 import recover_automation as r
 from refresh_tariffs import TARGETS
@@ -24,6 +25,25 @@ class Fake:
     def runs(self,workflow):return self.r
     def dispatch(self,workflow,inputs):self.sent.append((workflow,inputs))
 class RecoveryTests(unittest.TestCase):
+    def test_transient_dispatch_error_rechecks_for_an_accepted_run(self):
+        api = Fake()
+        def accepted_then_failed(workflow, inputs):
+            api.sent.append((workflow, inputs))
+            api.r = [{'status': 'queued'}]
+            raise r.TransientRecoveryError('HTTP 500')
+
+        with patch.object(api, 'dispatch', side_effect=accepted_then_failed), patch.object(r.time, 'sleep'):
+            result = r.recover_with_retry({}, api)
+        self.assertEqual(result['status'], 'waiting_for_active_run')
+        self.assertEqual(len(api.sent), 1)
+
+    def test_transient_read_error_retries_recovery(self):
+        api = Fake()
+        with patch.object(api, 'runs', side_effect=[r.TransientRecoveryError('HTTP 500'), []]), patch.object(r.time, 'sleep'):
+            result = r.recover_with_retry({}, api)
+        self.assertEqual(result['status'], 'dispatched')
+        self.assertEqual(api.sent, [(r.COLLECTOR, {'catch_up': True})])
+
     def test_complete_same_batch_attempt_does_nothing(self):
         api=Fake(receipt());self.assertEqual(r.recover(complete(),api,MOMENT)['status'],'complete');self.assertEqual(api.sent,[])
     def test_partial_or_previous_slot_recollects_in_catch_up_mode(self):

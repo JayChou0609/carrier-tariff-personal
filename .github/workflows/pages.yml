@@ -15,24 +15,47 @@ concurrency:
   group: pages
   cancel-in-progress: false
 jobs:
-  deploy:
+  build:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' || (github.event.workflow_run.name == 'Scheduled Tariff Refresh' && github.event.workflow_run.conclusion == 'failure')
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      publish: ${{ steps.archive.outputs.publish }}
+      artifact_id: ${{ steps.pages_artifact.outputs.artifact_id }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
+      - name: Check whether the triggering run wrote an archive
+        id: archive
+        env:
+          COLLECTION_RUN_ID: ${{ github.event.workflow_run.name == 'Scheduled Tariff Refresh' && github.event.workflow_run.id || '' }}
+        run: |
+          python3 -B - <<'PYTHON'
+          import json, os
+          from pathlib import Path
+
+          run_id = os.environ["COLLECTION_RUN_ID"]
+          publish = True
+          if run_id:
+              latest = json.loads(Path("data/refresh-status.json").read_text(encoding="utf-8"))["latest"]
+              publish = str(latest.get("id", "")).startswith(run_id + "-")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              print("publish=" + str(publish).lower(), file=output)
+          if not publish:
+              print("The triggering collection produced no current archive; skipping Pages publishing.")
+          PYTHON
       - uses: actions/setup-python@v5
+        if: steps.archive.outputs.publish == 'true'
         with:
           python-version: '3.11'
       - uses: actions/setup-node@v4
+        if: steps.archive.outputs.publish == 'true'
         with:
           node-version: '22'
       - run: pip install -r requirements.txt
+        if: steps.archive.outputs.publish == 'true'
       - name: Verify code and data
+        if: steps.archive.outputs.publish == 'true'
         run: |
           python3 tests/test_diff.py
           python3 tests/test_final_regressions.py
@@ -46,19 +69,30 @@ jobs:
           node --check unicom/app.js
           node --check custom/app.js
       - name: Build static artifact
+        if: steps.archive.outputs.publish == 'true'
         env:
           REPOSITORY: ${{ github.repository }}
         run: python3 scripts/prepare_pages.py --repo "$REPOSITORY"
       - uses: actions/configure-pages@v5
+        if: steps.archive.outputs.publish == 'true'
       - uses: actions/upload-pages-artifact@v3
+        if: steps.archive.outputs.publish == 'true'
         id: pages_artifact
         with:
           path: _pages
+  deploy:
+    needs: build
+    if: needs.build.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url || steps.retry.outputs.page_url }}
+    steps:
       - name: Wait for Pages artifact metadata
         timeout-minutes: 3
         env:
           GH_TOKEN: ${{ github.token }}
-          EXPECTED_ARTIFACT_ID: ${{ steps.pages_artifact.outputs.artifact_id }}
+          EXPECTED_ARTIFACT_ID: ${{ needs.build.outputs.artifact_id }}
         run: |
           python3 -B - <<'PY'
           import json, os, time, urllib.request, urllib.error
@@ -93,4 +127,12 @@ jobs:
           PY
       - name: Deploy
         id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+      - name: Wait before retrying Pages deployment
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 15
+      - name: Retry Pages deployment
+        id: retry
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v4

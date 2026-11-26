@@ -4,6 +4,7 @@ import base64
 import datetime as dt
 import json
 import os
+import time
 from pathlib import Path
 import urllib.error
 import urllib.request
@@ -18,6 +19,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class RecoveryError(RuntimeError):
+    pass
+
+
+class TransientRecoveryError(RecoveryError):
     pass
 
 
@@ -40,9 +45,12 @@ class GitHub:
         except urllib.error.HTTPError as exc:
             if missing and exc.code == 404:
                 return None
-            raise RecoveryError('GitHub recovery API HTTP '+str(exc.code)) from None
-        except (OSError, ValueError):
-            raise RecoveryError('GitHub recovery connection or response failed') from None
+            error_type = TransientRecoveryError if exc.code in (408, 429, 500, 502, 503, 504) else RecoveryError
+            raise error_type(f'GitHub recovery API {method} {path}: HTTP {exc.code}') from None
+        except OSError:
+            raise TransientRecoveryError(f'GitHub recovery API {method} {path}: connection failed') from None
+        except ValueError:
+            raise RecoveryError(f'GitHub recovery API {method} {path}: invalid response') from None
 
     def runs(self, workflow):
         return self.api('GET','actions/workflows/'+workflow+'/runs?branch=main&per_page=100')['workflow_runs']
@@ -98,11 +106,22 @@ def recover(status, github, moment=None):
     return {'status':'dispatched','reason':reason,'target_slot':slot,'workflow':workflow,'dispatched':True}
 
 
+def recover_with_retry(status, github):
+    # Recheck active and recent runs after delivery errors before issuing another dispatch.
+    for delay in (10, 20):
+        try:
+            return recover(status, github)
+        except TransientRecoveryError as exc:
+            print(f'{exc}; checking again in {delay}s', flush=True)
+            time.sleep(delay)
+    return recover(status, github)
+
+
 def main():
     if os.environ.get('GITHUB_REPOSITORY') != REPOSITORY:
         raise RecoveryError('Recovery is restricted to the configured repository')
     status = json.loads((ROOT/'data/refresh-status.json').read_text())
-    result = recover(status,GitHub(os.environ.get('GITHUB_TOKEN','')))
+    result = recover_with_retry(status,GitHub(os.environ.get('GITHUB_TOKEN','')))
     print(json.dumps(result,ensure_ascii=False))
     if os.environ.get('GITHUB_STEP_SUMMARY'):
         with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as stream:
